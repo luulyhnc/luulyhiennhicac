@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đọc Truyện – TruyệnHub</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+  <div class="hdr-top">
+    <a href="index.html" class="logo">Truyện<span>Hub</span></a>
+    <div class="search-bar">
+      <input type="text" id="search-input" placeholder="Tìm kiếm truyện..." onkeydown="if(event.key==='Enter')doSearch()">
+      <button onclick="doSearch()">🔍 Tìm</button>
+    </div>
+  </div>
+  <nav class="hdr-nav">
+    <ul>
+      <li><a href="index.html">Trang Chủ</a></li>
+      <li><a href="index.html?genre=Tiên+Hiệp">Tiên Hiệp</a></li>
+      <li><a href="index.html?genre=Huyền+Huyễn">Huyền Huyễn</a></li>
+      <li><a href="index.html?genre=Ngôn+Tình">Ngôn Tình</a></li>
+      <li><a href="index.html?genre=Đô+Thị">Đô Thị</a></li>
+      <li><a href="index.html?genre=Nữ+Cường">Nữ Cường</a></li>
+      <li><a href="index.html?status=Hoàn+thành">Đã Hoàn Thành</a></li>
+      <li><a href="guide.html">✍️ Đăng Truyện</a></li>
+    </ul>
+  </nav>
+</header>
+
+<!-- Reading toolbar: font size, width, theme -->
+<div class="reader-toolbar">
+  <div class="reader-toolbar-inner">
+    <span class="reader-chapter-title" id="toolbar-title">Đang tải...</span>
+    <div class="reader-controls">
+      <span class="ctrl-label">Chữ:</span>
+      <button class="ctrl-btn" onclick="changeFontSize(-1)" title="Giảm cỡ chữ">A−</button>
+      <button class="ctrl-btn" onclick="changeFontSize(1)"  title="Tăng cỡ chữ">A+</button>
+      <span class="ctrl-label" style="margin-left:.4rem">Nền:</span>
+      <button class="ctrl-btn" onclick="setTheme('')"      title="Tối">🌙</button>
+      <button class="ctrl-btn" onclick="setTheme('reader-light')" title="Sáng">☀️</button>
+      <button class="ctrl-btn" onclick="setTheme('reader-sepia')" title="Sepia">📜</button>
+    </div>
+  </div>
+</div>
+
+<main>
+  <div class="reader-content-wrap">
+    <div class="breadcrumb" id="reader-breadcrumb">
+      <a href="index.html">Trang chủ</a>
+      <span class="sep">›</span>
+      <a href="#" id="bc-story">Truyện</a>
+      <span class="sep">›</span>
+      <span id="bc-chapter">Chương</span>
+    </div>
+    <div id="reader-root">
+      <div class="empty-state"><div class="icon">⏳</div><p>Đang tải chương...</p></div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <span>© 2026 TruyệnHub – Nơi chia sẻ truyện tự viết</span>
+    <span>Liên hệ tác giả | Báo lỗi chương</span>
+  </div>
+</footer>
+
+<!-- INTERSTITIAL -->
+<div id="interstitial-overlay">
+  <div class="interstitial-box">
+    <h2>Chuyển Chương</h2>
+    <p>Ủng hộ tác giả bằng cách ghé qua trang này nhé! 🙏</p>
+    <a class="ad-banner" id="affiliate-link" href="#" target="_blank" rel="noopener">
+      <div class="ad-label">Tài trợ</div>
+      <div class="ad-title" id="ad-title"></div>
+      <div class="ad-desc"  id="ad-desc"></div>
+    </a>
+    <div class="countdown-wrap">
+      <div class="countdown-circle" id="countdown-ring">
+        <span id="countdown-num">5</span>
+      </div>
+      <div style="text-align:left;font-size:.82rem;color:var(--text2)">
+        Vui lòng chờ<br>để tiếp tục đọc
+      </div>
+    </div>
+    <div class="intst-btns">
+      <button class="btn-skip"     id="btn-skip"     disabled>Bỏ qua (<span id="skip-count">5</span>s)</button>
+      <button class="btn-continue" id="btn-continue" disabled>Đọc tiếp →</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script>
+  loadReaderPage();
+  window.addEventListener("hashchange", loadReaderPage);
+
+  // ── Reader settings ──────────────────
+  const RS = (() => {
+    const KEY = "reader_settings";
+    const defaults = { fontSize: 17, theme: "" };
+    let s = { ...defaults, ...JSON.parse(localStorage.getItem(KEY) || "{}") };
+    function save() { localStorage.setItem(KEY, JSON.stringify(s)); }
+    function apply() {
+      document.documentElement.style.setProperty("--reader-fs", s.fontSize + "px");
+      document.body.classList.remove("reader-light", "reader-sepia");
+      if (s.theme) document.body.classList.add(s.theme);
+    }
+    apply();
+    return { get: () => s, set: (k, v) => { s[k] = v; save(); apply(); } };
+  })();
+
+  function changeFontSize(delta) {
+    const s = RS.get();
+    const next = Math.min(24, Math.max(13, s.fontSize + delta));
+    RS.set("fontSize", next);
+  }
+  function setTheme(t) { RS.set("theme", t); }
+  function doSearch() {
+    const q = document.getElementById("search-input").value.trim();
+    if (q) location.href = "index.html?search=" + encodeURIComponent(q);
+  }
+</script>
+</body>
+</html>
