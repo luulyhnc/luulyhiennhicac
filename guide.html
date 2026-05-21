@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hướng Dẫn Đăng Truyện – TruyệnHub</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ── Guide-specific styles ── */
+    .guide-hero {
+      background: linear-gradient(135deg, #0f3460 0%, #1a1a2e 60%, rgba(232,140,30,.15) 100%);
+      padding: 3rem 1rem 2.5rem;
+      text-align: center;
+      border-bottom: 2px solid var(--accent);
+    }
+    .guide-hero h1 { font-size: 2rem; font-weight: 900; margin-bottom: .5rem; }
+    .guide-hero h1 span { color: var(--accent); }
+    .guide-hero p { color: var(--text2); font-size: 1rem; max-width: 600px; margin: 0 auto; }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.2rem;
+      margin: 1.5rem 0;
+    }
+    .step-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.3rem;
+      position: relative;
+      transition: border-color .2s;
+    }
+    .step-card:hover { border-color: var(--accent); }
+    .step-num {
+      width: 38px; height: 38px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 1rem;
+      margin-bottom: .8rem;
+    }
+    .step-card h3 { font-size: 1rem; font-weight: 800; margin-bottom: .4rem; }
+    .step-card p  { font-size: .85rem; color: var(--text2); line-height: 1.7; }
+
+    .info-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+    }
+    .info-table th {
+      background: var(--bg3);
+      color: var(--accent);
+      padding: .65rem 1rem;
+      text-align: left;
+      font-size: .85rem;
+      border-bottom: 2px solid var(--accent);
+    }
+    .info-table td {
+      padding: .7rem 1rem;
+      border-bottom: 1px solid var(--border);
+      font-size: .88rem;
+      vertical-align: top;
+    }
+    .info-table tr:hover td { background: var(--bg2); }
+    .info-table td:first-child { color: var(--text2); width: 160px; white-space: nowrap; }
+    .info-table td:last-child  { color: var(--text3); }
+
+    .rule-list { list-style: none; margin: .8rem 0; }
+    .rule-list li {
+      padding: .55rem .8rem;
+      border-left: 3px solid transparent;
+      border-bottom: 1px solid var(--border);
+      font-size: .88rem;
+      color: var(--text3);
+      display: flex;
+      gap: .6rem;
+      align-items: flex-start;
+    }
+    .rule-list li:hover { border-left-color: var(--accent); background: var(--bg2); }
+    .rule-list li .icon { flex-shrink: 0; margin-top: 1px; }
+    .rule-list li.bad  { color: var(--red); }
+    .rule-list li.good { color: var(--green); }
+
+    .register-box {
+      background: linear-gradient(135deg, var(--bg2), var(--bg3));
+      border: 2px solid var(--accent);
+      border-radius: 14px;
+      padding: 2rem;
+      text-align: center;
+      margin: 1.5rem 0;
+      box-shadow: 0 0 40px rgba(232,140,30,.1);
+    }
+    .register-box h2 { font-size: 1.4rem; margin-bottom: .5rem; }
+    .register-box p  { color: var(--text2); font-size: .9rem; margin-bottom: 1.3rem; }
+
+    .register-form {
+      max-width: 500px;
+      margin: 0 auto;
+      text-align: left;
+    }
+    .form-group { margin-bottom: 1rem; }
+    .form-group label {
+      display: block;
+      font-size: .82rem;
+      color: var(--text2);
+      margin-bottom: .3rem;
+      font-weight: 600;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: .55rem .8rem;
+      color: var(--text);
+      font-size: .9rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus { border-color: var(--accent); }
+    .form-group textarea { resize: vertical; min-height: 100px; }
+    .form-group select option { background: var(--bg2); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
+    .submit-btn {
+      width: 100%;
+      padding: .75rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: opacity .2s, transform .15s;
+      margin-top: .5rem;
+    }
+    .submit-btn:hover { opacity: .88; transform: translateY(-1px); }
+
+    .success-msg {
+      display: none;
+      background: rgba(46,204,113,.12);
+      border: 1.5px solid var(--green);
+      border-radius: var(--radius);
+      padding: 1.2rem;
+      text-align: center;
+      color: var(--green);
+      font-weight: 700;
+      margin-top: 1rem;
+    }
+
+    .faq-item {
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .faq-q {
+      width: 100%;
+      background: none;
+      border: none;
+      color: var(--text);
+      padding: 1rem .5rem;
+      text-align: left;
+      font-size: .92rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: color .2s;
+    }
+    .faq-q:hover { color: var(--accent); }
+    .faq-q .arrow { transition: transform .3s; font-size: .8rem; }
+    .faq-q.open   { color: var(--accent); }
+    .faq-q.open .arrow { transform: rotate(180deg); }
+    .faq-a {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height .35s ease;
+      font-size: .88rem;
+      color: var(--text2);
+      line-height: 1.8;
+      padding: 0 .5rem;
+    }
+    .faq-a.open { max-height: 300px; padding-bottom: 1rem; }
+
+    .badge-author {
+      display: inline-block;
+      background: rgba(232,140,30,.15);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: .2rem .6rem;
+      border-radius: 20px;
+      font-size: .78rem;
+      font-weight: 700;
+    }
+
+    @media(max-width:600px){
+      .form-row { grid-template-columns: 1fr; }
+      .guide-hero h1 { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="hdr-top">
+    <a href="index.html" class="logo">Truyện<span>Hub</span></a>
+    <div class="search-bar">
+      <input type="text" id="search-input" placeholder="Tìm kiếm truyện..."
+             onkeydown="if(event.key==='Enter')doSearch()">
+      <button onclick="doSearch()">🔍 Tìm</button>
+    </div>
+  </div>
+  <nav class="hdr-nav">
+    <ul>
+      <li><a href="index.html">Trang Chủ</a></li>
+      <li><a href="index.html?genre=Tiên+Hiệp">Tiên Hiệp</a></li>
+      <li><a href="index.html?genre=Huyền+Huyễn">Huyền Huyễn</a></li>
+      <li><a href="index.html?genre=Ngôn+Tình">Ngôn Tình</a></li>
+      <li><a href="index.html?genre=Đô+Thị">Đô Thị</a></li>
+      <li><a href="index.html?genre=Nữ+Cường">Nữ Cường</a></li>
+      <li><a href="guide.html" class="active">✍️ Đăng Truyện</a></li>
+    </ul>
+  </nav>
+</header>
+
+<!-- HERO -->
+<div class="guide-hero">
+  <h1>✍️ Hướng Dẫn <span>Đăng Truyện</span></h1>
+  <p>Bạn có truyện tự viết muốn chia sẻ? Đọc hướng dẫn dưới đây và đăng ký để trở thành tác giả trên TruyệnHub!</p>
+</div>
+
+<main class="container">
+
+  <!-- ── BƯỚC ĐĂNG TRUYỆN ── -->
+  <div class="sec-title">📋 Các Bước Để Đăng Truyện</div>
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-num">1</div>
+      <h3>Điền Form Đăng Ký</h3>
+      <p>Điền form bên dưới với thông tin cá nhân và truyện bạn muốn đăng. Admin sẽ xem xét trong 24–48 giờ.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">2</div>
+      <h3>Chờ Xét Duyệt</h3>
+      <p>Admin kiểm tra truyện, đảm bảo đúng nội quy. Bạn nhận email thông báo kết quả xét duyệt.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">3</div>
+      <h3>Gửi Nội Dung</h3>
+      <p>Sau khi được duyệt, gửi file truyện (Word/Google Docs/Text) theo hướng dẫn admin gửi qua email.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">4</div>
+      <h3>Lên Web &amp; Kiếm Tiền</h3>
+      <p>Truyện được đăng lên web. Bạn nhận <span class="badge-author">Huy Hiệu Tác Giả</span> và chia sẻ doanh thu affiliate.</p>
+    </div>
+  </div>
+
+  <!-- ── YÊU CẦU TRUYỆN ── -->
+  <div class="sec-title" style="margin-top:2rem">📌 Yêu Cầu Nội Dung</div>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1.5rem">
+    <table class="info-table">
+      <tr><th>Tiêu chí</th><th>Yêu cầu</th></tr>
+      <tr><td>Loại truyện</td><td>Truyện tự sáng tác (không copy từ nguồn khác)</td></tr>
+      <tr><td>Số chương tối thiểu</td><td>Ít nhất <strong>5 chương</strong> đã hoàn thành trước khi đăng</td></tr>
+      <tr><td>Độ dài mỗi chương</td><td>Tối thiểu <strong>1.000 từ</strong> / chương</td></tr>
+      <tr><td>Ngôn ngữ</td><td>Tiếng Việt (có thể có tên nhân vật tiếng nước ngoài)</td></tr>
+      <tr><td>Thể loại chấp nhận</td><td>Tiên Hiệp, Huyền Huyễn, Ngôn Tình, Đô Thị, Nữ Cường, Hành Động, Kinh Dị, v.v.</td></tr>
+      <tr><td>Cập nhật định kỳ</td><td>Ít nhất <strong>1 chương / tuần</strong> (truyện đang ra)</td></tr>
+    </table>
+  </div>
+
+  <!-- ── ĐƯỢC & KHÔNG ĐƯỢC ── -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:2rem">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+      <div style="padding:.7rem 1rem;background:rgba(46,204,113,.1);border-bottom:1px solid var(--border);font-weight:700;color:var(--green)">✅ Được phép</div>
+      <ul class="rule-list">
+        <li class="good"><span class="icon">✔</span> Truyện tự viết hoàn toàn</li>
+        <li class="good"><span class="icon">✔</span> Truyện dịch có ghi rõ nguồn gốc</li>
+        <li class="good"><span class="icon">✔</span> Đăng nhiều bộ truyện cùng lúc</li>
+        <li class="good"><span class="icon">✔</span> Nội dung 16+ (có gắn nhãn cảnh báo)</li>
+        <li class="good"><span class="icon">✔</span> Fan-fiction có ghi nguồn rõ ràng</li>
+      </ul>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+      <div style="padding:.7rem 1rem;background:rgba(233,69,96,.1);border-bottom:1px solid var(--border);font-weight:700;color:var(--red)">❌ Không được phép</div>
+      <ul class="rule-list">
+        <li class="bad"><span class="icon">✖</span> Copy nguyên văn từ web khác</li>
+        <li class="bad"><span class="icon">✖</span> Nội dung 18+ / khiêu dâm</li>
+        <li class="bad"><span class="icon">✖</span> Nội dung kích động, phân biệt chủng tộc</li>
+        <li class="bad"><span class="icon">✖</span> Spam, truyện không có nội dung</li>
+        <li class="bad"><span class="icon">✖</span> Vi phạm bản quyền không có phép</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ── FORM ĐĂNG KÝ ── -->
+  <div class="register-box" id="register">
+    <h2>📝 Form Đăng Ký Tác Giả</h2>
+    <p>Điền đầy đủ thông tin bên dưới. Admin sẽ liên hệ qua email trong vòng <strong>24–48 giờ</strong>.</p>
+
+    <form class="register-form" id="register-form" onsubmit="submitForm(event)">
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Họ và tên *</label>
+          <input type="text" id="f-name" placeholder="Nguyễn Văn A" required>
+        </div>
+        <div class="form-group">
+          <label>Bút danh tác giả *</label>
+          <input type="text" id="f-penname" placeholder="Tên hiển thị trên web" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Email liên hệ *</label>
+        <input type="email" id="f-email" placeholder="email@example.com" required>
+      </div>
+
+      <div class="form-group">
+        <label>Facebook / Zalo / SĐT (để admin liên hệ nhanh)</label>
+        <input type="text" id="f-contact" placeholder="Không bắt buộc">
+      </div>
+
+      <div style="border-top:1px solid var(--border);margin:.8rem 0;padding-top:.8rem"></div>
+
+      <div class="form-group">
+        <label>Tên truyện muốn đăng *</label>
+        <input type="text" id="f-story" placeholder="Tên bộ truyện của bạn" required>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Thể loại *</label>
+          <select id="f-genre" required>
+            <option value="">-- Chọn thể loại --</option>
+            <option>Tiên Hiệp</option>
+            <option>Huyền Huyễn</option>
+            <option>Ngôn Tình</option>
+            <option>Đô Thị</option>
+            <option>Nữ Cường</option>
+            <option>Hành Động</option>
+            <option>Kinh Dị</option>
+            <option>Lịch Sử</option>
+            <option>Khoa Học Viễn Tưởng</option>
+            <option>Khác</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Trạng thái *</label>
+          <select id="f-status" required>
+            <option value="">-- Chọn --</option>
+            <option>Đang viết (sẽ cập nhật thêm)</option>
+            <option>Đã hoàn thành</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Số chương hiện có *</label>
+          <input type="number" id="f-chapters" placeholder="Ví dụ: 10" min="5" required>
+        </div>
+        <div class="form-group">
+          <label>Ước tính tổng số chương</label>
+          <input type="text" id="f-total" placeholder="Ví dụ: ~100 hoặc Chưa biết">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Tóm tắt nội dung truyện *</label>
+        <textarea id="f-desc" placeholder="Mô tả ngắn về nội dung và cốt truyện (100–300 từ)..." required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Link đọc thử (Google Docs / Pastebin / Drive) *</label>
+        <input type="url" id="f-link" placeholder="https://docs.google.com/..." required>
+      </div>
+
+      <div class="form-group">
+        <label>Ghi chú thêm</label>
+        <textarea id="f-note" placeholder="Bất kỳ điều gì bạn muốn admin biết thêm..." style="min-height:70px"></textarea>
+      </div>
+
+      <button type="submit" class="submit-btn">
+        🚀 Gửi Đơn Đăng Ký
+      </button>
+    </form>
+
+    <div class="success-msg" id="success-msg">
+      ✅ Đơn đăng ký đã gửi thành công!<br>
+      Admin sẽ liên hệ với bạn qua email trong vòng 24–48 giờ. Cảm ơn bạn đã tin tưởng TruyệnHub! 🎉
+    </div>
+  </div>
+
+  <!-- ── FAQ ── -->
+  <div class="sec-title" style="margin-top:2rem">❓ Câu Hỏi Thường Gặp</div>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:2rem">
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Đăng truyện có mất phí không?
+        <span class="arrow">▼</span>
+      </button>
+      <div class="faq-a">
+        Hoàn toàn <strong>miễn phí</strong>. TruyệnHub không thu bất kỳ khoản phí nào từ tác giả. Ngược lại, tác giả có thể nhận được chia sẻ doanh thu affiliate từ lượt đọc truyện của mình.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Tôi có được chia sẻ doanh thu không?
+        <span class="arrow">▼</span>
+      </button>
+      <div class="faq-a">
+        Có. Web hoạt động theo mô hình affiliate — mỗi lần độc giả chuyển chương, một link affiliate hiển thị. Tác giả có lượng đọc cao sẽ được liên hệ để thoả thuận chia sẻ doanh thu cụ thể.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Tôi có giữ bản quyền truyện không?
+        <span class="arrow">▼</span>
+      </button>
+      <div class="faq-a">
+        Hoàn toàn <strong>có</strong>. Bạn là tác giả và giữ toàn bộ bản quyền. TruyệnHub chỉ là nền tảng hiển thị. Bạn có thể yêu cầu gỡ truyện bất cứ lúc nào.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Bao lâu thì truyện được xét duyệt?
+        <span class="arrow">▼</span>
+      </button>
+      <div class="faq-a">
+        Thông thường trong vòng <strong>24–48 giờ</strong> làm việc. Admin sẽ gửi email thông báo kết quả, kèm hướng dẫn bước tiếp theo nếu được chấp thuận.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Tôi gửi nội dung truyện bằng cách nào?
+        <span class="arrow">▼</span>
+      </button>
+      <div class="faq-a">
+        Sau khi được duyệt, admin sẽ gửi email hướng dẫn cụ thể. Thông thường bạn chia sẻ link Google Docs hoặc gửi file Word/Text. Admin sẽ format và đăng lên web cho bạn.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Truyện đang viết dở có đăng được không?
+        <span class="arrow">▼</span>
+      </button>
+      <div class="faq-a">
+        Được, miễn là bạn đã có ít nhất <strong>5 chương hoàn chỉnh</strong> và cam kết cập nhật đều đặn (ít nhất 1 chương/tuần). Truyện bỏ ngang quá 30 ngày không cập nhật có thể bị ẩn.
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <span>© 2026 TruyệnHub – Nơi chia sẻ truyện tự viết</span>
+    <span>Liên hệ tác giả | Báo lỗi chương</span>
+  </div>
+</footer>
+
+<script src="js/app.js"></script>
+<script>
+function doSearch() {
+  const q = document.getElementById("search-input").value.trim();
+  if (q) location.href = "index.html?search=" + encodeURIComponent(q);
+}
+
+function toggleFaq(btn) {
+  const answer = btn.nextElementSibling;
+  const isOpen = answer.classList.contains("open");
+  // Close all
+  document.querySelectorAll(".faq-a").forEach(a => a.classList.remove("open"));
+  document.querySelectorAll(".faq-q").forEach(b => b.classList.remove("open"));
+  // Open clicked (if it was closed)
+  if (!isOpen) {
+    answer.classList.add("open");
+    btn.classList.add("open");
+  }
+}
+
+function submitForm(e) {
+  e.preventDefault();
+
+  const data = {
+    name:     document.getElementById("f-name").value,
+    penname:  document.getElementById("f-penname").value,
+    email:    document.getElementById("f-email").value,
+    contact:  document.getElementById("f-contact").value,
+    story:    document.getElementById("f-story").value,
+    genre:    document.getElementById("f-genre").value,
+    status:   document.getElementById("f-status").value,
+    chapters: document.getElementById("f-chapters").value,
+    total:    document.getElementById("f-total").value,
+    desc:     document.getElementById("f-desc").value,
+    link:     document.getElementById("f-link").value,
+    note:     document.getElementById("f-note").value,
+  };
+
+  // ── Gửi qua mailto (thay EMAIL_CUA_BAN bằng email thật) ──
+  const EMAIL = "admin@truyenhub.com"; // ← ĐỔI EMAIL NÀY
+  const subject = encodeURIComponent("Đăng ký tác giả: " + data.story + " – " + data.penname);
+  const body = encodeURIComponent(
+`HỌ TÊN: ${data.name}
+BÚT DANH: ${data.penname}
+EMAIL: ${data.email}
+LIÊN HỆ: ${data.contact}
+
+TÊN TRUYỆN: ${data.story}
+THỂ LOẠI: ${data.genre}
+TRẠNG THÁI: ${data.status}
+SỐ CHƯƠNG HIỆN CÓ: ${data.chapters}
+TỔNG DỰ KIẾN: ${data.total}
+
+TÓM TẮT:
+${data.desc}
+
+LINK ĐỌC THỬ: ${data.link}
+
+GHI CHÚ: ${data.note}`
+  );
+
+  window.location.href = `mailto:${EMAIL}?subject=${subject}&body=${body}`;
+
+  // Hiển thị thông báo thành công
+  document.getElementById("register-form").style.display = "none";
+  document.getElementById("success-msg").style.display   = "block";
+}
+</script>
+</body>
+</html>
