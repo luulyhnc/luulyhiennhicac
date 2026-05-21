@@ -14,26 +14,25 @@
       <span class="logo-main">Lưu Ly Hiền Nhi Các</span>
       <span class="logo-slogan">Gác ngọc thanh vân, lưu vạn trang mộng</span>
     </a>
+    <nav class="hdr-nav">
+      <a href="index.html">Trang Chủ</a>
+      <a href="index.html?genre=Tiên+Hiệp">Tiên Hiệp</a>
+      <a href="index.html?genre=Huyền+Huyễn">Huyền Huyễn</a>
+      <a href="index.html?genre=Ngôn+Tình">Ngôn Tình</a>
+      <a href="index.html?genre=Đô+Thị">Đô Thị</a>
+      <a href="index.html?genre=Nữ+Cường">Nữ Cường</a>
+      <a href="guide.html">✍️ Đăng Truyện</a>
+    </nav>
     <div class="search-bar">
-      <input type="text" id="search-input" placeholder="Tìm kiếm truyện..." onkeydown="if(event.key==='Enter')doSearch()">
-      <button onclick="doSearch()">🔍 Tìm</button>
+      <input type="text" id="search-input" placeholder="Tìm kiếm truyện..."
+             onkeydown="if(event.key==='Enter')doSearch()">
+      <button onclick="doSearch()">🔍</button>
     </div>
+    <button class="btn-login" onclick="alert('Tính năng sắp ra mắt!')">👤 Đăng nhập</button>
   </div>
-  <nav class="hdr-nav">
-    <ul>
-      <li><a href="index.html">Trang Chủ</a></li>
-      <li><a href="index.html?genre=Tiên+Hiệp">Tiên Hiệp</a></li>
-      <li><a href="index.html?genre=Huyền+Huyễn">Huyền Huyễn</a></li>
-      <li><a href="index.html?genre=Ngôn+Tình">Ngôn Tình</a></li>
-      <li><a href="index.html?genre=Đô+Thị">Đô Thị</a></li>
-      <li><a href="index.html?genre=Nữ+Cường">Nữ Cường</a></li>
-      <li><a href="index.html?status=Hoàn+thành">Đã Hoàn Thành</a></li>
-      <li><a href="guide.html">✍️ Đăng Truyện</a></li>
-    </ul>
-  </nav>
 </header>
 
-<!-- Reading toolbar: font size, width, theme -->
+<!-- Reading toolbar: font size, theme -->
 <div class="reader-toolbar">
   <div class="reader-toolbar-inner">
     <span class="reader-chapter-title" id="toolbar-title">Đang tải...</span>
@@ -42,8 +41,8 @@
       <button class="ctrl-btn" onclick="changeFontSize(-1)" title="Giảm cỡ chữ">A−</button>
       <button class="ctrl-btn" onclick="changeFontSize(1)"  title="Tăng cỡ chữ">A+</button>
       <span class="ctrl-label" style="margin-left:.4rem">Nền:</span>
-      <button class="ctrl-btn" onclick="setTheme('')"      title="Tối">🌙</button>
-      <button class="ctrl-btn" onclick="setTheme('reader-light')" title="Sáng">☀️</button>
+      <button class="ctrl-btn" onclick="setTheme('')"             title="Sáng">☀️</button>
+      <button class="ctrl-btn" onclick="setTheme('reader-light')" title="Kem">🌅</button>
       <button class="ctrl-btn" onclick="setTheme('reader-sepia')" title="Sepia">📜</button>
     </div>
   </div>
@@ -65,8 +64,8 @@
 </main>
 
 <footer>
-  <div class="footer-inner">
-    <span class="footer-brand">© 2026 Lưu Ly Hiền Nhi Các – Gác ngọc thanh vân, lưu vạn trang mộng</span>
+  <div class="footer-simple">
+    <span>© 2026 Lưu Ly Hiền Nhi Các</span>
     <span>Liên hệ tác giả | Báo lỗi chương</span>
   </div>
 </footer>
@@ -101,7 +100,7 @@
   loadReaderPage();
   window.addEventListener("hashchange", loadReaderPage);
 
-  // ── Reader settings ──────────────────
+  // ── Reader settings ──
   const RS = (() => {
     const KEY = "reader_settings";
     const defaults = { fontSize: 17, theme: "" };
@@ -118,8 +117,7 @@
 
   function changeFontSize(delta) {
     const s = RS.get();
-    const next = Math.min(24, Math.max(13, s.fontSize + delta));
-    RS.set("fontSize", next);
+    RS.set("fontSize", Math.min(24, Math.max(13, s.fontSize + delta)));
   }
   function setTheme(t) { RS.set("theme", t); }
   function doSearch() {

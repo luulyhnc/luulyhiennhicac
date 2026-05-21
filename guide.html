@@ -7,20 +7,17 @@
   <link rel="stylesheet" href="css/style.css">
   <style>
     /* ── Guide-specific styles ── */
-    :root { --accent: #7ecac3; --accent2: #a8ddd8; }
+    :root { --accent: #3ab3ca; }
 
     .guide-hero {
-      background: linear-gradient(135deg, #090910 0%, #0d0d14 60%, rgba(126,202,195,.08) 100%);
+      background: linear-gradient(135deg, #bde0ef 0%, #d2eaf7 50%, #f0f7fd 100%);
       padding: 3rem 1rem 2.5rem;
       text-align: center;
-      border-bottom: 2px solid var(--accent);
+      border-bottom: 1.5px solid var(--border);
     }
-    .guide-hero h1 { font-size: 2rem; font-weight: 900; margin-bottom: .5rem;
-      font-family:'Playfair Display','Noto Serif SC',serif; letter-spacing: 2px; }
-    .guide-hero h1 span {
-      background: linear-gradient(135deg, #7ecac3, #a8ddd8, #7ecac3);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    }
+    .guide-hero h1 { font-size: 2rem; font-weight: 900; margin-bottom: .5rem; color: #1c3050;
+      font-family:'Noto Serif SC',serif; }
+    .guide-hero h1 span { color: var(--accent); }
     .guide-hero p { color: var(--text2); font-size: 1rem; max-width: 600px; margin: 0 auto; }
 
     .steps-grid {
@@ -220,23 +217,22 @@
       <span class="logo-main">Lưu Ly Hiền Nhi Các</span>
       <span class="logo-slogan">Gác ngọc thanh vân, lưu vạn trang mộng</span>
     </a>
+    <nav class="hdr-nav">
+      <a href="index.html">Trang Chủ</a>
+      <a href="index.html?genre=Tiên+Hiệp">Tiên Hiệp</a>
+      <a href="index.html?genre=Huyền+Huyễn">Huyền Huyễn</a>
+      <a href="index.html?genre=Ngôn+Tình">Ngôn Tình</a>
+      <a href="index.html?genre=Đô+Thị">Đô Thị</a>
+      <a href="index.html?genre=Nữ+Cường">Nữ Cường</a>
+      <a href="guide.html" class="active">✍️ Đăng Truyện</a>
+    </nav>
     <div class="search-bar">
       <input type="text" id="search-input" placeholder="Tìm kiếm truyện..."
              onkeydown="if(event.key==='Enter')doSearch()">
-      <button onclick="doSearch()">🔍 Tìm</button>
+      <button onclick="doSearch()">🔍</button>
     </div>
+    <button class="btn-login" onclick="alert('Tính năng sắp ra mắt!')">👤 Đăng nhập</button>
   </div>
-  <nav class="hdr-nav">
-    <ul>
-      <li><a href="index.html">Trang Chủ</a></li>
-      <li><a href="index.html?genre=Tiên+Hiệp">Tiên Hiệp</a></li>
-      <li><a href="index.html?genre=Huyền+Huyễn">Huyền Huyễn</a></li>
-      <li><a href="index.html?genre=Ngôn+Tình">Ngôn Tình</a></li>
-      <li><a href="index.html?genre=Đô+Thị">Đô Thị</a></li>
-      <li><a href="index.html?genre=Nữ+Cường">Nữ Cường</a></li>
-      <li><a href="guide.html" class="active">✍️ Đăng Truyện</a></li>
-    </ul>
-  </nav>
 </header>
 
 <!-- HERO -->
@@ -478,8 +474,8 @@
 </main>
 
 <footer>
-  <div class="footer-inner">
-    <span class="footer-brand">© 2026 Lưu Ly Hiền Nhi Các – Gác ngọc thanh vân, lưu vạn trang mộng</span>
+  <div class="footer-simple">
+    <span>© 2026 Lưu Ly Hiền Nhi Các</span>
     <span>Liên hệ tác giả | Báo lỗi chương</span>
   </div>
 </footer>

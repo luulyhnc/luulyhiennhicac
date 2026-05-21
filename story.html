@@ -14,26 +14,26 @@
       <span class="logo-main">Lưu Ly Hiền Nhi Các</span>
       <span class="logo-slogan">Gác ngọc thanh vân, lưu vạn trang mộng</span>
     </a>
+    <nav class="hdr-nav">
+      <a href="index.html">Trang Chủ</a>
+      <a href="index.html?genre=Tiên+Hiệp">Tiên Hiệp</a>
+      <a href="index.html?genre=Huyền+Huyễn">Huyền Huyễn</a>
+      <a href="index.html?genre=Ngôn+Tình">Ngôn Tình</a>
+      <a href="index.html?genre=Đô+Thị">Đô Thị</a>
+      <a href="index.html?genre=Nữ+Cường">Nữ Cường</a>
+      <a href="index.html?status=Hoàn+thành">Đã Hoàn Thành</a>
+      <a href="guide.html">✍️ Đăng Truyện</a>
+    </nav>
     <div class="search-bar">
-      <input type="text" id="search-input" placeholder="Tìm kiếm truyện..." onkeydown="if(event.key==='Enter')doSearch()">
-      <button onclick="doSearch()">🔍 Tìm</button>
+      <input type="text" id="search-input" placeholder="Tìm kiếm truyện, tác giả..."
+             onkeydown="if(event.key==='Enter')doSearch()">
+      <button onclick="doSearch()">🔍</button>
     </div>
+    <button class="btn-login" onclick="alert('Tính năng sắp ra mắt!')">👤 Đăng nhập</button>
   </div>
-  <nav class="hdr-nav">
-    <ul>
-      <li><a href="index.html">Trang Chủ</a></li>
-      <li><a href="index.html?genre=Tiên+Hiệp">Tiên Hiệp</a></li>
-      <li><a href="index.html?genre=Huyền+Huyễn">Huyền Huyễn</a></li>
-      <li><a href="index.html?genre=Ngôn+Tình">Ngôn Tình</a></li>
-      <li><a href="index.html?genre=Đô+Thị">Đô Thị</a></li>
-      <li><a href="index.html?genre=Nữ+Cường">Nữ Cường</a></li>
-      <li><a href="index.html?status=Hoàn+thành">Đã Hoàn Thành</a></li>
-      <li><a href="guide.html">✍️ Đăng Truyện</a></li>
-    </ul>
-  </nav>
 </header>
 
-<main class="container">
+<main class="container" style="padding-top:1.5rem">
   <div class="breadcrumb" id="breadcrumb">
     <a href="index.html">Trang chủ</a>
     <span class="sep">›</span>
@@ -45,8 +45,8 @@
 </main>
 
 <footer>
-  <div class="footer-inner">
-    <span class="footer-brand">© 2026 Lưu Ly Hiền Nhi Các – Gác ngọc thanh vân, lưu vạn trang mộng</span>
+  <div class="footer-simple">
+    <span>© 2026 Lưu Ly Hiền Nhi Các</span>
     <span>Liên hệ tác giả | Báo lỗi chương</span>
   </div>
 </footer>
@@ -55,6 +55,10 @@
 <script>
   loadStoryPage();
   window.addEventListener("hashchange", loadStoryPage);
+  function doSearch() {
+    const q = document.getElementById("search-input").value.trim();
+    if (q) location.href = "index.html?search=" + encodeURIComponent(q);
+  }
 </script>
 </body>
 </html>
