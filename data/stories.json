@@ -1,0 +1,39 @@
+[
+  {
+    "id": "truyen-demo-1",
+    "title": "Kiếm Thần Vô Song",
+    "author": "Tác giả Demo",
+    "cover": "https://placehold.co/300x400/1a1a2e/e94560?text=Ki%E1%BA%BFm+Th%E1%BA%A7n",
+    "genre": ["Tiên Hiệp", "Hành Động"],
+    "status": "Đang ra",
+    "rating": 4.7,
+    "rateCount": 1250,
+    "views": 85400,
+    "follows": 2300,
+    "source": "Tác giả tự viết",
+    "description": "Một thiếu niên bình thường tình cờ nhặt được thanh kiếm cổ, từ đó bước vào con đường tu tiên đầy gian nan nhưng cũng vô cùng hào hùng.",
+    "chapters": [
+      { "id": 1, "title": "Chương 1: Khởi Đầu", "content": "Ngày hôm đó, bầu trời xanh trong vắt. Lý Phong — một thiếu niên 16 tuổi sống ở làng nhỏ ven núi — đang chặt củi thì bỗng nhiên mặt đất rung chuyển dữ dội.\n\nMột vệt sáng chói lóa từ trên trời lao xuống, xuyên thẳng vào lòng đất ngay trước mặt cậu. Bụi đất bay mù mịt. Khi bụi tan, Lý Phong trố mắt nhìn vào hố sâu — ở dưới đó, một thanh kiếm cổ phát ánh bạc lạnh lẽo đang nằm im lìm.\n\n\"Đây là...?\" Cậu cúi xuống nhặt lên. Ngay khoảnh khắc tay chạm vào chuôi kiếm, một luồng khí lạnh chạy dọc từ lòng bàn tay lên thẳng thiên linh cái.\n\nTrong đầu Lý Phong bỗng xuất hiện vô số ký ức xa lạ — hình ảnh những trận đại chiến, những bí pháp kiếm thuật thượng thừa, và tiếng vọng của một giọng nói cổ kính: \"Người được chọn... hãy gánh vác trọng trách này.\"\n\nĐó là ngày đầu tiên Lý Phong bước chân vào thế giới tu tiên." },
+      { "id": 2, "title": "Chương 2: Bí Pháp Đầu Tiên", "content": "Suốt đêm hôm đó, Lý Phong không ngủ được. Cậu cứ nhìn chằm chằm vào thanh kiếm đặt trên bàn, trong đầu vẫn còn văng vẳng tiếng vọng bí ẩn.\n\nSáng sớm, khi ánh bình minh vừa ló dạng, cậu lặng lẽ ra sau nhà, cầm kiếm lên và bắt đầu vận công theo những ký ức mà kiếm đã truyền cho mình.\n\nChân khí bắt đầu lưu chuyển trong kinh mạch. Ban đầu chỉ là một làn gió nhẹ, rồi dần dần mạnh hơn, nhanh hơn, như dòng sông mùa lũ.\n\n\"Kiếm Khí Nhất Thức — Phong Vũ!\" Lý Phong vung kiếm. Một lưỡi kiếm khí xanh bạc bắn ra, chém đứt đôi tảng đá to bằng người trước mặt.\n\nCậu đứng sững, thở hổn hển, mồ hôi ướt đẫm áo. Nhưng trong mắt cậu bừng lên một ngọn lửa chưa từng có.\n\n\"Ta... có thể làm được.\"" },
+      { "id": 3, "title": "Chương 3: Kẻ Thù Xuất Hiện", "content": "Ba ngày sau khi nhặt được kiếm, Lý Phong phát hiện có người theo dõi mình.\n\nHắn ta mặc áo đen, đứng nấp sau cây cổ thụ đầu làng. Khi Lý Phong quay lại nhìn, người đó lập tức biến mất như bóng ma.\n\n\"Ai đó muốn lấy lại thanh kiếm này.\" Lý Phong siết chặt chuôi kiếm. Cậu biết rõ — thứ mình đang cầm không phải đồ bình thường. Và những kẻ muốn tranh đoạt nó sẽ không dừng lại.\n\nĐêm hôm đó, bốn kẻ mang mặt nạ đột nhập vào nhà cậu." }
+    ]
+  },
+  {
+    "id": "truyen-demo-2",
+    "title": "Nữ Hoàng Bóng Tối",
+    "author": "Tác giả Demo",
+    "cover": "https://placehold.co/300x400/2d1b69/f8f8ff?text=N%E1%BB%AF+Ho%C3%A0ng",
+    "genre": ["Huyền Huyễn", "Nữ Cường"],
+    "status": "Hoàn thành",
+    "rating": 4.9,
+    "rateCount": 873,
+    "views": 43200,
+    "follows": 1100,
+    "source": "Tác giả tự viết",
+    "description": "Cô gái bị phản bội, mang theo oán hận tái sinh vào thế giới khác. Lần này, cô sẽ không còn là kẻ yếu đuối nữa.",
+    "chapters": [
+      { "id": 1, "title": "Chương 1: Tái Sinh", "content": "Khi mở mắt ra, Vân Hy biết mình đã chết.\n\nCái chết đến quá đột ngột — lưỡi dao sau lưng của người cô tin tưởng nhất. Máu loang trên sàn đá lạnh. Và nụ cười phản bội trên gương mặt hắn là thứ cuối cùng cô thấy trước khi màn đêm buông xuống.\n\nVậy mà bây giờ cô lại thức dậy.\n\nBầu trời... màu tím? Hai mặt trăng?\n\n\"Đây không phải thế giới của ta.\" Vân Hy ngồi dậy, nhìn xuống bàn tay — đôi tay của một đứa trẻ mười hai tuổi, gầy guộc và xanh xao.\n\nNhưng trong tâm trí cô là ký ức trọn vẹn của kiếp trước. Kỹ năng. Sự tính toán. Và lòng căm thù chưa nguội.\n\n\"Tốt lắm,\" cô khẽ thì thầm, khóe môi cong lên. \"Hãy bắt đầu lại từ đầu.\"" },
+      { "id": 2, "title": "Chương 2: Thức Tỉnh Hắc Ám", "content": "Thân xác mới của Vân Hy là con gái thứ ba của một gia tộc suy tàn, không ai coi ra gì.\n\nHoàn hảo. Cô không cần ai chú ý — ít nhất là chưa phải lúc này.\n\nĐêm đầu tiên, khi cả nhà ngủ say, Vân Hy lẻn ra khu rừng sau nhà. Cô ngồi thiền, cố gắng cảm nhận linh lực của thế giới này.\n\nVà nó đáp lại.\n\nKhông phải linh lực trắng trong như người bình thường vận dụng — thứ tuôn vào người cô là bóng tối đặc quánh, lạnh như băng và tràn đầy sức mạnh hủy diệt.\n\n\"Hắc Ám Linh Căn?\" Vân Hy không ngạc nhiên lắm. Phù hợp với kiếp trước của cô.\n\nCô mỉm cười, để bóng tối cuộn quanh ngón tay như những vòi bạch tuộc ngoan ngoãn." }
+    ]
+  }
+]
