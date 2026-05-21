@@ -1,63 +1,60 @@
 @echo off
 chcp 65001 >nul
-title TruyenHub - Deploy len GitHub Pages (Mien phi mai mai)
+title Deploy Web Truyen
 color 0A
 
 echo.
-echo  ████████╗██████╗ ██╗   ██╗███████╗███╗  ██╗
-echo  ╚══██╔══╝██╔══██╗██║   ██║██╔════╝████╗ ██║
-echo     ██║   ██████╔╝██║   ██║█████╗  ██╔██╗██║
-echo     ██║   ██╔══██╗██║   ██║██╔══╝  ██║╚████║
-echo     ██║   ██║  ██║╚██████╔╝███████╗██║ ╚███║
-echo     ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚══╝
-echo.
-echo  [DEPLOY WEB TRUYEN - GITHUB PAGES MIEN PHI]
-echo  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+echo ===================================================
+echo   DEPLOY WEB TRUYEN - GITHUB PAGES MIEN PHI
+echo ===================================================
 echo.
 
-:: ── BUOC 1: Kiem tra Git ──────────────────────────
+:: Kiem tra Git
 git --version >nul 2>&1
 if errorlevel 1 (
-  echo  [LOI] Git chua duoc cai dat.
-  echo  Tai Git tai: https://git-scm.com/download/win
-  start https://git-scm.com/download/win
-  pause & exit
+    echo [LOI] Chua cai Git. Tai tai: https://git-scm.com
+    start https://git-scm.com/download/win
+    pause & exit /b
 )
-echo  [OK] Git da san sang.
+echo [OK] Git san sang.
 echo.
 
-:: ── BUOC 2: Thong tin nguoi dung ─────────────────
-echo  BUOC 1/4 - Nhap thong tin GitHub
-echo  ─────────────────────────────────
-echo  (Chua co tai khoan? Mien phi tai: https://github.com/signup)
+:: BUOC 1 - Nhap ten GitHub
+echo BUOC 1: Nhap ten dang nhap GitHub cua ban
+echo (Chua co tai khoan? Mien phi tai: https://github.com/signup)
 echo.
-set /p GITHUB_USER= Ten dang nhap GitHub cua ban:
-if "%GITHUB_USER%"=="" (echo  [LOI] Khong duoc de trong! & pause & exit)
-
+set /p GITHUB_USER=Ten GitHub:
+if "%GITHUB_USER%"=="" (
+    echo [LOI] Ten GitHub khong duoc de trong!
+    pause & exit /b
+)
 set REPO_NAME=web-truyen
+
+:: BUOC 2 - Mo trang tao repo
 echo.
-echo  Repository se tao: github.com/%GITHUB_USER%/%REPO_NAME%
+echo ===================================================
+echo BUOC 2: Tao repo tren GitHub
+echo ===================================================
+echo.
+echo Trinh duyet se mo trang tao repo GitHub...
+echo.
+echo Lam theo cac buoc sau:
+echo   1. Dat ten repo la: web-truyen
+echo   2. Chon: Public
+echo   3. KHONG tick "Add a README file"
+echo   4. Nhan nut "Create repository" (mau xanh)
+echo.
+timeout /t 3 /nobreak >nul
+start https://github.com/new?name=web-truyen^&visibility=public
+echo.
+echo Sau khi tao xong repo, quay lai day va...
+pause
+
+:: BUOC 3 - Cau hinh git va push
+echo.
+echo BUOC 3: Dang day code len GitHub...
 echo.
 
-:: ── BUOC 3: Mo trang tao repo ────────────────────
-echo  BUOC 2/4 - Tao repository tren GitHub
-echo  ─────────────────────────────────────
-echo  Trinh duyet se mo trang tao repo...
-echo  Hay lam theo:
-echo    1. Dat ten repo la: %REPO_NAME%
-echo    2. Chon "Public"
-echo    3. KHONG tick "Add README"
-echo    4. Nhan "Create repository"
-echo.
-timeout /t 2 >nul
-start https://github.com/new?name=%REPO_NAME%^&visibility=public
-echo.
-pause "Sau khi tao xong repo, nhan phim bat ky de tiep tuc..."
-
-:: ── BUOC 4: Push code ────────────────────────────
-echo.
-echo  BUOC 3/4 - Dang day code len GitHub...
-echo  ─────────────────────────────────────
 cd /d C:\web-truyen
 
 git config user.email "%GITHUB_USER%@users.noreply.github.com"
@@ -67,51 +64,68 @@ git remote remove origin 2>nul
 git remote add origin https://github.com/%GITHUB_USER%/%REPO_NAME%.git
 
 git add -A
-git commit -m "Deploy TruyenHub website" --allow-empty
-
-git branch -M main
+git commit -m "Deploy TruyenHub" --allow-empty 2>nul
 
 echo.
-echo  [Trinh duyet se mo de ban dang nhap GitHub - chi can lam 1 lan]
+echo Dang push code... (Trinh duyet co the mo de ban dang nhap GitHub)
+echo.
+git branch -M main
 git push -u origin main
 
 if errorlevel 1 (
-  echo.
-  echo  [LOI] Push that bai. Hay kiem tra lai ten GitHub va repo.
-  pause & exit
+    echo.
+    echo ===================================================
+    echo [LOI] Push that bai! Nguyen nhan co the la:
+    echo.
+    echo   1. Chua tao repo tren GitHub
+    echo      -> Vao: https://github.com/new
+    echo      -> Ten repo: web-truyen, chon Public
+    echo.
+    echo   2. Sai ten dang nhap GitHub
+    echo      -> Ban nhap: %GITHUB_USER%
+    echo      -> Kiem tra lai tai: https://github.com
+    echo.
+    echo   3. Chua dang nhap GitHub trong trinh duyet
+    echo      -> Dang nhap tai: https://github.com/login
+    echo      -> Roi chay lai file nay
+    echo ===================================================
+    echo.
+    pause & exit /b
 )
 
-:: ── BUOC 5: Bat GitHub Pages ─────────────────────
+:: BUOC 4 - Bat GitHub Pages
 echo.
-echo  BUOC 4/4 - Bat GitHub Pages
-echo  ─────────────────────────────
-echo  Trinh duyet se mo trang Settings...
-echo  Hay lam:
-echo    1. Keo xuong muc "Source"
-echo    2. Chon "GitHub Actions"
-echo    3. Nhan Save
+echo BUOC 4: Bat GitHub Pages...
 echo.
-timeout /t 2 >nul
+echo Trinh duyet se mo trang Settings...
+echo.
+echo Lam theo:
+echo   1. Keo xuong muc "Build and deployment"
+echo   2. Source: chon "GitHub Actions"
+echo   3. Nhan Save (neu co)
+echo.
+timeout /t 2 /nobreak >nul
 start https://github.com/%GITHUB_USER%/%REPO_NAME%/settings/pages
 
 echo.
-echo  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+echo ===================================================
 echo.
-echo   HOAN TAT! Web cua ban se song tai:
+echo   HOAN TAT! Web cua ban:
 echo.
-echo   https://%GITHUB_USER%.github.io/%REPO_NAME%/
+echo   https://%GITHUB_USER%.github.io/web-truyen/
 echo.
 echo   (Cho 1-2 phut de GitHub build xong)
 echo.
-echo   Kiem tra tien trinh build tai:
-start https://github.com/%GITHUB_USER%/%REPO_NAME%/actions
+echo   Xem tien trinh build tai:
 echo   https://github.com/%GITHUB_USER%/%REPO_NAME%/actions
 echo.
-echo  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+timeout /t 3 /nobreak >nul
+start https://github.com/%GITHUB_USER%/%REPO_NAME%/actions
+echo ===================================================
 echo.
 echo   CAP NHAT TRUYEN SAU NAY:
-echo   - Sua file C:\web-truyen\data\stories.json
-echo   - Chay lai file DEPLOY.bat nay
+echo   - Sua file: C:\web-truyen\data\stories.json
+echo   - Chay lai file DEPLOY.bat
 echo   - Web tu dong cap nhat trong 1 phut
 echo.
 pause
