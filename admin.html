@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel – Lưu Ly Hiền Nhi Các</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: #edf4fb; color: #1a2535; min-height: 100vh; }
+
+    /* ── Header ── */
+    .adm-hdr {
+      background: #fff; border-bottom: 2px solid #3ab3ca;
+      padding: 0 1.25rem; height: 58px;
+      display: flex; align-items: center; gap: .75rem;
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 2px 8px rgba(58,179,202,.12);
+    }
+    .adm-logo { font-size: 1.05rem; font-weight: 700; color: #3ab3ca; text-decoration: none; flex-shrink: 0; }
+    .adm-logo em { color: #7a96b0; font-style: normal; font-weight: 400; font-size: .78rem; margin-left: .3rem; }
+
+    /* ── Tabs ── */
+    .adm-tabs { display: flex; gap: .2rem; flex: 1; }
+    .adm-tab {
+      padding: .38rem .8rem; border: none; background: transparent;
+      border-radius: 6px; cursor: pointer; font-family: inherit;
+      font-size: .85rem; color: #4a6080; font-weight: 500; transition: all .15s;
+    }
+    .adm-tab:hover { background: #e0f3f8; color: #3ab3ca; }
+    .adm-tab.active { background: #3ab3ca; color: #fff; }
+
+    /* ── Settings strip ── */
+    .hdr-settings { display: flex; align-items: center; gap: .45rem; font-size: .8rem; flex-shrink: 0; }
+    .hdr-settings input {
+      padding: .3rem .55rem; border: 1.5px solid #c5dce9; border-radius: 6px;
+      font-size: .8rem; font-family: inherit; outline: none; background: #f7fbfd;
+    }
+    .hdr-settings input:focus { border-color: #3ab3ca; background: #fff; }
+    #inp-apikey { width: 190px; }
+    #inp-model  { width: 140px; }
+    .btn-save-cfg {
+      padding: .3rem .65rem; background: #3ab3ca; color: #fff;
+      border: none; border-radius: 6px; cursor: pointer; font-size: .8rem; font-family: inherit;
+    }
+    .btn-save-cfg:hover { background: #2896ac; }
+    #key-dot { font-size: .9rem; }
+
+    /* ── Layout ── */
+    .adm-body { max-width: 1280px; margin: 0 auto; padding: 1.25rem 1rem; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Cards ── */
+    .card {
+      background: #fff; border-radius: 12px; padding: 1.2rem;
+      box-shadow: 0 2px 10px rgba(0,50,100,.06);
+    }
+    .card-hd {
+      font-size: .95rem; font-weight: 600; color: #1a2535;
+      margin-bottom: 1rem; display: flex; align-items: center; gap: .4rem;
+    }
+
+    /* ── Grid helpers ── */
+    .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .g3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; }
+    .g4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; }
+    .mt1 { margin-top: .5rem; }
+    .mt2 { margin-top: 1rem; }
+    .flex { display: flex; } .fw { flex-wrap: wrap; } .gap1 { gap: .45rem; } .gap2 { gap: 1rem; }
+    .aic { align-items: center; } .jsb { justify-content: space-between; }
+    .tsmall { font-size: .78rem; } .tmuted { color: #7a96b0; }
+
+    /* ── Stat cards ── */
+    .stat-card { background: #fff; border-radius: 12px; padding: 1.2rem; text-align: center; box-shadow: 0 2px 10px rgba(0,50,100,.06); }
+    .stat-icon { font-size: 1.8rem; margin-bottom: .35rem; }
+    .stat-num  { font-size: 2rem; font-weight: 700; color: #3ab3ca; line-height: 1; }
+    .stat-lbl  { font-size: .75rem; color: #7a96b0; margin-top: .25rem; }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: .3rem;
+      padding: .42rem .9rem; border: none; border-radius: 7px;
+      cursor: pointer; font-family: inherit; font-size: .84rem; font-weight: 500; transition: all .15s;
+      text-decoration: none;
+    }
+    .btn-primary   { background: #3ab3ca; color: #fff; }
+    .btn-primary:hover { background: #2896ac; }
+    .btn-secondary { background: #e0f3f8; color: #2896ac; }
+    .btn-secondary:hover { background: #c5e8f3; }
+    .btn-danger    { background: #fdecea; color: #e74c3c; }
+    .btn-danger:hover { background: #f5c6c3; }
+    .btn-success   { background: #e8f5e9; color: #27ae60; }
+    .btn-success:hover { background: #c8e6c9; }
+    .btn-sm  { padding: .28rem .6rem; font-size: .77rem; }
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+
+    /* ── Forms ── */
+    .fgrp { margin-bottom: .9rem; }
+    .fgrp label { display: block; font-size: .8rem; font-weight: 500; color: #4a6080; margin-bottom: .3rem; }
+    .fctl {
+      width: 100%; padding: .45rem .7rem; border: 1.5px solid #c5dce9; border-radius: 8px;
+      font-size: .87rem; font-family: inherit; color: #1a2535; outline: none; transition: border-color .15s;
+      background: #fafcfe;
+    }
+    .fctl:focus { border-color: #3ab3ca; background: #fff; }
+    textarea.fctl { resize: vertical; min-height: 75px; }
+
+    /* ── Genre checkboxes ── */
+    .genre-group { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .25rem; }
+    .gc { display: none; }
+    .gc + label {
+      padding: .22rem .6rem; border: 1.5px solid #c5dce9; border-radius: 20px;
+      font-size: .76rem; cursor: pointer; transition: all .15s; color: #4a6080; user-select: none;
+    }
+    .gc:checked + label { background: #3ab3ca; color: #fff; border-color: #3ab3ca; }
+
+    /* ── Upload zone ── */
+    .upload-zone {
+      border: 2.5px dashed #9fcfde; border-radius: 12px;
+      padding: 2.2rem 1.5rem; text-align: center; cursor: pointer;
+      transition: all .2s; background: #f5fafd;
+    }
+    .upload-zone:hover, .upload-zone.drag-over { border-color: #3ab3ca; background: #e0f3f8; }
+    .upload-icon { font-size: 2.2rem; margin-bottom: .6rem; }
+    .upload-txt  { font-size: .92rem; color: #4a6080; }
+    .upload-hint { font-size: .75rem; color: #9fb8cc; margin-top: .3rem; }
+
+    /* ── Story items ── */
+    .story-item {
+      background: #fff; border-radius: 10px; padding: .85rem 1rem;
+      display: flex; align-items: center; gap: .7rem;
+      box-shadow: 0 1px 6px rgba(0,50,100,.05); margin-bottom: .55rem; transition: box-shadow .15s;
+    }
+    .story-item:hover { box-shadow: 0 3px 14px rgba(0,50,100,.1); }
+    .s-cover { width: 44px; height: 58px; object-fit: cover; border-radius: 5px; background: #e0f3f8; flex-shrink: 0; }
+    .s-info  { flex: 1; min-width: 0; }
+    .s-title { font-weight: 600; font-size: .92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .s-meta  { font-size: .76rem; color: #7a96b0; margin-top: .18rem; }
+    .s-tags  { display: flex; gap: .35rem; margin-top: .3rem; flex-wrap: wrap; }
+    .tag { padding: .13rem .45rem; background: #e0f3f8; color: #2896ac; border-radius: 4px; font-size: .7rem; }
+    .s-actions { display: flex; gap: .3rem; flex-shrink: 0; }
+
+    /* ── Chapter preview list ── */
+    .ch-list { max-height: 220px; overflow-y: auto; border: 1.5px solid #c5dce9; border-radius: 8px; }
+    .ch-item {
+      padding: .45rem .75rem; border-bottom: 1px solid #eef3f7;
+      font-size: .8rem; display: flex; gap: .45rem; align-items: center;
+    }
+    .ch-item:last-child { border-bottom: none; }
+    .ch-num { background: #e0f3f8; color: #2896ac; border-radius: 4px; padding: .08rem .32rem; font-size: .72rem; font-weight: 600; flex-shrink: 0; }
+
+    /* ── Push area ── */
+    .push-row { display: flex; gap: .6rem; align-items: center; padding: .85rem; background: #f0f9fc; border-radius: 9px; }
+
+    /* ── AI Chat ── */
+    .chat-wrap {
+      display: flex; flex-direction: column;
+      height: calc(100vh - 120px); min-height: 500px;
+      background: #fff; border-radius: 12px; overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,50,100,.06);
+    }
+    .chat-msgs {
+      flex: 1; overflow-y: auto; padding: 1.1rem;
+      display: flex; flex-direction: column; gap: .65rem;
+    }
+    .msg { max-width: 78%; padding: .7rem .95rem; border-radius: 12px; font-size: .88rem; line-height: 1.65; }
+    .msg-user      { background: #3ab3ca; color: #fff; align-self: flex-end; border-bottom-right-radius: 3px; }
+    .msg-assistant { background: #f0f9fc; color: #1a2535; align-self: flex-start; border-bottom-left-radius: 3px; }
+    .msg-tool {
+      background: #fffde7; color: #6d4c00; align-self: flex-start;
+      border: 1px solid #ffe082; font-size: .76rem; font-family: 'Courier New', monospace;
+      max-width: 88%; border-radius: 8px; padding: .45rem .7rem;
+    }
+    .msg-sys { background: transparent; color: #9fb8cc; align-self: center; font-size: .75rem; padding: .25rem .7rem; border-radius: 20px; border: 1px solid #ddeef5; }
+
+    .typing { display: flex; gap: 4px; align-items: center; padding: .7rem .95rem; background: #f0f9fc; border-radius: 12px; align-self: flex-start; width: fit-content; }
+    .dot { width: 6px; height: 6px; background: #9fcfde; border-radius: 50%; animation: bop .8s infinite; }
+    .dot:nth-child(2) { animation-delay: .14s; }
+    .dot:nth-child(3) { animation-delay: .28s; }
+    @keyframes bop { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
+
+    .chat-bar {
+      padding: .85rem 1rem; border-top: 1.5px solid #e0f0f5;
+      display: flex; gap: .55rem; background: #fff;
+    }
+    .chat-in {
+      flex: 1; padding: .55rem .85rem; border: 1.5px solid #c5dce9; border-radius: 22px;
+      font-family: inherit; font-size: .88rem; outline: none; resize: none; max-height: 110px; line-height: 1.45;
+    }
+    .chat-in:focus { border-color: #3ab3ca; }
+    .btn-send {
+      width: 42px; height: 42px; background: #3ab3ca; color: #fff; border: none;
+      border-radius: 50%; cursor: pointer; font-size: 1rem;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background .15s;
+    }
+    .btn-send:hover { background: #2896ac; }
+    .btn-send:disabled { opacity: .45; cursor: not-allowed; }
+
+    /* ── Edit Modal ── */
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.38); z-index: 200; align-items: center; justify-content: center; }
+    .overlay.open { display: flex; }
+    .modal { background: #fff; border-radius: 14px; padding: 1.4rem; width: 90%; max-width: 580px; max-height: 90vh; overflow-y: auto; }
+    .modal-hd { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.1rem; }
+    .modal-title { font-size: 1rem; font-weight: 600; }
+    .btn-x { width: 30px; height: 30px; border: none; background: #f0f4f8; border-radius: 50%; cursor: pointer; font-size: .95rem; color: #4a6080; display: flex; align-items: center; justify-content: center; }
+
+    /* ── Section header ── */
+    .sec-hd { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+    .sec-ttl { font-size: 1.05rem; font-weight: 700; color: #1a2535; }
+    .empty-state { text-align: center; padding: 2.5rem; color: #9fb8cc; font-size: .9rem; }
+    .empty-state .ico { font-size: 2.2rem; margin-bottom: .4rem; }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed; bottom: 1.4rem; right: 1.4rem;
+      background: #1a2535; color: #fff; padding: .65rem 1.1rem;
+      border-radius: 8px; font-size: .85rem; z-index: 999;
+      animation: slup .2s ease; max-width: 300px;
+    }
+    .toast.ok  { background: #27ae60; }
+    .toast.err { background: #e74c3c; }
+    @keyframes slup { from{transform:translateY(16px);opacity:0} to{transform:translateY(0);opacity:1} }
+
+    /* ── Pre/code in chat ── */
+    .msg-assistant code { background: #e0f3f8; padding: .1rem .3rem; border-radius: 3px; font-size: .84em; font-family: 'Courier New', monospace; }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: #f0f4f8; }
+    ::-webkit-scrollbar-thumb { background: #9fcfde; border-radius: 3px; }
+
+    @media (max-width: 768px) {
+      .g4 { grid-template-columns: repeat(2,1fr); }
+      .g3 { grid-template-columns: 1fr 1fr; }
+      .g2 { grid-template-columns: 1fr; }
+      #inp-apikey { width: 130px; }
+      #inp-model  { display: none; }
+      .msg { max-width: 90%; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════ HEADER ══════════════════ -->
+<header class="adm-hdr">
+  <a class="adm-logo" href="index.html" target="_blank">🌸 LLHNC <em>Admin</em></a>
+
+  <nav class="adm-tabs">
+    <button class="adm-tab active" onclick="gotoTab('dashboard',this)">🏠 Tổng Quan</button>
+    <button class="adm-tab"        onclick="gotoTab('upload',this)">📤 Đăng Truyện</button>
+    <button class="adm-tab"        onclick="gotoTab('manage',this)">📚 Quản Lý</button>
+    <button class="adm-tab"        onclick="gotoTab('chat',this)">🤖 AI Chat</button>
+  </nav>
+
+  <div class="hdr-settings">
+    <input type="password" id="inp-apikey" placeholder="Anthropic API Key..." autocomplete="off">
+    <input type="text"     id="inp-model"  placeholder="claude-opus-4-5">
+    <button class="btn-save-cfg" onclick="saveCfg()">Lưu</button>
+    <span id="key-dot" title="Trạng thái API key">⚫</span>
+  </div>
+</header>
+
+<!-- ══════════════════ BODY ══════════════════ -->
+<div class="adm-body">
+
+  <!-- ── TAB: DASHBOARD ── -->
+  <div class="tab-panel active" id="panel-dashboard">
+    <div class="sec-hd">
+      <div class="sec-ttl">📊 Tổng Quan</div>
+      <div class="flex gap1">
+        <button class="btn btn-secondary btn-sm" onclick="loadDashboard()">🔄 Làm mới</button>
+        <a href="index.html" target="_blank" class="btn btn-secondary btn-sm">🌐 Xem web</a>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="g4" id="stats-row">
+      <div class="stat-card"><div class="stat-icon">📚</div><div class="stat-num" id="st-stories">–</div><div class="stat-lbl">Truyện</div></div>
+      <div class="stat-card"><div class="stat-icon">📖</div><div class="stat-num" id="st-chapters">–</div><div class="stat-lbl">Chương</div></div>
+      <div class="stat-card"><div class="stat-icon">👁️</div><div class="stat-num" id="st-views">–</div><div class="stat-lbl">Lượt đọc</div></div>
+      <div class="stat-card"><div class="stat-icon">❤️</div><div class="stat-num" id="st-follows">–</div><div class="stat-lbl">Theo dõi</div></div>
+    </div>
+
+    <!-- Story list -->
+    <div class="mt2">
+      <div class="sec-hd"><div class="sec-ttl" style="font-size:.95rem">📋 Danh Sách Truyện</div></div>
+      <div id="dash-list"></div>
+    </div>
+
+    <!-- Deploy -->
+    <div class="mt2">
+      <div class="card">
+        <div class="card-hd">🚀 Deploy Lên GitHub Pages</div>
+        <div class="flex gap1 fw aic">
+          <input type="text" id="push-msg" class="fctl" style="flex:1;min-width:200px"
+                 value="Admin: cập nhật nội dung" placeholder="Commit message...">
+          <button class="btn btn-primary" onclick="doPush()">⬆️ Push GitHub</button>
+        </div>
+        <pre id="push-out" class="mt1 tmuted tsmall" style="display:none;white-space:pre-wrap;font-family:monospace"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB: UPLOAD ── -->
+  <div class="tab-panel" id="panel-upload">
+    <div class="sec-ttl mt1" style="margin-bottom:1rem">📤 Đăng Truyện Mới</div>
+    <div class="g2" style="gap:1.4rem;align-items:start">
+
+      <!-- Left col -->
+      <div>
+        <div class="card" style="margin-bottom:1rem">
+          <div class="card-hd">📄 Tải File Word (.docx)</div>
+          <div class="upload-zone" id="up-zone" onclick="document.getElementById('file-in').click()">
+            <input type="file" id="file-in" accept=".docx,.doc" style="display:none" onchange="handleFile(this.files[0])">
+            <div class="upload-icon">📄</div>
+            <div class="upload-txt">Nhấp hoặc kéo file .docx vào đây</div>
+            <div class="upload-hint">Tự động nhận diện chương theo "Chương N" hoặc "Chapter N"</div>
+          </div>
+          <div id="up-status" class="mt1 tsmall" style="display:none"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-hd">📝 Thông Tin Truyện</div>
+          <div class="fgrp"><label>Tên truyện *</label><input id="f-title"  type="text" class="fctl" placeholder="Tên truyện..."></div>
+          <div class="fgrp"><label>Tác giả *</label><input   id="f-author" type="text" class="fctl" placeholder="Tác giả..."></div>
+          <div class="fgrp"><label>Ảnh bìa (URL)</label><input id="f-cover" type="text" class="fctl" placeholder="https://..."></div>
+          <div class="g2">
+            <div class="fgrp">
+              <label>Trạng thái</label>
+              <select id="f-status" class="fctl"><option>Đang ra</option><option>Hoàn thành</option><option>Tạm dừng</option></select>
+            </div>
+            <div class="fgrp">
+              <label>Nguồn</label>
+              <select id="f-source" class="fctl"><option>Sáng tác</option><option>Dịch</option><option>ST</option></select>
+            </div>
+          </div>
+          <div class="fgrp">
+            <label>Thể loại</label>
+            <div class="genre-group">
+              <input type="checkbox" class="gc" id="g1" value="Tiên Hiệp"><label for="g1">Tiên Hiệp</label>
+              <input type="checkbox" class="gc" id="g2" value="Huyền Huyễn"><label for="g2">Huyền Huyễn</label>
+              <input type="checkbox" class="gc" id="g3" value="Ngôn Tình"><label for="g3">Ngôn Tình</label>
+              <input type="checkbox" class="gc" id="g4" value="Đô Thị"><label for="g4">Đô Thị</label>
+              <input type="checkbox" class="gc" id="g5" value="Nữ Cường"><label for="g5">Nữ Cường</label>
+              <input type="checkbox" class="gc" id="g6" value="Lịch Sử"><label for="g6">Lịch Sử</label>
+              <input type="checkbox" class="gc" id="g7" value="Võ Hiệp"><label for="g7">Võ Hiệp</label>
+              <input type="checkbox" class="gc" id="g8" value="Hệ Thống"><label for="g8">Hệ Thống</label>
+            </div>
+          </div>
+          <div class="fgrp"><label>Giới thiệu</label><textarea id="f-desc" class="fctl" rows="4" placeholder="Tóm tắt nội dung..."></textarea></div>
+        </div>
+      </div>
+
+      <!-- Right col -->
+      <div>
+        <div class="card" style="margin-bottom:1rem">
+          <div class="card-hd">📖 Danh Sách Chương <span id="ch-cnt" class="tmuted tsmall">(0 chương)</span></div>
+          <div class="ch-list" id="ch-preview">
+            <div class="empty-state"><div class="ico">📂</div>Tải file Word để xem danh sách chương.</div>
+          </div>
+          <div id="ch-hint" class="mt1 tsmall tmuted"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-hd">✅ Lưu Truyện</div>
+          <button class="btn btn-primary" style="width:100%" onclick="saveStory(false)">💾 Lưu vào stories.json</button>
+          <div class="push-row mt1">
+            <span class="tsmall" style="flex:1">Sau khi lưu, push lên GitHub để công bố</span>
+            <button class="btn btn-success btn-sm" onclick="saveStory(true)">🚀 Lưu & Push</button>
+          </div>
+          <div id="save-st" class="mt1 tsmall" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB: MANAGE ── -->
+  <div class="tab-panel" id="panel-manage">
+    <div class="sec-hd">
+      <div class="sec-ttl">📚 Quản Lý Truyện</div>
+      <div class="flex gap1">
+        <button class="btn btn-secondary btn-sm" onclick="loadManage()">🔄 Tải lại</button>
+        <button class="btn btn-primary   btn-sm" onclick="gotoTabById('upload')">➕ Thêm truyện</button>
+      </div>
+    </div>
+    <div id="manage-list"></div>
+  </div>
+
+  <!-- ── TAB: CHAT ── -->
+  <div class="tab-panel" id="panel-chat">
+    <div class="chat-wrap">
+      <div class="chat-msgs" id="chat-msgs">
+        <div class="msg msg-sys">Nhập API Key ở góc trên để bắt đầu trò chuyện với AI.</div>
+        <div class="msg msg-assistant">Xin chào! Tôi là trợ lý quản trị <strong>Lưu Ly Hiền Nhi Các</strong> 🌸<br><br>
+Tôi có thể giúp bạn:<br>
+• 📚 Xem &amp; quản lý danh sách truyện<br>
+• ✏️ Chỉnh sửa thông tin, thể loại, trạng thái<br>
+• 📊 Thống kê nội dung<br>
+• 🚀 Deploy lên GitHub Pages<br>
+• 💡 Tư vấn cách tổ chức truyện<br><br>
+Hãy đặt câu hỏi hoặc cho tôi một nhiệm vụ!</div>
+      </div>
+      <div class="chat-bar">
+        <textarea class="chat-in" id="chat-in" placeholder="Nhắn tin với AI trợ lý..." rows="1"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}"></textarea>
+        <button class="btn-send" id="btn-send" onclick="sendMsg()" title="Gửi (Enter)">➤</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /adm-body -->
+
+<!-- ══════════════════ EDIT MODAL ══════════════════ -->
+<div class="overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-title">✏️ Chỉnh sửa truyện</div>
+      <button class="btn-x" onclick="closeModal()">✕</button>
+    </div>
+    <div class="fgrp"><label>Tên truyện</label><input type="text" id="e-title" class="fctl"></div>
+    <div class="fgrp"><label>Tác giả</label><input type="text" id="e-author" class="fctl"></div>
+    <div class="fgrp"><label>Ảnh bìa (URL)</label><input type="text" id="e-cover" class="fctl"></div>
+    <div class="g2">
+      <div class="fgrp">
+        <label>Trạng thái</label>
+        <select id="e-status" class="fctl"><option>Đang ra</option><option>Hoàn thành</option><option>Tạm dừng</option></select>
+      </div>
+      <div class="fgrp">
+        <label>Nguồn</label>
+        <select id="e-source" class="fctl"><option>Sáng tác</option><option>Dịch</option><option>ST</option></select>
+      </div>
+    </div>
+    <div class="fgrp">
+      <label>Thể loại</label>
+      <div class="genre-group" id="e-genres">
+        <input type="checkbox" class="gc" id="eg1" value="Tiên Hiệp"><label for="eg1">Tiên Hiệp</label>
+        <input type="checkbox" class="gc" id="eg2" value="Huyền Huyễn"><label for="eg2">Huyền Huyễn</label>
+        <input type="checkbox" class="gc" id="eg3" value="Ngôn Tình"><label for="eg3">Ngôn Tình</label>
+        <input type="checkbox" class="gc" id="eg4" value="Đô Thị"><label for="eg4">Đô Thị</label>
+        <input type="checkbox" class="gc" id="eg5" value="Nữ Cường"><label for="eg5">Nữ Cường</label>
+        <input type="checkbox" class="gc" id="eg6" value="Lịch Sử"><label for="eg6">Lịch Sử</label>
+        <input type="checkbox" class="gc" id="eg7" value="Võ Hiệp"><label for="eg7">Võ Hiệp</label>
+        <input type="checkbox" class="gc" id="eg8" value="Hệ Thống"><label for="eg8">Hệ Thống</label>
+      </div>
+    </div>
+    <div class="fgrp"><label>Giới thiệu</label><textarea id="e-desc" class="fctl" rows="4"></textarea></div>
+    <div class="fgrp"><label>Lượt đọc</label><input type="number" id="e-views" class="fctl"></div>
+    <input type="hidden" id="e-id">
+    <div class="flex gap1" style="justify-content:flex-end;margin-top:.5rem">
+      <button class="btn btn-secondary" onclick="closeModal()">Hủy</button>
+      <button class="btn btn-primary"   onclick="saveEdit()">💾 Lưu thay đổi</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ SCRIPT ══════════════════ -->
+<script>
+'use strict';
+
+// ────────────────── STATE ──────────────────
+let stories      = [];
+let chatMsgs     = [];   // [{role, content}] for Claude API
+let chatBusy     = false;
+let pendingChs   = [];   // chapters from parsed docx
+
+// ────────────────── INIT ──────────────────
+(function init() {
+  const key   = ls('api_key') || '';
+  const model = ls('model')   || 'claude-opus-4-5';
+  document.getElementById('inp-apikey').value = key;
+  document.getElementById('inp-model').value  = model;
+  setKeyDot(key);
+
+  // Drag & drop
+  const zone = document.getElementById('up-zone');
+  zone.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('drag-over'); });
+  zone.addEventListener('dragleave', ()  => zone.classList.remove('drag-over'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.classList.remove('drag-over');
+    if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+  });
+
+  fetchStories().then(loadDashboard);
+})();
+
+// ────────────────── CONFIG ──────────────────
+function saveCfg() {
+  const key   = document.getElementById('inp-apikey').value.trim();
+  const model = document.getElementById('inp-model').value.trim() || 'claude-opus-4-5';
+  lsSet('api_key', key);
+  lsSet('model', model);
+  setKeyDot(key);
+  toast(key ? '🔑 Đã lưu cấu hình!' : '⚠️ Đã xóa API Key');
+}
+function setKeyDot(key) {
+  document.getElementById('key-dot').textContent = key ? '🟢' : '🔴';
+}
+
+// ────────────────── TAB NAVIGATION ──────────────────
+function gotoTab(name, el) {
+  document.querySelectorAll('.adm-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-' + name).classList.add('active');
+  if (name === 'dashboard') loadDashboard();
+  if (name === 'manage')    loadManage();
+}
+function gotoTabById(name) {
+  const tabs  = [...document.querySelectorAll('.adm-tab')];
+  const names = ['dashboard','upload','manage','chat'];
+  const idx   = names.indexOf(name);
+  if (idx >= 0) gotoTab(name, tabs[idx]);
+}
+
+// ────────────────── API HELPERS ──────────────────
+async function apiFetch(path, opts = {}) {
+  const r = await fetch(path, opts);
+  const t = await r.text();
+  try { return JSON.parse(t); } catch { return { ok: false, error: t }; }
+}
+async function apiGet(path) {
+  return apiFetch(path);
+}
+async function apiPost(path, body) {
+  return apiFetch(path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+}
+
+// ────────────────── STORIES ──────────────────
+async function fetchStories() {
+  try {
+    stories = await apiGet('/api/stories');
+    if (!Array.isArray(stories)) stories = [];
+  } catch(e) {
+    toast('Lỗi tải stories: ' + e.message, 'err');
+    stories = [];
+  }
+}
+
+async function persistStories() {
+  const res = await apiPost('/api/stories', stories);
+  if (res.ok || res.count >= 0) return true;
+  toast('❌ Lỗi lưu: ' + (res.error || ''), 'err');
+  return false;
+}
+
+// ────────────────── DASHBOARD ──────────────────
+async function loadDashboard() {
+  await fetchStories();
+  const totalCh  = stories.reduce((s,t) => s + (t.chapters?.length || 0), 0);
+  const totalV   = stories.reduce((s,t) => s + (t.views    || 0), 0);
+  const totalF   = stories.reduce((s,t) => s + (t.follows  || 0), 0);
+
+  q('#st-stories').textContent  = stories.length;
+  q('#st-chapters').textContent = totalCh;
+  q('#st-views').textContent    = fmt(totalV);
+  q('#st-follows').textContent  = fmt(totalF);
+
+  const el = q('#dash-list');
+  if (!stories.length) {
+    el.innerHTML = '<div class="empty-state"><div class="ico">📭</div>Chưa có truyện nào.</div>';
+    return;
+  }
+  el.innerHTML = stories.map(s => `
+    <div class="story-item">
+      <img class="s-cover" src="${esc(s.cover||'')}" alt="" onerror="this.style.visibility='hidden'">
+      <div class="s-info">
+        <div class="s-title">${esc(s.title)}</div>
+        <div class="s-meta">${esc(s.author)} · ${s.chapters?.length||0} chương · ${fmt(s.views||0)} lượt đọc</div>
+        <div class="s-tags">
+          ${(s.genre||[]).map(g=>`<span class="tag">${g}</span>`).join('')}
+          <span class="tag" style="background:#fff8e1;color:#856404">${s.status||'Đang ra'}</span>
+        </div>
+      </div>
+      <div class="s-actions">
+        <button class="btn btn-secondary btn-sm" onclick="openEdit('${esc(s.id)}')">✏️ Sửa</button>
+        <a href="story.html#${esc(s.id)}" target="_blank" class="btn btn-secondary btn-sm">🔗</a>
+      </div>
+    </div>`).join('');
+}
+
+async function doPush() {
+  const msg = q('#push-msg').value.trim() || 'Admin: cập nhật nội dung';
+  const btn = event.currentTarget;
+  btn.disabled = true; btn.textContent = '⏳ Đang push...';
+  const out = q('#push-out');
+  out.style.display = 'block'; out.textContent = '...';
+
+  const res = await apiPost('/api/push', { message: msg });
+  out.textContent = res.output || (res.ok ? 'OK!' : 'Lỗi: ' + (res.error||''));
+  btn.disabled = false; btn.textContent = '⬆️ Push GitHub';
+  toast(res.ok ? '✅ Push thành công!' : '❌ Push thất bại', res.ok ? 'ok' : 'err');
+}
+
+// ────────────────── DOCX UPLOAD ──────────────────
+async function handleFile(file) {
+  if (!file) return;
+  if (!window.mammoth) { toast('mammoth.js chưa tải. Kiểm tra kết nối!', 'err'); return; }
+
+  const st = q('#up-status');
+  st.style.display = 'block';
+  st.style.color = '#4a6080';
+  st.textContent = '⏳ Đang phân tích...';
+
+  try {
+    const buf = await file.arrayBuffer();
+    const { value: text } = await mammoth.extractRawText({ arrayBuffer: buf });
+
+    // Auto-fill title from filename
+    if (!q('#f-title').value.trim()) {
+      q('#f-title').value = file.name.replace(/\.(docx?)$/i,'').replace(/[-_]+/g,' ');
+    }
+
+    pendingChs = detectChapters(text);
+
+    if (pendingChs.length === 0) {
+      pendingChs = [{ id: 1, title: 'Chương 1', content: text.trim() }];
+      q('#ch-hint').textContent = '⚠️ Không tìm thấy dấu phân chương – đã gom thành 1 chương.';
+    } else {
+      q('#ch-hint').textContent = `✅ Nhận diện qua "Chương N" / "Chapter N"`;
+    }
+
+    st.style.color = '#27ae60';
+    st.textContent = `✅ Đã đọc xong! Phát hiện ${pendingChs.length} chương.`;
+    renderChapters(pendingChs);
+    toast(`📄 ${file.name}: ${pendingChs.length} chương`);
+  } catch(e) {
+    st.style.color = '#e74c3c';
+    st.textContent = '❌ Lỗi: ' + e.message;
+    toast('Lỗi đọc file: ' + e.message, 'err');
+  }
+}
+
+function detectChapters(text) {
+  // Matches: "Chương 1", "Chương 1:", "Chương 1 - Tên", "CHƯƠNG 1", "Chapter 1"
+  const rx = /^(?:chương|chapter)\s+(\d+)[:\-\s]*(.*)$/i;
+  const lines = text.split('\n');
+  const result = [];
+  let cur = null, buf = [];
+
+  for (const raw of lines) {
+    const line = raw.trim();
+    const m    = line.match(rx);
+    if (m) {
+      if (cur !== null) {
+        result.push({ id: cur.n, title: cur.t, content: buf.join('\n').trim() });
+      }
+      const n = parseInt(m[1]);
+      const t = m[2]?.trim() ? `Chương ${n}: ${m[2].trim()}` : `Chương ${n}`;
+      cur = { n, t };
+      buf = [];
+    } else if (cur !== null) {
+      buf.push(raw);
+    }
+  }
+  if (cur !== null) result.push({ id: cur.n, title: cur.t, content: buf.join('\n').trim() });
+  return result;
+}
+
+function renderChapters(chs) {
+  q('#ch-cnt').textContent = `(${chs.length} chương)`;
+  if (!chs.length) { q('#ch-preview').innerHTML = '<div class="empty-state"><div>📂</div>Không có chương</div>'; return; }
+  q('#ch-preview').innerHTML =
+    chs.slice(0, 60).map(c => `
+      <div class="ch-item">
+        <span class="ch-num">${c.id}</span>
+        <span style="flex:1">${esc(c.title)}</span>
+        <span class="tmuted tsmall">${Math.round(c.content.length/500)/2}k</span>
+      </div>`).join('') +
+    (chs.length > 60 ? `<div class="ch-item tmuted">…và ${chs.length - 60} chương nữa</div>` : '');
+}
+
+async function saveStory(andPush) {
+  const title  = q('#f-title').value.trim();
+  const author = q('#f-author').value.trim();
+  if (!title)        { toast('Chưa nhập tên truyện!', 'err'); return; }
+  if (!author)       { toast('Chưa nhập tác giả!',    'err'); return; }
+  if (!pendingChs.length) { toast('Chưa có chương nào!', 'err'); return; }
+
+  const genres = [...document.querySelectorAll('#panel-upload .gc:checked')].map(c => c.value);
+  const id     = slugify(title);
+
+  const story = {
+    id, title, author,
+    cover: q('#f-cover').value.trim() ||
+      `https://placehold.co/200x280/e0f3f8/3ab3ca?text=${encodeURIComponent(title.slice(0,6))}`,
+    genre: genres,
+    status: q('#f-status').value,
+    rating: 0, rateCount: 0, views: 0, follows: 0,
+    source: q('#f-source').value,
+    description: q('#f-desc').value.trim(),
+    chapters: pendingChs
+  };
+
+  const existing = stories.findIndex(s => s.id === id);
+  if (existing >= 0) {
+    if (!confirm(`Truyện "${title}" đã tồn tại. Ghi đè?`)) return;
+    stories[existing] = { ...stories[existing], ...story };
+  } else {
+    stories.unshift(story); // Add to front (newest first)
+  }
+
+  const st = q('#save-st');
+  st.style.display = 'block';
+  st.textContent = '⏳ Đang lưu...';
+  st.style.color = '#4a6080';
+
+  const ok = await persistStories();
+  if (ok) {
+    st.style.color = '#27ae60';
+    st.textContent = `✅ Đã lưu "${title}" (${stories.length} truyện)`;
+    toast('✅ Lưu thành công!', 'ok');
+    if (andPush) {
+      const res = await apiPost('/api/push', { message: `Thêm truyện: ${title}` });
+      toast(res.ok ? '🚀 Push thành công!' : '❌ Push thất bại', res.ok ? 'ok' : 'err');
+    }
+  }
+}
+
+// ────────────────── MANAGE ──────────────────
+async function loadManage() {
+  await fetchStories();
+  const el = q('#manage-list');
+  if (!stories.length) {
+    el.innerHTML = '<div class="empty-state"><div class="ico">📭</div>Chưa có truyện. <a href="#" onclick="gotoTabById(\'upload\');return false">Thêm ngay</a></div>';
+    return;
+  }
+  el.innerHTML = stories.map((s, i) => `
+    <div class="story-item">
+      <img class="s-cover" src="${esc(s.cover||'')}" alt="" onerror="this.style.visibility='hidden'">
+      <div class="s-info">
+        <div class="s-title">${esc(s.title)}</div>
+        <div class="s-meta">${esc(s.author)} · ${s.chapters?.length||0} chương · ${fmt(s.views||0)} lượt</div>
+        <div class="s-tags">
+          ${(s.genre||[]).map(g=>`<span class="tag">${g}</span>`).join('')}
+          <span class="tag" style="background:#fff8e1;color:#856404">${s.status||'Đang ra'}</span>
+          <span class="tag" style="background:#f3f3f3;color:#888">#${i+1}</span>
+        </div>
+      </div>
+      <div class="s-actions">
+        ${i>0 ? `<button class="btn btn-secondary btn-sm" onclick="moveStory('${esc(s.id)}',-1)" title="Lên trên">↑</button>` : ''}
+        ${i<stories.length-1 ? `<button class="btn btn-secondary btn-sm" onclick="moveStory('${esc(s.id)}',1)" title="Xuống dưới">↓</button>` : ''}
+        <button class="btn btn-secondary btn-sm" onclick="openEdit('${esc(s.id)}')">✏️</button>
+        <button class="btn btn-danger    btn-sm" onclick="deleteStory('${esc(s.id)}')">🗑️</button>
+      </div>
+    </div>`).join('');
+}
+
+async function moveStory(id, dir) {
+  const i = stories.findIndex(s => s.id === id);
+  const j = i + dir;
+  if (i < 0 || j < 0 || j >= stories.length) return;
+  [stories[i], stories[j]] = [stories[j], stories[i]];
+  await persistStories();
+  loadManage();
+  toast(dir < 0 ? '⬆️ Đã di chuyển lên' : '⬇️ Đã di chuyển xuống');
+}
+
+async function deleteStory(id) {
+  const s = stories.find(x => x.id === id);
+  if (!confirm(`Xóa truyện "${s?.title}"?\nHành động này không thể hoàn tác!`)) return;
+  stories = stories.filter(x => x.id !== id);
+  await persistStories();
+  loadManage();
+  toast('🗑️ Đã xóa truyện');
+}
+
+// ────────────────── EDIT MODAL ──────────────────
+function openEdit(id) {
+  const s = stories.find(x => x.id === id);
+  if (!s) return;
+  q('#e-id').value     = id;
+  q('#e-title').value  = s.title;
+  q('#e-author').value = s.author;
+  q('#e-cover').value  = s.cover  || '';
+  q('#e-status').value = s.status || 'Đang ra';
+  q('#e-source').value = s.source || 'Sáng tác';
+  q('#e-desc').value   = s.description || '';
+  q('#e-views').value  = s.views  || 0;
+  document.querySelectorAll('#e-genres .gc').forEach(cb => cb.checked = (s.genre||[]).includes(cb.value));
+  q('#edit-modal').classList.add('open');
+}
+function closeModal() { q('#edit-modal').classList.remove('open'); }
+
+async function saveEdit() {
+  const id  = q('#e-id').value;
+  const idx = stories.findIndex(s => s.id === id);
+  if (idx < 0) return;
+  stories[idx] = {
+    ...stories[idx],
+    title:       q('#e-title').value.trim(),
+    author:      q('#e-author').value.trim(),
+    cover:       q('#e-cover').value.trim(),
+    status:      q('#e-status').value,
+    source:      q('#e-source').value,
+    description: q('#e-desc').value.trim(),
+    views:       parseInt(q('#e-views').value) || 0,
+    genre:       [...document.querySelectorAll('#e-genres .gc:checked')].map(c => c.value),
+  };
+  const ok = await persistStories();
+  if (ok) {
+    closeModal();
+    toast('✅ Đã cập nhật', 'ok');
+    if (q('#panel-manage').classList.contains('active'))    loadManage();
+    if (q('#panel-dashboard').classList.contains('active')) loadDashboard();
+  }
+}
+
+// ────────────────── AI CHAT ──────────────────
+const SYS = `Bạn là trợ lý quản trị website "Lưu Ly Hiền Nhi Các" – trang đọc truyện tiếng Việt.
+
+Website: https://luulyhnc.github.io/luulyhiennhicac/
+Dữ liệu: data/stories.json
+
+Công cụ sẵn có:
+• get_stories       – Lấy toàn bộ danh sách truyện
+• save_stories      – Ghi đè stories.json bằng mảng mới
+• push_to_github    – Commit + push lên GitHub Pages
+
+Cấu trúc một truyện:
+{
+  "id": "slug",           // dùng để tạo URL
+  "title": "Tên Truyện",
+  "author": "Tác giả",
+  "cover": "URL ảnh bìa",
+  "genre": ["Tiên Hiệp","Ngôn Tình",...],
+  "status": "Đang ra | Hoàn thành | Tạm dừng",
+  "rating": 0–5,  "rateCount": 0,
+  "views": 0,     "follows": 0,
+  "source": "Sáng tác | Dịch | ST",
+  "description": "Giới thiệu...",
+  "chapters": [{"id":1,"title":"Chương 1","content":"..."}]
+}
+
+Hãy trả lời bằng tiếng Việt, ngắn gọn và rõ ràng.`;
+
+const TOOLS = [
+  { name: 'get_stories',
+    description: 'Lấy danh sách tất cả truyện từ stories.json',
+    input_schema: { type: 'object', properties: {}, required: [] } },
+  { name: 'save_stories',
+    description: 'Lưu (ghi đè) danh sách truyện vào stories.json',
+    input_schema: {
+      type: 'object',
+      properties: { stories: { type: 'array', description: 'Mảng đầy đủ các story object' } },
+      required: ['stories'] } },
+  { name: 'push_to_github',
+    description: 'Commit và push lên GitHub Pages để deploy',
+    input_schema: {
+      type: 'object',
+      properties: { message: { type: 'string', description: 'Commit message (không bắt buộc)' } },
+      required: [] } }
+];
+
+async function runTool(name, input) {
+  switch (name) {
+    case 'get_stories': {
+      await fetchStories();
+      return { ok: true, count: stories.length, stories };
+    }
+    case 'save_stories': {
+      stories = input.stories;
+      const ok = await persistStories();
+      return { ok, count: stories.length };
+    }
+    case 'push_to_github': {
+      const res = await apiPost('/api/push', { message: input.message || 'AI: cập nhật nội dung' });
+      return { ok: res.ok, output: (res.output||'').slice(0, 300) };
+    }
+    default: return { ok: false, error: 'Unknown tool: ' + name };
+  }
+}
+
+async function sendMsg() {
+  if (chatBusy) return;
+  const inp = q('#chat-in');
+  const txt = inp.value.trim();
+  if (!txt) return;
+
+  const apiKey = ls('api_key') || '';
+  if (!apiKey) { toast('Vui lòng nhập và lưu API Key trước!', 'err'); return; }
+
+  inp.value = ''; inp.style.height = 'auto';
+  addBubble('user', txt);
+  chatMsgs.push({ role: 'user', content: txt });
+
+  chatBusy = true;
+  q('#btn-send').disabled = true;
+
+  try     { await agentLoop(apiKey); }
+  catch(e){ addBubble('assistant', '❌ Lỗi kết nối: ' + e.message); }
+  finally {
+    chatBusy = false;
+    q('#btn-send').disabled = false;
+  }
+}
+
+async function agentLoop(apiKey) {
+  const model = ls('model') || 'claude-opus-4-5';
+  let typing  = addTyping();
+
+  while (true) {
+    const res = await apiPost('/api/claude', {
+      apiKey, model,
+      max_tokens: 4096,
+      system: SYS,
+      tools:  TOOLS,
+      messages: chatMsgs
+    });
+
+    typing?.remove(); typing = null;
+
+    // API / auth error
+    if (res.type === 'error') {
+      addBubble('assistant', '❌ ' + (res.error?.message || JSON.stringify(res.error)));
+      return;
+    }
+    if (!res.content) {
+      addBubble('assistant', '❌ Phản hồi không hợp lệ: ' + JSON.stringify(res).slice(0,200));
+      return;
+    }
+
+    // Push assistant turn
+    chatMsgs.push({ role: 'assistant', content: res.content });
+
+    // Show text
+    const textParts = res.content.filter(b => b.type === 'text').map(b => b.text).join('\n').trim();
+    if (textParts) addBubble('assistant', textParts);
+
+    // Tool use?
+    const uses = res.content.filter(b => b.type === 'tool_use');
+    if (!uses.length) break;
+
+    const results = [];
+    for (const tu of uses) {
+      const inStr = JSON.stringify(tu.input);
+      addBubble('tool', `🔧 ${tu.name}(${inStr.length > 90 ? inStr.slice(0,90)+'…' : inStr})`);
+      const result = await runTool(tu.name, tu.input);
+
+      // Summarise large results
+      let displayRes = result;
+      if (tu.name === 'get_stories' && result.stories) {
+        displayRes = { ok: true, count: result.count, titles: result.stories.map(s => s.title) };
+      }
+      const resStr = JSON.stringify(displayRes);
+      addBubble('tool', `↩️ ${resStr.length > 180 ? resStr.slice(0,180)+'…' : resStr}`);
+
+      results.push({ type: 'tool_result', tool_use_id: tu.id, content: JSON.stringify(result) });
+    }
+
+    chatMsgs.push({ role: 'user', content: results });
+    if (res.stop_reason !== 'tool_use') break;
+    typing = addTyping();
+  }
+}
+
+function addBubble(role, text) {
+  const el  = q('#chat-msgs');
+  const div = document.createElement('div');
+  div.className = 'msg msg-' + role;
+  div.innerHTML  = role === 'tool' ? esc(text) : md(text);
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+  return div;
+}
+
+function addTyping() {
+  const el  = q('#chat-msgs');
+  const div = document.createElement('div');
+  div.className = 'typing';
+  div.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+  return div;
+}
+
+// ────────────────── UTILS ──────────────────
+function q(sel)  { return document.querySelector(sel); }
+function ls(k)   { return localStorage.getItem(k) || ''; }
+function lsSet(k,v){ localStorage.setItem(k, v); }
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// Light markdown: bold, italic, inline code, newlines
+function md(s) {
+  return esc(s)
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g,     '<em>$1</em>')
+    .replace(/`(.+?)`/g,       '<code>$1</code>')
+    .replace(/\n/g,            '<br>');
+}
+
+function fmt(n) {
+  if (n >= 1e6) return (n/1e6).toFixed(1) + 'M';
+  if (n >= 1e3) return (n/1e3).toFixed(1) + 'K';
+  return String(n);
+}
+
+function slugify(text) {
+  const vi = 'àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ';
+  const en = 'aaaaaaaaaaaaaaaaaeeeeeeeeeeeiiiiiooooooooooooooooouuuuuuuuuuuyyyyyyd';
+  let s = text.toLowerCase();
+  for (let i = 0; i < vi.length; i++) s = s.split(vi[i]).join(en[i]);
+  return s.replace(/[^a-z0-9\s-]/g,'').trim().replace(/\s+/g,'-').replace(/-+/g,'-').slice(0,60) || 'truyen-' + Date.now();
+}
+
+function toast(msg, type='') {
+  const d = document.createElement('div');
+  d.className = 'toast' + (type?' '+type:'');
+  d.textContent = msg;
+  document.body.appendChild(d);
+  setTimeout(() => d.remove(), 3000);
+}
+
+// Close modal on overlay click
+document.getElementById('edit-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+</script>
+</body>
+</html>
