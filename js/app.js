@@ -58,60 +58,140 @@ function doSearch() {
 //  HOME PAGE
 // ══════════════════════════════════════════════
 async function loadHomePage() {
-  const grid    = document.getElementById("story-grid");
+  const listEl  = document.getElementById("story-list");
   const heading = document.getElementById("section-heading");
-  const stats   = document.getElementById("hero-stats");
-  if (!grid) return;
+  if (!listEl) return;
 
   const params = new URLSearchParams(location.search);
   const search = params.get("search") || "";
   const genre  = params.get("genre")  || "";
   const status = params.get("status") || "";
 
-  let stories = await fetchStories();
+  let all = await fetchStories();
 
-  // Stats banner
-  if (stats) {
-    stats.innerHTML = `
-      <div class="hero-stat"><div class="num">${stories.length}</div><div class="lbl">Truyện</div></div>
-      <div class="hero-stat"><div class="num">${stories.reduce((a,s) => a + s.chapters.length, 0)}</div><div class="lbl">Chương</div></div>
-      <div class="hero-stat"><div class="num">${stories.filter(s=>s.status==="Hoàn thành").length}</div><div class="lbl">Hoàn thành</div></div>
-    `;
-  }
+  // Render hero & sidebar with full list (no filter)
+  renderHero(all[0], all);
+  renderSidebar(all);
 
-  // Filtering
+  // Apply filter
+  let stories = [...all];
   if (search) {
     stories = stories.filter(s =>
       s.title.toLowerCase().includes(search.toLowerCase()) ||
       s.author.toLowerCase().includes(search.toLowerCase())
     );
-    if (heading) heading.textContent = `🔍 Kết quả: "${search}"`;
+    if (heading) heading.textContent = `Kết quả: "${search}"`;
   } else if (genre) {
     stories = stories.filter(s => s.genre.some(g => g.toLowerCase() === genre.toLowerCase()));
-    if (heading) heading.textContent = "📂 Thể loại: " + genre;
+    if (heading) heading.textContent = "Thể loại: " + genre;
   } else if (status) {
     stories = stories.filter(s => s.status.toLowerCase() === status.toLowerCase());
-    if (heading) heading.textContent = "📋 " + status;
+    if (heading) heading.textContent = status;
   }
 
   if (!stories.length) {
-    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="icon">😢</div><p>Không tìm thấy truyện phù hợp.</p></div>`;
+    listEl.innerHTML = `<div class="empty-state"><div class="icon">😢</div><p>Không tìm thấy truyện phù hợp.</p></div>`;
     return;
   }
 
-  grid.innerHTML = stories.map(s => `
-    <div class="story-card" onclick="location.href='${storyUrl(s.id)}'">
-      <div class="thumb">
-        <img src="${s.cover}" alt="${s.title}" loading="lazy">
-        <span class="status-badge ${s.status === "Hoàn thành" ? "badge-done" : "badge-ongoing"}">${s.status}</span>
+  listEl.innerHTML = stories.map(s => storyCardH(s)).join("");
+}
+
+function renderHero(s, all) {
+  if (!s) return;
+  const elTitle  = document.getElementById("hero-title");
+  const elAuthor = document.getElementById("hero-author");
+  const elTags   = document.getElementById("hero-tags");
+  const elDesc   = document.getElementById("hero-desc");
+  const elBtns   = document.getElementById("hero-btns");
+  const elCovers = document.getElementById("hero-covers");
+
+  if (elTitle)  elTitle.textContent = s.title;
+  if (elAuthor) elAuthor.innerHTML  = `Tác giả: <strong>${s.author}</strong>`;
+  if (elTags)   elTags.innerHTML    = s.genre.map(g => `<span class="hero-tag">${g}</span>`).join("");
+  if (elDesc)   elDesc.textContent  = s.description;
+
+  if (elBtns) {
+    const firstCh = s.chapters[0];
+    elBtns.innerHTML = firstCh
+      ? `<a href="${readerUrl(s.id, firstCh.id)}" class="btn-primary">▶ Đọc ngay</a>
+         <a href="${storyUrl(s.id)}" class="btn-outline-white">📖 Xem chi tiết</a>`
+      : `<a href="${storyUrl(s.id)}" class="btn-primary">Xem chi tiết</a>`;
+  }
+
+  if (elCovers) {
+    const mainImg = s.cover
+      ? `<img src="${s.cover}" alt="${s.title}" class="hero-cover-main">`
+      : `<div class="hero-cover-main hero-cover-ph">📚</div>`;
+    const sides = all.slice(1, 3).map(ss => ss.cover
+      ? `<img src="${ss.cover}" alt="${ss.title}" class="hero-cover-side">`
+      : `<div class="hero-cover-side hero-cover-ph">📖</div>`
+    ).join("");
+    elCovers.innerHTML = mainImg + (sides ? `<div class="hero-cover-stack">${sides}</div>` : "");
+  }
+}
+
+function renderSidebar(stories) {
+  const hotList   = document.getElementById("hot-list");
+  const trendTags = document.getElementById("trend-tags");
+
+  if (hotList) {
+    const sorted = [...stories].sort((a, b) => (b.views || 0) - (a.views || 0));
+    hotList.innerHTML = sorted.map((s, i) => `
+      <a class="hot-item" href="${storyUrl(s.id)}">
+        <span class="hot-rank ${i===0?'r1':i===1?'r2':i===2?'r3':''}">${i+1}</span>
+        ${s.cover
+          ? `<img src="${s.cover}" alt="${s.title}" class="hot-cover">`
+          : `<div class="hot-cover-ph">📚</div>`}
+        <div class="hot-info">
+          <div class="hot-title">${s.title}</div>
+          <div class="hot-meta">⭐${s.rating||4.5} · 👁 ${fmtNum(s.views||0)}</div>
+        </div>
+      </a>`).join("");
+  }
+
+  if (trendTags) {
+    const genres = [...new Set(stories.flatMap(s => s.genre))];
+    const list   = genres.length ? genres
+      : ["Tiên Hiệp","Huyền Huyễn","Ngôn Tình","Đô Thị","Nữ Cường","Kiếm Hiệp","Lịch Sử","Tu Tiên","Hành Động"];
+    trendTags.innerHTML = list.map(g =>
+      `<a class="trend-tag" href="index.html?genre=${encodeURIComponent(g)}">${g}</a>`
+    ).join("");
+  }
+}
+
+function storyCardH(s) {
+  const firstCh = s.chapters[0];
+  const sc = s.status === "Hoàn thành" ? "bs-done" : "bs-ongoing";
+  return `
+    <div class="card-h" onclick="location.href='${storyUrl(s.id)}'">
+      ${s.cover
+        ? `<img src="${s.cover}" alt="${s.title}" class="card-h-cover" loading="lazy">`
+        : `<div class="card-h-ph">📚</div>`}
+      <div class="card-h-info">
+        <div class="card-h-title">${s.title}</div>
+        <div class="card-h-author">${s.author}</div>
+        <div class="card-h-tags">
+          ${s.genre.slice(0,3).map(g=>`<span class="tag">${g}</span>`).join("")}
+          <span class="badge-status-sm ${sc}">${s.status}</span>
+        </div>
+        <div class="card-h-desc">${s.description}</div>
+        <div class="card-h-stats">
+          <span><span class="stat-star">⭐</span>${s.rating||4.5}</span>
+          <span>👁 ${fmtNum(s.views||0)}</span>
+          <span>📖 ${s.chapters.length} chương</span>
+          ${firstCh ? `<span class="badge-new">Mới</span>` : ""}
+        </div>
       </div>
-      <div class="info">
-        <div class="title">${s.title}</div>
-        <div class="meta">${s.author}</div>
-        <div class="chap-count">📖 ${s.chapters.length} chương</div>
-      </div>
-    </div>
-  `).join("");
+    </div>`;
+}
+
+function filterGenre(tabEl, genre) {
+  document.querySelectorAll('.genre-tab').forEach(t => t.classList.remove('active'));
+  tabEl.classList.add('active');
+  const url = genre ? `index.html?genre=${encodeURIComponent(genre)}` : 'index.html';
+  history.pushState({}, '', url);
+  loadHomePage();
 }
 
 // ══════════════════════════════════════════════
@@ -134,7 +214,7 @@ async function loadStoryPage() {
   const story = await findStory(id);
   if (!story) { root.innerHTML = errHtml("Truyện không tồn tại."); return; }
 
-  document.title = story.title + " – TruyệnHub";
+  document.title = story.title + " – Lưu Ly Hiền Nhi Các";
   if (bcTitle) bcTitle.textContent = story.title;
 
   const firstCh  = story.chapters[0];
@@ -168,7 +248,7 @@ async function loadStoryPage() {
         <table class="story-meta-table">
           <tr><td>Tác giả</td><td><a href="index.html?search=${encodeURIComponent(story.author)}">${story.author}</a></td></tr>
           <tr><td>Thể loại</td><td>${story.genre.map(g=>`<a class="genre-tag" href="index.html?genre=${encodeURIComponent(g)}">${g}</a>`).join("")}</td></tr>
-          <tr><td>Trạng thái</td><td><span style="color:${story.status==="Hoàn thành"?"var(--green)":"var(--accent)"}">${story.status}</span></td></tr>
+          <tr><td>Trạng thái</td><td><span style="color:${story.status==="Hoàn thành"?"var(--green)":"var(--primary)"}">${story.status}</span></td></tr>
           <tr><td>Nguồn</td><td>${story.source || "Tác giả tự viết"}</td></tr>
         </table>
 
@@ -269,7 +349,7 @@ async function loadReaderPage() {
   const prevCh   = idx > 0 ? story.chapters[idx - 1] : null;
   const nextCh   = idx < story.chapters.length - 1 ? story.chapters[idx + 1] : null;
 
-  document.title = chapter.title + " – " + story.title + " – TruyệnHub";
+  document.title = chapter.title + " – " + story.title + " – Lưu Ly Hiền Nhi Các";
 
   const tbTitle = document.getElementById("toolbar-title");
   const bcStory = document.getElementById("bc-story");
@@ -331,7 +411,7 @@ function showInterstitial(ad, onContinue) {
   btnSkip.disabled   = true;
   btnCont.disabled   = true;
   ring.style.animation = "cspin 1s linear infinite";
-  ring.style.borderTopColor = "var(--accent)";
+  ring.style.borderTopColor = "var(--primary)";
 
   overlay.classList.add("show");
   document.body.style.overflow = "hidden";
@@ -343,7 +423,7 @@ function showInterstitial(ad, onContinue) {
     if (t <= 0) {
       clearInterval(timer);
       ring.style.animation = "none";
-      ring.style.borderColor = "var(--accent)";
+      ring.style.borderColor = "var(--primary)";
       numEl.textContent = "✓";
       btnSkip.disabled  = false;
       btnCont.disabled  = false;

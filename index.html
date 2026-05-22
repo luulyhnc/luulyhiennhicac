@@ -3,57 +3,141 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TruyệnHub – Đọc Truyện Tự Viết</title>
+  <title>Lưu Ly Hiền Nhi Các – Gác Ngọc Thanh Vân</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
 <header>
   <div class="hdr-top">
-    <a href="index.html" class="logo">Truyện<span>Hub</span></a>
+    <a href="index.html" class="logo">
+      <span class="logo-main">Lưu Ly Hiền Nhi Các</span>
+      <span class="logo-slogan">Gác ngọc thanh vân, lưu vạn trang mộng</span>
+    </a>
+    <nav class="hdr-nav">
+      <a href="index.html" class="active">Trang Chủ</a>
+      <a href="index.html?genre=Tiên+Hiệp">Tiên Hiệp</a>
+      <a href="index.html?genre=Huyền+Huyễn">Huyền Huyễn</a>
+      <a href="index.html?genre=Ngôn+Tình">Ngôn Tình</a>
+      <a href="index.html?genre=Đô+Thị">Đô Thị</a>
+      <a href="index.html?genre=Nữ+Cường">Nữ Cường</a>
+      <a href="index.html?status=Hoàn+thành">Đã Hoàn Thành</a>
+      <a href="guide.html">✍️ Đăng Truyện</a>
+    </nav>
     <div class="search-bar">
-      <input type="text" id="search-input" placeholder="Tìm kiếm truyện..." onkeydown="if(event.key==='Enter')doSearch()">
-      <button onclick="doSearch()">🔍 Tìm</button>
+      <input type="text" id="search-input" placeholder="Tìm kiếm truyện, tác giả..."
+             onkeydown="if(event.key==='Enter')doSearch()">
+      <button onclick="doSearch()">🔍</button>
     </div>
+    <button class="btn-login" onclick="alert('Tính năng sắp ra mắt!')">👤 Đăng nhập</button>
   </div>
-  <nav class="hdr-nav">
-    <ul>
-      <li><a href="index.html" class="active">Trang Chủ</a></li>
-      <li><a href="index.html?genre=Tiên+Hiệp">Tiên Hiệp</a></li>
-      <li><a href="index.html?genre=Huyền+Huyễn">Huyền Huyễn</a></li>
-      <li><a href="index.html?genre=Ngôn+Tình">Ngôn Tình</a></li>
-      <li><a href="index.html?genre=Đô+Thị">Đô Thị</a></li>
-      <li><a href="index.html?genre=Nữ+Cường">Nữ Cường</a></li>
-      <li><a href="index.html?status=Hoàn+thành">Đã Hoàn Thành</a></li>
-      <li><a href="guide.html">✍️ Đăng Truyện</a></li>
-    </ul>
-  </nav>
 </header>
 
-<div class="hero">
+<!-- HERO BANNER -->
+<div class="hero-banner">
   <div class="hero-inner">
-    <div>
-      <h1>Đọc Truyện <span>Tự Viết</span></h1>
-      <p>Kho truyện do tác giả tự sáng tác — cập nhật liên tục</p>
+    <div class="hero-info">
+      <div class="hero-badge">⭐ TRUYỆN ĐỀ CỬ</div>
+      <h1 class="hero-title-big" id="hero-title">Đang tải...</h1>
+      <div class="hero-meta" id="hero-author"></div>
+      <div class="hero-tag-list" id="hero-tags"></div>
+      <p class="hero-excerpt" id="hero-desc"></p>
+      <div class="hero-action-btns" id="hero-btns"></div>
     </div>
-    <div class="hero-stats" id="hero-stats"></div>
+    <div class="hero-covers" id="hero-covers"></div>
   </div>
 </div>
 
-<main class="container">
-  <div class="sec-title" id="section-heading">📚 Tất Cả Truyện</div>
-  <div class="story-grid" id="story-grid">
-    <div class="empty-state" style="grid-column:1/-1">
-      <div class="icon">⏳</div><p>Đang tải...</p>
+<!-- GENRE TABS -->
+<div class="genre-tabs-bar">
+  <div class="genre-tabs">
+    <button class="genre-tab active" onclick="filterGenre(this,'')">🏠 Tất cả</button>
+    <button class="genre-tab" onclick="filterGenre(this,'Tiên Hiệp')">⚡ Tiên Hiệp</button>
+    <button class="genre-tab" onclick="filterGenre(this,'Huyền Huyễn')">🌀 Huyền Huyễn</button>
+    <button class="genre-tab" onclick="filterGenre(this,'Ngôn Tình')">💕 Ngôn Tình</button>
+    <button class="genre-tab" onclick="filterGenre(this,'Đô Thị')">🏙️ Đô Thị</button>
+    <button class="genre-tab" onclick="filterGenre(this,'Nữ Cường')">🔥 Nữ Cường</button>
+    <button class="genre-tab" onclick="filterGenre(this,'Kiếm Hiệp')">⚔️ Kiếm Hiệp</button>
+    <button class="genre-tab" onclick="filterGenre(this,'Lịch Sử')">📜 Lịch Sử</button>
+  </div>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="page-layout">
+  <main class="main-col">
+    <div class="section-hdr">
+      <h2>📚 <span id="section-heading">Truyện mới cập nhật</span></h2>
+      <a href="#">Xem tất cả ›</a>
+    </div>
+    <div class="story-list" id="story-list">
+      <div class="empty-state"><div class="icon">⏳</div><p>Đang tải...</p></div>
+    </div>
+  </main>
+
+  <aside class="sidebar">
+    <div class="sidebar-card">
+      <div class="sidebar-card-title">🔥 Truyện nổi bật</div>
+      <ul class="hot-list" id="hot-list"></ul>
+    </div>
+    <div class="sidebar-card">
+      <div class="sidebar-card-title">🔍 Thể loại phổ biến</div>
+      <div class="trend-tags" id="trend-tags"></div>
+    </div>
+  </aside>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-main">
+    <div class="footer-brand">
+      <a href="index.html" class="logo" style="margin-bottom:.5rem;display:inline-flex">
+        <span class="logo-main">Lưu Ly Hiền Nhi Các</span>
+      </a>
+      <p class="footer-desc">Không gian đọc truyện online với các tác phẩm độc quyền từ các tác giả nội địa. Cập nhật liên tục mỗi ngày.</p>
+      <div class="footer-social">
+        <a href="#" title="Facebook">f</a>
+        <a href="#" title="Instagram">📷</a>
+        <a href="#" title="TikTok">🎵</a>
+        <a href="#" title="YouTube">▶</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Khám phá</h4>
+      <ul>
+        <li><a href="index.html">Trang chủ</a></li>
+        <li><a href="index.html?genre=Tiên+Hiệp">Tiên Hiệp</a></li>
+        <li><a href="index.html?genre=Ngôn+Tình">Ngôn Tình</a></li>
+        <li><a href="index.html?status=Hoàn+thành">Đã hoàn thành</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Cộng đồng</h4>
+      <ul>
+        <li><a href="#">Diễn đàn</a></li>
+        <li><a href="#">Group Facebook</a></li>
+        <li><a href="#">Hoạt động</a></li>
+        <li><a href="#">Đóng góp</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Hỗ trợ</h4>
+      <ul>
+        <li><a href="guide.html">Đăng truyện</a></li>
+        <li><a href="#">Điều khoản sử dụng</a></li>
+        <li><a href="#">Chính sách bảo mật</a></li>
+        <li><a href="#">Liên hệ</a></li>
+      </ul>
+    </div>
+    <div class="footer-col footer-newsletter">
+      <h4>Nhận thông báo truyện mới</h4>
+      <p>Đăng ký để nhận thông báo khi có chương mới!</p>
+      <div class="newsletter-form">
+        <input type="email" placeholder="Nhập email của bạn...">
+        <button onclick="alert('Cảm ơn bạn đã đăng ký!')">Đăng ký</button>
+      </div>
     </div>
   </div>
-</main>
-
-<footer>
-  <div class="footer-inner">
-    <span>© 2026 TruyệnHub – Nơi chia sẻ truyện tự viết</span>
-    <span>Liên hệ tác giả | Báo lỗi chương</span>
-  </div>
+  <div class="footer-bottom">© 2026 Lưu Ly Hiền Nhi Các – Gác ngọc thanh vân, lưu vạn trang mộng</div>
 </footer>
 
 <script src="js/app.js"></script>
