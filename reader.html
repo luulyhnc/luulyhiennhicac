@@ -32,18 +32,69 @@
   </div>
 </header>
 
-<!-- Reading toolbar: font size, theme -->
+<!-- Reading toolbar + Word-style typography panel -->
 <div class="reader-toolbar">
   <div class="reader-toolbar-inner">
     <span class="reader-chapter-title" id="toolbar-title">Đang tải...</span>
-    <div class="reader-controls">
-      <span class="ctrl-label">Chữ:</span>
-      <button class="ctrl-btn" onclick="changeFontSize(-1)" title="Giảm cỡ chữ">A−</button>
-      <button class="ctrl-btn" onclick="changeFontSize(1)"  title="Tăng cỡ chữ">A+</button>
-      <span class="ctrl-label" style="margin-left:.4rem">Nền:</span>
-      <button class="ctrl-btn" onclick="setTheme('')"             title="Sáng">☀️</button>
-      <button class="ctrl-btn" onclick="setTheme('reader-light')" title="Kem">🌅</button>
-      <button class="ctrl-btn" onclick="setTheme('reader-sepia')" title="Sepia">📜</button>
+    <button class="ctrl-btn ctrl-typo-toggle" onclick="toggleTypoPanel()" title="Tùy chỉnh kiểu chữ">⚙️ Kiểu chữ</button>
+  </div>
+
+  <div class="typo-panel" id="typo-panel">
+    <div class="typo-panel-inner">
+
+      <div class="typo-row">
+        <span class="typo-label">Font chữ</span>
+        <div class="font-pills">
+          <button class="font-pill" data-font="'Merriweather',Georgia,serif"  onclick="setFont(this)" style="font-family:'Merriweather',Georgia,serif">Merriweather</button>
+          <button class="font-pill" data-font="Georgia,serif"                 onclick="setFont(this)" style="font-family:Georgia,serif">Georgia</button>
+          <button class="font-pill" data-font="'Times New Roman',serif"       onclick="setFont(this)" style="font-family:'Times New Roman',serif">Times New Roman</button>
+          <button class="font-pill" data-font="'Inter',sans-serif"            onclick="setFont(this)" style="font-family:'Inter',sans-serif">Inter</button>
+          <button class="font-pill" data-font="'Be Vietnam Pro',sans-serif"   onclick="setFont(this)" style="font-family:'Be Vietnam Pro',sans-serif">Be Vietnam Pro</button>
+        </div>
+      </div>
+
+      <div class="typo-row">
+        <span class="typo-label">Cỡ chữ</span>
+        <div class="typo-ctrl-row">
+          <button class="ctrl-btn" onclick="changeFontSize(-1)" title="Giảm cỡ chữ">A−</button>
+          <span class="typo-val" id="fs-val">17px</span>
+          <button class="ctrl-btn" onclick="changeFontSize(1)"  title="Tăng cỡ chữ">A+</button>
+          <input type="range" class="typo-slider" id="fs-range" min="13" max="24" value="17"
+                 oninput="setFontSizeRange(this.value)">
+        </div>
+      </div>
+
+      <div class="typo-row">
+        <span class="typo-label">Dãn dòng</span>
+        <div class="typo-ctrl-row">
+          <button class="ctrl-btn" onclick="changeLineHeight(-0.1)" title="Giảm dãn dòng">≡−</button>
+          <span class="typo-val" id="lh-val">1.8</span>
+          <button class="ctrl-btn" onclick="changeLineHeight(0.1)"  title="Tăng dãn dòng">≡+</button>
+          <input type="range" class="typo-slider" id="lh-range" min="140" max="240" value="180"
+                 oninput="setLineHeightRange(this.value)">
+        </div>
+      </div>
+
+      <div class="typo-row">
+        <span class="typo-label">Màu nền</span>
+        <div class="theme-chips">
+          <button class="theme-chip" onclick="setTheme('')"             title="Sáng">☀️ Sáng</button>
+          <button class="theme-chip" onclick="setTheme('reader-light')" title="Kem">🌅 Kem</button>
+          <button class="theme-chip" onclick="setTheme('reader-sepia')" title="Sepia">📜 Sepia</button>
+          <button class="theme-chip" onclick="setTheme('reader-dark')"  title="Tối">🌙 Tối</button>
+          <button class="theme-chip" onclick="setTheme('reader-green')" title="Xanh lá">🍃 Xanh</button>
+        </div>
+      </div>
+
+      <div class="typo-row">
+        <span class="typo-label">Độ rộng</span>
+        <div class="width-chips">
+          <button class="width-chip" data-width="narrow" onclick="setWidth('narrow')">Hẹp</button>
+          <button class="width-chip" data-width="normal" onclick="setWidth('normal')">Vừa</button>
+          <button class="width-chip" data-width="wide"   onclick="setWidth('wide')">Rộng</button>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -95,31 +146,90 @@
   </div>
 </div>
 
+<script src="js/auth.js"></script>
 <script src="js/app.js"></script>
 <script>
   loadReaderPage();
   window.addEventListener("hashchange", loadReaderPage);
 
-  // ── Reader settings ──
+  // ── Reader settings (Word-style typography) ──────────────────
   const RS = (() => {
     const KEY = "reader_settings";
-    const defaults = { fontSize: 17, theme: "" };
-    let s = { ...defaults, ...JSON.parse(localStorage.getItem(KEY) || "{}") };
+    const DEFAULTS = {
+      fontSize:   17,
+      theme:      "",
+      font:       "'Merriweather',Georgia,serif",
+      lineHeight: 1.8,
+      width:      "normal"
+    };
+    let s = { ...DEFAULTS, ...JSON.parse(localStorage.getItem(KEY) || "{}") };
+
     function save() { localStorage.setItem(KEY, JSON.stringify(s)); }
+
     function apply() {
-      document.documentElement.style.setProperty("--reader-fs", s.fontSize + "px");
-      document.body.classList.remove("reader-light", "reader-sepia");
+      const root = document.documentElement;
+      root.style.setProperty("--reader-fs",   s.fontSize + "px");
+      root.style.setProperty("--reader-lh",   s.lineHeight);
+      root.style.setProperty("--reader-font",  s.font);
+      document.body.classList.remove("reader-light","reader-sepia","reader-dark","reader-green");
       if (s.theme) document.body.classList.add(s.theme);
+
+      // Reading width
+      const wrap = document.querySelector('.reader-content-wrap');
+      if (wrap) {
+        wrap.classList.remove('rw-narrow','rw-normal','rw-wide');
+        wrap.classList.add('rw-' + (s.width || 'normal'));
+      }
+
+      // Sync control values
+      const fsVal   = document.getElementById('fs-val');
+      const lhVal   = document.getElementById('lh-val');
+      const fsRange = document.getElementById('fs-range');
+      const lhRange = document.getElementById('lh-range');
+      if (fsVal)   fsVal.textContent = s.fontSize + "px";
+      if (lhVal)   lhVal.textContent = parseFloat(s.lineHeight).toFixed(1);
+      if (fsRange) fsRange.value     = s.fontSize;
+      if (lhRange) lhRange.value     = Math.round(s.lineHeight * 100);
+
+      // Highlight active font pill
+      document.querySelectorAll('.font-pill').forEach(p =>
+        p.classList.toggle('active', p.dataset.font === s.font));
+
+      // Highlight active width chip
+      document.querySelectorAll('.width-chip').forEach(c =>
+        c.classList.toggle('active', c.dataset.width === (s.width || 'normal')));
+
+      // Highlight active theme chip
+      document.querySelectorAll('.theme-chip').forEach(c => {
+        const m = c.getAttribute('onclick')?.match(/setTheme\('([^']*)'\)/);
+        c.classList.toggle('active', (m ? m[1] : '') === s.theme);
+      });
     }
+
     apply();
     return { get: () => s, set: (k, v) => { s[k] = v; save(); apply(); } };
   })();
 
   function changeFontSize(delta) {
-    const s = RS.get();
-    RS.set("fontSize", Math.min(24, Math.max(13, s.fontSize + delta)));
+    RS.set("fontSize", Math.min(24, Math.max(13, RS.get().fontSize + delta)));
   }
+  function setFontSizeRange(v) { RS.set("fontSize", parseInt(v)); }
+
+  function changeLineHeight(delta) {
+    const cur = RS.get().lineHeight;
+    RS.set("lineHeight", Math.round(Math.min(2.4, Math.max(1.4, cur + delta)) * 10) / 10);
+  }
+  function setLineHeightRange(v) { RS.set("lineHeight", Math.round(parseInt(v)) / 100); }
+
   function setTheme(t) { RS.set("theme", t); }
+  function setFont(btn) { RS.set("font", btn.dataset.font); }
+  function setWidth(w) { RS.set("width", w); }
+
+  function toggleTypoPanel() {
+    const p = document.getElementById("typo-panel");
+    if (p) p.classList.toggle("typo-panel--open");
+  }
+
   function doSearch() {
     const q = document.getElementById("search-input").value.trim();
     if (q) location.href = "index.html?search=" + encodeURIComponent(q);

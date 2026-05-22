@@ -265,6 +265,8 @@ async function loadStoryPage() {
   `;
 
   renderChapterList(story);
+  window._currentStory = story;
+  if (window.AUTH?.isOwner && typeof initStoryEditMode === 'function') initStoryEditMode(story);
 }
 
 function renderChapterList(story) {
@@ -377,6 +379,8 @@ async function loadReaderPage() {
   `;
 
   window.scrollTo({ top: 0, behavior: "smooth" });
+  window._currentReaderCtx = { story, chapter, idx };
+  if (window.AUTH?.isOwner && typeof initReaderEditMode === 'function') initReaderEditMode(story, chapter, idx);
 }
 
 // ══════════════════════════════════════════════
