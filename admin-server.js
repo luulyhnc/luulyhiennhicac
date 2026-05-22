@@ -131,6 +131,30 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // ── POST /api/gemini  (Google Gemini proxy) ──────────
+  if (req.method === 'POST' && pathname === '/api/gemini') {
+    try {
+      const body = await readBody(req);
+      const { apiKey, model = 'gemini-2.0-flash', ...payload } = JSON.parse(body);
+      if (!apiKey) { json(res, 400, { error: 'API key required' }); return; }
+      const data = JSON.stringify(payload);
+      const opts = {
+        hostname: 'generativelanguage.googleapis.com', port: 443,
+        path: `/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${apiKey}`,
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(data) }
+      };
+      const greq = https.request(opts, r => {
+        let rb = '';
+        r.on('data', c => rb += c);
+        r.on('end', () => json(res, r.statusCode, rb));
+      });
+      greq.on('error', e => json(res, 500, { error: e.message }));
+      greq.write(data); greq.end();
+    } catch(e) { json(res, 500, { error: e.message }); }
+    return;
+  }
+
   // ── GET / → serve admin.html ──────────────────────────
   if (pathname === '/' || pathname === '/admin' || pathname === '/admin.html') {
     try {

@@ -255,6 +255,11 @@
   </nav>
 
   <div class="hdr-settings">
+    <select id="inp-provider" onchange="onProviderChange()"
+      style="padding:.3rem .5rem;border:1.5px solid #c5dce9;border-radius:6px;font-size:.8rem;font-family:inherit;outline:none;background:#f7fbfd;cursor:pointer">
+      <option value="claude">🤖 Claude</option>
+      <option value="gemini">✨ Gemini (Free)</option>
+    </select>
     <input type="password" id="inp-apikey" placeholder="Anthropic API Key..." autocomplete="off">
     <input type="text"     id="inp-model"  placeholder="claude-opus-4-5">
     <button class="btn-save-cfg" onclick="saveCfg()">Lưu</button>
@@ -462,15 +467,22 @@ Hãy đặt câu hỏi hoặc cho tôi một nhiệm vụ!</div>
 // ────────────────── STATE ──────────────────
 let stories      = [];
 let chatMsgs     = [];   // [{role, content}] for Claude API
+let geminiConts  = [];   // [{role, parts}]   for Gemini API
 let chatBusy     = false;
 let pendingChs   = [];   // chapters from parsed docx
 
 // ────────────────── INIT ──────────────────
 (function init() {
-  const key   = ls('api_key') || '';
-  const model = ls('model')   || 'claude-opus-4-5';
-  document.getElementById('inp-apikey').value = key;
-  document.getElementById('inp-model').value  = model;
+  const key      = ls('api_key')  || '';
+  const provider = ls('provider') || 'claude';
+  const model    = ls('model')    || (provider === 'gemini' ? 'gemini-2.0-flash' : 'claude-opus-4-5');
+  document.getElementById('inp-apikey').value   = key;
+  document.getElementById('inp-model').value    = model;
+  document.getElementById('inp-provider').value = provider;
+  if (provider === 'gemini') {
+    document.getElementById('inp-model').placeholder  = 'gemini-2.0-flash';
+    document.getElementById('inp-apikey').placeholder = 'Google AI Studio API Key...';
+  }
   setKeyDot(key);
 
   // Drag & drop
@@ -487,10 +499,13 @@ let pendingChs   = [];   // chapters from parsed docx
 
 // ────────────────── CONFIG ──────────────────
 function saveCfg() {
-  const key   = document.getElementById('inp-apikey').value.trim();
-  const model = document.getElementById('inp-model').value.trim() || 'claude-opus-4-5';
-  lsSet('api_key', key);
-  lsSet('model', model);
+  const key      = document.getElementById('inp-apikey').value.trim();
+  const provider = document.getElementById('inp-provider').value;
+  const defModel = provider === 'gemini' ? 'gemini-2.0-flash' : 'claude-opus-4-5';
+  const model    = document.getElementById('inp-model').value.trim() || defModel;
+  lsSet('api_key',  key);
+  lsSet('model',    model);
+  lsSet('provider', provider);
   setKeyDot(key);
   toast(key ? '🔑 Đã lưu cấu hình!' : '⚠️ Đã xóa API Key');
 }
@@ -878,23 +893,31 @@ async function runTool(name, input) {
 
 async function sendMsg() {
   if (chatBusy) return;
-  const inp = q('#chat-in');
-  const txt = inp.value.trim();
+  const inp      = q('#chat-in');
+  const txt      = inp.value.trim();
   if (!txt) return;
 
-  const apiKey = ls('api_key') || '';
+  const apiKey   = ls('api_key')  || '';
+  const provider = ls('provider') || 'claude';
   if (!apiKey) { toast('Vui lòng nhập và lưu API Key trước!', 'err'); return; }
 
   inp.value = ''; inp.style.height = 'auto';
   addBubble('user', txt);
-  chatMsgs.push({ role: 'user', content: txt });
 
   chatBusy = true;
   q('#btn-send').disabled = true;
 
-  try     { await agentLoop(apiKey); }
-  catch(e){ addBubble('assistant', '❌ Lỗi kết nối: ' + e.message); }
-  finally {
+  try {
+    if (provider === 'gemini') {
+      geminiConts.push({ role: 'user', parts: [{ text: txt }] });
+      await geminiAgentLoop(apiKey);
+    } else {
+      chatMsgs.push({ role: 'user', content: txt });
+      await agentLoop(apiKey);
+    }
+  } catch(e) {
+    addBubble('assistant', '❌ Lỗi kết nối: ' + e.message);
+  } finally {
     chatBusy = false;
     q('#btn-send').disabled = false;
   }
@@ -1017,6 +1040,112 @@ function toast(msg, type='') {
   d.textContent = msg;
   document.body.appendChild(d);
   setTimeout(() => d.remove(), 3000);
+}
+
+// ────────────────── GEMINI TOOLS & LOOP ──────────────────
+const GEMINI_TOOLS = [
+  { name: 'get_stories',
+    description: 'Lấy danh sách tất cả truyện từ stories.json',
+    parameters: { type: 'object', properties: {} } },
+  { name: 'save_stories',
+    description: 'Lưu (ghi đè) danh sách truyện vào stories.json',
+    parameters: {
+      type: 'object',
+      properties: {
+        stories: { type: 'array', items: { type: 'object' }, description: 'Mảng đầy đủ các story object' }
+      },
+      required: ['stories'] } },
+  { name: 'push_to_github',
+    description: 'Commit và push lên GitHub Pages để deploy',
+    parameters: {
+      type: 'object',
+      properties: { message: { type: 'string', description: 'Commit message' } } } }
+];
+
+async function geminiAgentLoop(apiKey) {
+  const model = ls('model') || 'gemini-2.0-flash';
+  let typing  = addTyping();
+
+  while (true) {
+    const res = await apiPost('/api/gemini', {
+      apiKey, model,
+      contents: geminiConts,
+      systemInstruction: { parts: [{ text: SYS }] },
+      tools: [{ functionDeclarations: GEMINI_TOOLS }],
+      generationConfig: { temperature: 0.7, maxOutputTokens: 4096 }
+    });
+
+    typing?.remove(); typing = null;
+
+    // Handle errors
+    if (res.error) {
+      addBubble('assistant', '❌ Gemini lỗi: ' + (res.error.message || JSON.stringify(res.error)));
+      return;
+    }
+    if (!res.candidates?.length) {
+      const reason = res.promptFeedback?.blockReason || JSON.stringify(res).slice(0, 200);
+      addBubble('assistant', '❌ Không có phản hồi: ' + reason);
+      return;
+    }
+
+    const parts = res.candidates[0].content?.parts || [];
+
+    // Push model turn to Gemini history
+    geminiConts.push({ role: 'model', parts });
+
+    // Show text parts
+    const textOut = parts.filter(p => p.text).map(p => p.text).join('\n').trim();
+    if (textOut) addBubble('assistant', textOut);
+
+    // Handle function calls
+    const fnCalls = parts.filter(p => p.functionCall);
+    if (!fnCalls.length) break;
+
+    const fnResults = [];
+    for (const part of fnCalls) {
+      const { name, args } = part.functionCall;
+      addBubble('tool', `🔧 ${name}(${JSON.stringify(args || {}).slice(0, 90)})`);
+      const result = await runTool(name, args || {});
+      let display = result;
+      if (name === 'get_stories' && result.stories) {
+        display = { ok: true, count: result.count, titles: result.stories.map(s => s.title) };
+      }
+      addBubble('tool', `↩️ ${JSON.stringify(display).slice(0, 180)}`);
+      fnResults.push({ functionResponse: { name, response: { result } } });
+    }
+
+    geminiConts.push({ role: 'user', parts: fnResults });
+    typing = addTyping();
+  }
+}
+
+// ── Provider switch ──
+function onProviderChange() {
+  const provider = document.getElementById('inp-provider').value;
+  const modelInp = document.getElementById('inp-model');
+  const keyInp   = document.getElementById('inp-apikey');
+
+  if (provider === 'gemini') {
+    modelInp.value       = 'gemini-2.0-flash';
+    modelInp.placeholder = 'gemini-2.0-flash';
+    keyInp.placeholder   = 'Google AI Studio API Key...';
+  } else {
+    modelInp.value       = 'claude-opus-4-5';
+    modelInp.placeholder = 'claude-opus-4-5';
+    keyInp.placeholder   = 'Anthropic API Key...';
+  }
+
+  // Reset both chat histories
+  chatMsgs    = [];
+  geminiConts = [];
+  lsSet('provider', provider);
+  lsSet('model', modelInp.value);
+
+  const pName = provider === 'gemini' ? 'Gemini ✨ (Free)' : 'Claude 🤖';
+  const el = q('#chat-msgs');
+  if (el) el.innerHTML = `
+    <div class="msg msg-sys">Đã chuyển sang ${pName}. Lịch sử chat đã xóa.</div>
+    <div class="msg msg-assistant">Xin chào! Tôi đang chạy trên <strong>${pName}</strong>.<br>Hãy đặt câu hỏi hoặc giao nhiệm vụ!</div>`;
 }
 
 // Close modal on overlay click
