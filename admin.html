@@ -330,7 +330,22 @@
           <div class="card-hd">📝 Thông Tin Truyện</div>
           <div class="fgrp"><label>Tên truyện *</label><input id="f-title"  type="text" class="fctl" placeholder="Tên truyện..."></div>
           <div class="fgrp"><label>Tác giả *</label><input   id="f-author" type="text" class="fctl" placeholder="Tác giả..."></div>
-          <div class="fgrp"><label>Ảnh bìa (URL)</label><input id="f-cover" type="text" class="fctl" placeholder="https://..."></div>
+          <div class="fgrp">
+            <label>Ảnh bìa</label>
+            <div style="display:flex;gap:.6rem;align-items:flex-start">
+              <div style="flex:1">
+                <input id="f-cover" type="text" class="fctl" placeholder="Nhập URL hoặc tải ảnh từ máy..."
+                       oninput="updateCoverPreview('f-cover','f-cover-prev')">
+                <label class="btn btn-secondary btn-sm" style="margin-top:.4rem;cursor:pointer">
+                  📁 Chọn ảnh từ máy
+                  <input type="file" accept="image/*" style="display:none"
+                         onchange="uploadCover(this,'f-cover','f-cover-prev')">
+                </label>
+              </div>
+              <img id="f-cover-prev" src="" alt="Preview"
+                   style="width:64px;height:86px;object-fit:cover;border-radius:7px;border:1.5px solid #c5dce9;display:none;flex-shrink:0">
+            </div>
+          </div>
           <div class="g2">
             <div class="fgrp">
               <label>Trạng thái</label>
@@ -426,7 +441,22 @@ Hãy đặt câu hỏi hoặc cho tôi một nhiệm vụ!</div>
     </div>
     <div class="fgrp"><label>Tên truyện</label><input type="text" id="e-title" class="fctl"></div>
     <div class="fgrp"><label>Tác giả</label><input type="text" id="e-author" class="fctl"></div>
-    <div class="fgrp"><label>Ảnh bìa (URL)</label><input type="text" id="e-cover" class="fctl"></div>
+    <div class="fgrp">
+      <label>Ảnh bìa</label>
+      <div style="display:flex;gap:.6rem;align-items:flex-start">
+        <div style="flex:1">
+          <input type="text" id="e-cover" class="fctl" placeholder="Nhập URL hoặc tải ảnh từ máy..."
+                 oninput="updateCoverPreview('e-cover','e-cover-prev')">
+          <label class="btn btn-secondary btn-sm" style="margin-top:.4rem;cursor:pointer">
+            📁 Chọn ảnh từ máy
+            <input type="file" accept="image/*" style="display:none"
+                   onchange="uploadCover(this,'e-cover','e-cover-prev')">
+          </label>
+        </div>
+        <img id="e-cover-prev" src="" alt="Preview"
+             style="width:64px;height:86px;object-fit:cover;border-radius:7px;border:1.5px solid #c5dce9;display:none;flex-shrink:0">
+      </div>
+    </div>
     <div class="g2">
       <div class="fgrp">
         <label>Trạng thái</label>
@@ -793,6 +823,9 @@ function openEdit(id) {
   q('#e-title').value  = s.title;
   q('#e-author').value = s.author;
   q('#e-cover').value  = s.cover  || '';
+  const ePrev = q('#e-cover-prev');
+  if (s.cover) { ePrev.src = s.cover; ePrev.style.display = 'block'; }
+  else ePrev.style.display = 'none';
   q('#e-status').value = s.status || 'Đang ra';
   q('#e-source').value = s.source || 'Sáng tác';
   q('#e-desc').value   = s.description || '';
@@ -1116,6 +1149,49 @@ async function geminiAgentLoop(apiKey) {
 
     geminiConts.push({ role: 'user', parts: fnResults });
     typing = addTyping();
+  }
+}
+
+// ────────────────── COVER UPLOAD ──────────────────
+async function uploadCover(input, targetId, previewId) {
+  const file = input.files[0];
+  if (!file) return;
+
+  // Validate: chỉ nhận ảnh, giới hạn 5MB
+  if (!file.type.startsWith('image/')) { toast('Chỉ chấp nhận file ảnh!', 'err'); return; }
+  if (file.size > 5 * 1024 * 1024)     { toast('Ảnh quá lớn (tối đa 5MB)!', 'err'); return; }
+
+  toast('⏳ Đang tải ảnh lên...');
+
+  const reader = new FileReader();
+  reader.onload = async e => {
+    const dataUrl  = e.target.result;
+    const base64   = dataUrl.split(',')[1];
+    const ts       = Date.now();
+    const safeName = ts + '_' + file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+
+    const res = await apiPost('/api/upload-cover', { filename: safeName, base64 });
+    if (res.ok) {
+      document.getElementById(targetId).value = res.path;
+      updateCoverPreview(targetId, previewId);
+      toast('✅ Ảnh đã lưu: ' + res.path, 'ok');
+    } else {
+      toast('❌ Lỗi tải ảnh: ' + (res.error || ''), 'err');
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function updateCoverPreview(inputId, previewId) {
+  const val  = document.getElementById(inputId)?.value.trim();
+  const prev = document.getElementById(previewId);
+  if (!prev) return;
+  if (val) {
+    prev.src          = val;
+    prev.style.display = 'block';
+    prev.onerror      = () => { prev.style.display = 'none'; };
+  } else {
+    prev.style.display = 'none';
   }
 }
 

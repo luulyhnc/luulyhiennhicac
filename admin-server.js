@@ -131,6 +131,22 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // ── POST /api/upload-cover  (lưu ảnh bìa vào covers/) ─
+  if (req.method === 'POST' && pathname === '/api/upload-cover') {
+    try {
+      const body = await readBody(req);
+      const { filename, base64 } = JSON.parse(body);
+      if (!filename || !base64) { json(res, 400, { error: 'filename và base64 là bắt buộc' }); return; }
+      // Sanitize tên file
+      const safe = filename.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 120);
+      const coversDir = path.join(ROOT, 'covers');
+      if (!fs.existsSync(coversDir)) fs.mkdirSync(coversDir);
+      fs.writeFileSync(path.join(coversDir, safe), Buffer.from(base64, 'base64'));
+      json(res, 200, { ok: true, path: 'covers/' + safe });
+    } catch(e) { json(res, 500, { error: e.message }); }
+    return;
+  }
+
   // ── POST /api/gemini  (Google Gemini proxy) ──────────
   if (req.method === 'POST' && pathname === '/api/gemini') {
     try {
