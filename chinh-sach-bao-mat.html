@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chính Sách Bảo Mật – Lưu Ly Hiền Nhi Các</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+  <div class="hdr-top">
+    <a href="index.html" class="logo">
+      <span class="logo-main">Lưu Ly Hiền Nhi Các</span>
+      <span class="logo-slogan">Gác ngọc thanh vân, lưu vạn trang mộng</span>
+    </a>
+    <nav class="hdr-nav">
+      <a href="index.html">Trang Chủ</a>
+      <a href="index.html?genre=Tiên+Hiệp">Tiên Hiệp</a>
+      <a href="index.html?genre=Huyền+Huyễn">Huyền Huyễn</a>
+      <a href="index.html?genre=Ngôn+Tình">Ngôn Tình</a>
+      <a href="index.html?genre=Đô+Thị">Đô Thị</a>
+      <a href="index.html?genre=Nữ+Cường">Nữ Cường</a>
+      <a href="index.html?status=Hoàn+thành">Đã Hoàn Thành</a>
+      <a href="guide.html">✍️ Đăng Truyện</a>
+    </nav>
+    <div class="search-bar">
+      <input type="text" id="search-input" placeholder="Tìm kiếm truyện, tác giả..."
+             onkeydown="if(event.key==='Enter')doSearch()">
+      <button onclick="doSearch()">🔍</button>
+    </div>
+    <button class="btn-login" onclick="location.href='login.html'">👤 Đăng nhập</button>
+  </div>
+</header>
+
+<main class="container" style="padding-top:1.5rem;padding-bottom:3rem">
+  <div class="breadcrumb">
+    <a href="index.html">Trang chủ</a>
+    <span class="sep">›</span>
+    <span>Chính sách bảo mật</span>
+  </div>
+
+  <div class="static-page-wrap">
+    <div class="static-page-card">
+      <h1 class="static-page-title">🔒 Chính Sách Bảo Mật</h1>
+      <p class="static-page-updated">Cập nhật lần cuối: tháng 5 năm 2026</p>
+
+      <p>Lưu Ly Hiền Nhi Các tôn trọng quyền riêng tư của người dùng. Chúng tôi chỉ thu thập những thông tin cần thiết nhằm nâng cao trải nghiệm sử dụng dịch vụ.</p>
+
+      <h2>1. Mục đích thu thập thông tin</h2>
+      <p>Chúng tôi thu thập thông tin cá nhân của bạn cho các mục đích sau:</p>
+      <ul>
+        <li>Nâng cao trải nghiệm đọc truyện trên website.</li>
+        <li>Hỗ trợ kỹ thuật và phản hồi thắc mắc của người dùng nhanh chóng.</li>
+        <li>Gửi thông báo khi có truyện mới hoặc chương mới (nếu bạn đã đăng ký nhận tin).</li>
+        <li>Quản lý tài khoản thành viên và duy trì hoạt động bình luận, tương tác trên nền tảng.</li>
+      </ul>
+
+      <h2>2. Loại thông tin thu thập</h2>
+      <p>Chúng tôi có thể thu thập các loại thông tin sau:</p>
+      <ul>
+        <li><strong>Thông tin bạn cung cấp:</strong> tên đăng nhập, địa chỉ email, họ và tên, mật khẩu (được mã hóa an toàn).</li>
+        <li><strong>Dữ liệu truy cập:</strong> địa chỉ IP, loại trình duyệt, hệ điều hành, lịch sử đọc truyện, cookie phiên làm việc.</li>
+        <li><strong>Thông tin tương tác:</strong> bình luận, đánh giá, danh sách truyện yêu thích.</li>
+      </ul>
+
+      <h2>3. Cách sử dụng thông tin</h2>
+      <p>Thông tin của bạn chỉ được sử dụng cho mục đích quản trị website, cải thiện nội dung và nâng cao trải nghiệm người dùng. Chúng tôi cam kết:</p>
+      <ul>
+        <li>Không bán, chia sẻ hay tiết lộ thông tin của bạn cho bên thứ ba.</li>
+        <li>Chỉ cung cấp thông tin khi có yêu cầu hợp pháp từ cơ quan chức năng.</li>
+        <li>Không sử dụng thông tin vào mục đích quảng cáo từ bên thứ ba mà không có sự đồng ý của bạn.</li>
+      </ul>
+
+      <h2>4. Bảo mật dữ liệu</h2>
+      <p>Dữ liệu người dùng được lưu trữ trên hệ thống có bảo mật cao với các biện pháp bảo vệ sau:</p>
+      <ul>
+        <li>Mật khẩu được mã hóa bằng thuật toán <strong>bcrypt</strong> (12 vòng), không lưu dạng thô.</li>
+        <li>Kết nối sử dụng giao thức <strong>HTTPS</strong> mã hóa end-to-end.</li>
+        <li>Kiểm soát quyền truy cập nghiêm ngặt, chỉ quản trị viên mới có quyền xem dữ liệu cần thiết.</li>
+        <li>Xác thực hai bước (OTP qua email) khi đăng nhập để bảo vệ tài khoản.</li>
+      </ul>
+
+      <h2>5. Cookie</h2>
+      <p>Chúng tôi sử dụng cookie để duy trì phiên đăng nhập và ghi nhớ tùy chọn đọc truyện (font chữ, màu nền, v.v.). Bạn có thể tắt cookie trong trình duyệt, tuy nhiên một số tính năng có thể không hoạt động đầy đủ.</p>
+
+      <h2>6. Quyền của người dùng</h2>
+      <p>Bạn có các quyền sau đối với dữ liệu cá nhân của mình:</p>
+      <ul>
+        <li><strong>Truy cập:</strong> Xem lại thông tin cá nhân đã cung cấp.</li>
+        <li><strong>Chỉnh sửa:</strong> Cập nhật thông tin không chính xác.</li>
+        <li><strong>Xóa tài khoản:</strong> Yêu cầu xóa toàn bộ dữ liệu cá nhân.</li>
+        <li><strong>Hủy đăng ký nhận tin:</strong> Bất kỳ lúc nào qua trang cài đặt hoặc liên hệ quản trị viên.</li>
+      </ul>
+      <p>Để thực hiện các quyền trên, vui lòng liên hệ chúng tôi qua trang <a href="lien-he.html">Liên hệ</a>.</p>
+
+      <h2>7. Thay đổi chính sách</h2>
+      <p>Chúng tôi có thể cập nhật Chính sách bảo mật này theo thời gian. Mọi thay đổi sẽ được thông báo trên trang này kèm ngày cập nhật. Việc tiếp tục sử dụng dịch vụ sau khi có thay đổi đồng nghĩa với việc bạn chấp nhận chính sách mới.</p>
+
+      <div class="static-page-contact">
+        <strong>📬 Mọi thắc mắc về chính sách bảo mật, vui lòng liên hệ:</strong><br>
+        Email: <a href="mailto:lethuhien211094@gmail.com">lethuhien211094@gmail.com</a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-simple">
+    <span>© 2026 Lưu Ly Hiền Nhi Các</span>
+    <span>
+      <a href="chinh-sach-bao-mat.html" style="color:inherit">Chính sách bảo mật</a> |
+      <a href="dieu-khoan-su-dung.html" style="color:inherit">Điều khoản sử dụng</a>
+    </span>
+  </div>
+</footer>
+
+<script src="js/auth.js"></script>
+<script src="js/app.js"></script>
+<script src="js/member.js"></script>
+<script>
+  function doSearch() {
+    const q = document.getElementById('search-input').value.trim();
+    if (q) location.href = 'index.html?search=' + encodeURIComponent(q);
+  }
+</script>
+</body>
+</html>
