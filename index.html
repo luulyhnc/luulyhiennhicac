@@ -146,7 +146,10 @@
 <script>
   loadHomePage();
 
-  function subscribeNewsletter() {
+  const NL_FILE = 'data/newsletter.json';
+  const GH_API  = 'https://api.github.com/repos/luulyhnc/luulyhiennhicac/contents/';
+
+  async function subscribeNewsletter() {
     const input = document.getElementById('newsletter-email');
     const email = input.value.trim();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -154,10 +157,7 @@
       input.style.borderColor = 'var(--red)';
       input.placeholder = 'Vui lòng nhập email!';
       input.focus();
-      setTimeout(() => {
-        input.style.borderColor = '';
-        input.placeholder = 'Nhập email của bạn...';
-      }, 2000);
+      setTimeout(() => { input.style.borderColor = ''; input.placeholder = 'Nhập email của bạn...'; }, 2000);
       return;
     }
     if (!emailRegex.test(email)) {
@@ -167,13 +167,75 @@
       alert('Email không hợp lệ. Vui lòng kiểm tra lại!');
       return;
     }
+    // Save to GitHub if owner is logged in, otherwise just save locally
+    try { await _saveNewsletterEmail(email); } catch(e) { /* silently ok */ }
     input.value = '';
     input.placeholder = '✅ Đã đăng ký!';
-    input.style.borderColor = 'var(--green)';
-    setTimeout(() => {
-      input.placeholder = 'Nhập email của bạn...';
-      input.style.borderColor = '';
-    }, 3000);
+    input.style.borderColor = 'var(--green, #28b870)';
+    setTimeout(() => { input.placeholder = 'Nhập email của bạn...'; input.style.borderColor = ''; }, 3000);
+  }
+
+  async function _saveNewsletterEmail(email) {
+    // Always store in localStorage for offline resilience
+    const local = JSON.parse(localStorage.getItem('_nl_emails') || '[]');
+    if (!local.includes(email)) { local.push(email); localStorage.setItem('_nl_emails', JSON.stringify(local)); }
+
+    // If owner is logged in, also persist to GitHub data/newsletter.json
+    if (!window.AUTH?.isOwner) return;
+    const pat = window.AUTH.pat;
+    if (!pat) return;
+
+    // GET current file (need SHA for PUT)
+    let existing = [], sha = null;
+    try {
+      const r = await fetch(GH_API + NL_FILE, { headers:{ Authorization:`token ${pat}`, Accept:'application/vnd.github.v3+json' }});
+      if (r.ok) {
+        const info = await r.json();
+        existing = JSON.parse(atob(info.content.replace(/\n/g,'')));
+        sha = info.sha;
+      }
+    } catch(e) { /* file doesn't exist yet, will create */ }
+
+    if (existing.find(e => e.email === email)) return; // duplicate
+    existing.push({ email, date: new Date().toISOString().slice(0,10) });
+
+    const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(existing, null, 2))));
+    const body = { message: `Newsletter: +${email}`, content: b64 };
+    if (sha) body.sha = sha;
+    await fetch(GH_API + NL_FILE, {
+      method:'PUT',
+      headers:{ Authorization:`token ${pat}`, Accept:'application/vnd.github.v3+json', 'Content-Type':'application/json' },
+      body: JSON.stringify(body)
+    });
+  }
+
+  // Called from admin dropdown → download all emails as CSV (opens Excel)
+  async function downloadNewsletterExcel() {
+    document.getElementById('_omenu')?.remove();
+    let emails = [];
+    // Try GitHub first if owner
+    if (window.AUTH?.isOwner && window.AUTH.pat) {
+      try {
+        const r = await fetch(GH_API + NL_FILE, { headers:{ Authorization:`token ${window.AUTH.pat}`, Accept:'application/vnd.github.v3+json' }});
+        if (r.ok) { const info = await r.json(); emails = JSON.parse(atob(info.content.replace(/\n/g,''))); }
+      } catch(e) {}
+    }
+    // Merge with localStorage
+    const local = JSON.parse(localStorage.getItem('_nl_emails') || '[]');
+    local.forEach(e => { if (!emails.find(x=>x.email===e)) emails.push({email:e,date:''}); });
+
+    if (!emails.length) { alert('Chưa có email nào đăng ký.'); return; }
+
+    // Build CSV (UTF-8 BOM for Excel)
+    const bom = '﻿';
+    const csv = bom + 'STT,Email,Ngày đăng ký\n'
+      + emails.map((e,i) => `${i+1},${e.email},${e.date||''}`).join('\n');
+    const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = 'newsletter_emails.csv';
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
   }
 </script>
 </body>
