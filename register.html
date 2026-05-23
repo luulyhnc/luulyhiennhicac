@@ -70,7 +70,7 @@
           <label for="reg-pw">Mật khẩu *</label>
           <div class="auth-pw-wrap">
             <input class="auth-input" type="password" id="reg-pw" placeholder="Tối thiểu 8 ký tự"
-                   oninput="updatePwStrength(this.value)"
+                   oninput="updatePwStrength(this.value); checkPwMatch()"
                    onkeydown="if(event.key==='Enter')document.getElementById('reg-pw2').focus()">
             <button type="button" class="auth-pw-toggle" id="reg-pw-toggle"
                     onclick="toggleAuthPw('reg-pw','reg-pw-toggle')" title="Hiện/Ẩn mật khẩu">👁</button>
@@ -88,10 +88,12 @@
           <label for="reg-pw2">Xác nhận mật khẩu *</label>
           <div class="auth-pw-wrap">
             <input class="auth-input" type="password" id="reg-pw2" placeholder="Nhập lại mật khẩu"
+                   oninput="checkPwMatch()"
                    onkeydown="if(event.key==='Enter')doRegister()">
             <button type="button" class="auth-pw-toggle" id="reg-pw2-toggle"
                     onclick="toggleAuthPw('reg-pw2','reg-pw2-toggle')" title="Hiện/Ẩn mật khẩu">👁</button>
           </div>
+          <div class="pw-match-status" id="pw-match-status"></div>
         </div>
 
         <div class="auth-form-group">
@@ -123,7 +125,7 @@
 
         <div class="auth-check-row">
           <input type="checkbox" id="reg-terms">
-          <label for="reg-terms">Tôi đã đọc và đồng ý với <a href="#" style="color:var(--primary)">điều khoản sử dụng</a></label>
+          <label for="reg-terms">Tôi đã đọc và đồng ý với <a href="chinh-sach-bao-mat.html" target="_blank" style="color:var(--primary)">chính sách bảo mật</a> và <a href="dieu-khoan-su-dung.html" target="_blank" style="color:var(--primary)">điều khoản sử dụng</a></label>
         </div>
 
         <div id="reg-alert"></div>
@@ -203,6 +205,23 @@
   function clearRegAlert() {
     const el = document.getElementById('reg-alert');
     if (el) { el.className = ''; el.textContent = ''; }
+  }
+
+  function checkPwMatch() {
+    const pw  = document.getElementById('reg-pw').value;
+    const pw2 = document.getElementById('reg-pw2').value;
+    const el  = document.getElementById('pw-match-status');
+    if (!el) return;
+    if (!pw2) { el.textContent = ''; el.className = 'pw-match-status'; return; }
+    if (pw2 === pw) {
+      el.textContent = '✓ Mật khẩu khớp';
+      el.className   = 'pw-match-status pw-match-ok';
+      document.getElementById('reg-pw2').style.borderColor = 'var(--green)';
+    } else {
+      el.textContent = '✗ Mật khẩu không khớp';
+      el.className   = 'pw-match-status pw-match-err';
+      document.getElementById('reg-pw2').style.borderColor = 'var(--red)';
+    }
   }
 
   function getPwScore(pw) {

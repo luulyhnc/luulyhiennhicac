@@ -687,6 +687,32 @@ footer {
   max-width:1280px; margin:0 auto; padding-top:1rem;
   border-top:1px solid var(--border); font-size:.76rem; color:var(--text3); text-align:center;
 }
+/* ── Static content pages (privacy policy, terms…) ── */
+.static-page-wrap { max-width:860px; margin:0 auto; }
+.static-page-card {
+  background:var(--card); border:1.5px solid var(--border);
+  border-radius:var(--radius-l); padding:2rem 2.2rem;
+}
+.static-page-title {
+  font-size:1.45rem; font-weight:700; color:var(--navy);
+  margin:0 0 .35rem;
+}
+.static-page-updated { font-size:.78rem; color:var(--text3); margin:0 0 1.4rem; }
+.static-page-card h2 {
+  font-size:1rem; font-weight:700; color:var(--navy);
+  margin:1.6rem 0 .55rem; padding-bottom:.3rem;
+  border-bottom:2px solid var(--pri-l);
+}
+.static-page-card p  { font-size:.9rem; color:var(--text2); line-height:1.75; margin:.4rem 0 .7rem; }
+.static-page-card ul { padding-left:1.3rem; margin:.35rem 0 .7rem; }
+.static-page-card li { font-size:.9rem; color:var(--text2); line-height:1.75; margin-bottom:.25rem; }
+.static-page-card a  { color:var(--primary); text-decoration:none; }
+.static-page-card a:hover { text-decoration:underline; }
+.static-page-contact {
+  margin-top:1.8rem; padding:1rem 1.2rem;
+  background:var(--pri-ll); border-left:4px solid var(--primary);
+  border-radius:8px; font-size:.87rem; color:var(--text2); line-height:1.7;
+}
 
 /* Guide page */
 .guide-hero {
@@ -780,6 +806,9 @@ footer {
 .pw-strength-bar { display:flex; gap:3px; margin-top:.32rem; height:4px; }
 .pw-seg { flex:1; border-radius:4px; background:var(--border); transition:background .22s; }
 .pw-strength-label { font-size:.71rem; font-weight:700; margin-top:.22rem; color:var(--text3); }
+.pw-match-status   { font-size:.75rem; font-weight:600; margin-top:.3rem; min-height:1rem; }
+.pw-match-ok       { color:var(--green); }
+.pw-match-err      { color:var(--red); }
 /* OTP boxes */
 .otp-inputs { display:flex; gap:.5rem; justify-content:center; margin:1.2rem 0; }
 .otp-box {
