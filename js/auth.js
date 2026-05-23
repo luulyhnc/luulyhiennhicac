@@ -150,8 +150,10 @@ function _initHeader() {
         m.style.cssText = `position:fixed;top:${rc.bottom+4}px;right:${window.innerWidth-rc.right}px;background:#fff;border-radius:10px;box-shadow:0 4px 24px rgba(0,0,0,.18);z-index:9998;min-width:196px;overflow:hidden;font-family:'Inter',sans-serif`;
         m.innerHTML = `
           <a href="http://localhost:3344" target="_blank" class="_omenu_item">⚙️ Admin Panel (local)</a>
+          <button onclick="document.getElementById('_omenu')?.remove();_openAiModeration()" class="_omenu_item" style="background:none;border:none;cursor:pointer;width:100%;text-align:left;font-family:'Inter',sans-serif">🤖 AI Kiểm duyệt nội dung</button>
+          ${typeof downloadNewsletterExcel==='function'?'<button onclick="downloadNewsletterExcel()" class="_omenu_item" style="background:none;border:none;cursor:pointer;width:100%;text-align:left;font-family:\'Inter\',sans-serif">📥 Tải email đăng ký (.csv)</button>':''}
           <div style="height:1px;background:#eef3f7"></div>
-          <button onclick="AUTH.logout()" class="_omenu_item" style="color:#e74c3c;background:none;border:none;cursor:pointer;width:100%;text-align:left">🚪 Đăng xuất</button>`;
+          <button onclick="AUTH.logout()" class="_omenu_item" style="color:#e74c3c;background:none;border:none;cursor:pointer;width:100%;text-align:left;font-family:'Inter',sans-serif">🚪 Đăng xuất</button>`;
         m.querySelectorAll('._omenu_item').forEach(el => {
           el.style.cssText = 'display:block;padding:.7rem 1rem;font-size:.86rem;color:#1a2535;text-decoration:none';
         });
@@ -180,6 +182,18 @@ function initStoryEditMode(story) {
       <button class="oe-btn" onclick="openAddChapter('${story.id}')">➕ Thêm chương</button>
       <button class="oe-btn oe-danger" onclick="deleteStoryOnline('${story.id}')">🗑️ Xóa</button>`;
     root.insertAdjacentElement('beforebegin', bar);
+  }
+
+  // Inline edit icon directly next to story title in the card
+  const titleH1 = document.querySelector('.story-info h1');
+  if (titleH1 && !titleH1.querySelector('._oe_inline')) {
+    const editBtn = document.createElement('button');
+    editBtn.className = '_oe_inline';
+    editBtn.title = 'Sửa thông tin truyện';
+    editBtn.textContent = '✏️ Sửa';
+    editBtn.style.cssText = 'background:#e8f5e9;border:1.5px solid #a8d5b5;border-radius:7px;padding:.2rem .6rem;font-size:.78rem;font-weight:600;color:#27ae60;cursor:pointer;margin-left:.6rem;vertical-align:middle;font-family:inherit';
+    editBtn.onclick = () => openStoryEditor(story.id);
+    titleH1.appendChild(editBtn);
   }
 
   // Watch chapter list for re-renders (handles sort/pagination)
@@ -429,6 +443,140 @@ async function deleteStoryOnline(storyId) {
     await AUTH.saveStories(filtered, sha, `Online: xóa truyện ${storyId}`);
     alert('✅ Đã xóa! Chuyển về trang chủ...');
     location.href = location.pathname.includes('/luulyhiennhicac/') ? '/luulyhiennhicac/' : '/';
+  } catch(e) { alert('❌ ' + e.message); }
+}
+
+// ── AI Content Moderation ─────────────────────────────────────
+function _openAiModeration() {
+  if (document.getElementById('_ai_modal')) return;
+  const savedKey = localStorage.getItem('_llhnc_gk') || '';
+  document.body.insertAdjacentHTML('beforeend', `
+<div id="_ai_modal" onclick="if(event.target===this)this.remove()"
+  style="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9998;display:flex;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto;font-family:'Inter',sans-serif">
+  <div style="background:#fff;border-radius:14px;padding:1.5rem;width:100%;max-width:780px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem">
+      <b style="font-size:1rem;color:#1a2535">🤖 AI Kiểm duyệt nội dung</b>
+      <button onclick="document.getElementById('_ai_modal').remove()"
+        style="border:none;background:#f0f4f8;width:30px;height:30px;border-radius:50%;cursor:pointer">✕</button>
+    </div>
+    <div style="display:flex;gap:.5rem;margin-bottom:.85rem;flex-wrap:wrap">
+      <input id="_ai_key" type="password" placeholder="Gemini API Key (miễn phí tại aistudio.google.com)"
+        value="${_ea(savedKey)}"
+        style="flex:1;min-width:200px;padding:.45rem .7rem;border:1.5px solid #c5dce9;border-radius:7px;font-size:.84rem;font-family:inherit;outline:none">
+      <button onclick="_saveAiKey()"
+        style="padding:.45rem .9rem;background:#f0f4f8;border:1.5px solid #c5dce9;border-radius:7px;cursor:pointer;font-size:.83rem;font-family:inherit">💾 Lưu key</button>
+      <button onclick="_runAiCheckAll()"
+        style="padding:.45rem 1rem;background:#3ab3ca;color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:.85rem;font-weight:600;font-family:inherit">▶ Kiểm tra tất cả</button>
+    </div>
+    <div id="_ai_status" style="font-size:.8rem;color:#9fb8cc;margin-bottom:.8rem">Nhập Gemini API Key rồi bấm "Kiểm tra tất cả".</div>
+    <div id="_ai_results"></div>
+  </div>
+</div>`);
+}
+
+function _saveAiKey() {
+  const key = (document.getElementById('_ai_key')?.value || '').trim();
+  localStorage.setItem('_llhnc_gk', key);
+  const st = document.getElementById('_ai_status');
+  if (st) st.textContent = key ? '✅ Đã lưu API Key.' : '⚠️ Key trống.';
+}
+
+async function _runAiCheckAll() {
+  const keyEl = document.getElementById('_ai_key');
+  const apiKey = (keyEl?.value || '').trim() || localStorage.getItem('_llhnc_gk') || '';
+  const st = document.getElementById('_ai_status');
+  const results = document.getElementById('_ai_results');
+  if (!apiKey) { if (st) st.textContent = '❌ Vui lòng nhập Gemini API Key.'; return; }
+  localStorage.setItem('_llhnc_gk', apiKey);
+  if (!st || !results) return;
+
+  st.textContent = '⏳ Đang tải danh sách truyện từ GitHub...';
+  results.innerHTML = '';
+
+  let stories, sha;
+  try { ({ stories, sha } = await AUTH.loadStories()); }
+  catch(e) { st.textContent = '❌ Không tải được dữ liệu: ' + e.message; return; }
+
+  st.textContent = `Đang kiểm tra ${stories.length} truyện...`;
+
+  for (let i = 0; i < stories.length; i++) {
+    const s = stories[i];
+    const rid = '_air_' + s.id.replace(/[^a-z0-9]/gi,'_');
+    results.insertAdjacentHTML('beforeend', `
+      <div id="${rid}" style="background:#f8fafc;border:1.5px solid #dce8f5;border-radius:9px;padding:.75rem 1rem;margin-bottom:.55rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
+        <div style="flex:1;min-width:160px">
+          <b style="font-size:.87rem;color:#1a2535">${_ea(s.title)}</b>
+          <span style="font-size:.74rem;color:#9fb8cc;margin-left:.35rem">${_ea(s.author)}</span>
+          ${s.hidden?'<span style="font-size:.7rem;background:#fdecea;color:#e74c3c;border-radius:4px;padding:.1rem .35rem;margin-left:.3rem">Đã ẩn</span>':''}
+        </div>
+        <span id="${rid}_badge" style="font-size:.78rem;color:#9fb8cc">⏳ Đang phân tích...</span>
+        <div id="${rid}_act" style="display:flex;gap:.4rem"></div>
+      </div>`);
+
+    st.textContent = `Kiểm tra (${i+1}/${stories.length}): ${s.title}`;
+    try {
+      const r = await _aiCheckStory(s, apiKey);
+      const badge = document.getElementById(rid+'_badge');
+      const act   = document.getElementById(rid+'_act');
+      const row   = document.getElementById(rid);
+      if (!badge) continue;
+      if (r.safe) {
+        badge.innerHTML = `<span style="color:#27ae60">✅ An toàn</span> <span style="font-size:.7rem;color:#b0c4d8">(${r.score}/10)</span>`;
+      } else {
+        badge.innerHTML = `<span style="color:#e74c3c">⚠️ ${_ea(r.recommendation)}</span> <span style="font-size:.7rem;color:#b0c4d8">(${r.score}/10)</span>`;
+        if (r.issues?.length && row)
+          row.insertAdjacentHTML('beforeend',`<div style="width:100%;font-size:.76rem;color:#c0392b;background:#fdecea;padding:.3rem .55rem;border-radius:5px;margin-top:.3rem">${r.issues.map(x=>'• '+_ea(x)).join('<br>')}</div>`);
+        if (act && !s.hidden)
+          act.innerHTML=`<button onclick="_toggleHideStory('${s.id}',true,'${_ea(s.title)}')" style="padding:.22rem .6rem;background:#fdecea;color:#e74c3c;border:1.5px solid #f0b8bc;border-radius:6px;cursor:pointer;font-size:.77rem;font-family:inherit">🙈 Ẩn</button>`;
+      }
+      if (act && s.hidden)
+        act.innerHTML=`<button onclick="_toggleHideStory('${s.id}',false,'${_ea(s.title)}')" style="padding:.22rem .6rem;background:#e8f5e9;color:#27ae60;border:1.5px solid #a8d5b5;border-radius:6px;cursor:pointer;font-size:.77rem;font-family:inherit">👁 Hiện</button>`;
+    } catch(e) {
+      const badge = document.getElementById(rid+'_badge');
+      if (badge) badge.innerHTML=`<span style="color:#e74c3c">❌ ${_ea(e.message)}</span>`;
+    }
+    await new Promise(r => setTimeout(r, 600)); // rate limit buffer
+  }
+  st.textContent = `✅ Đã kiểm tra xong ${stories.length} truyện.`;
+}
+
+async function _aiCheckStory(story, apiKey) {
+  const sample = story.chapters.slice(0,2).map(c=>(c.content||'').slice(0,600)).join('\n---\n');
+  const prompt = `Bạn là hệ thống kiểm duyệt nội dung tự động cho website đọc truyện Việt Nam hợp pháp. Phân tích truyện sau:
+
+Tên: ${story.title}
+Tác giả: ${story.author}
+Mô tả: ${story.description}
+Nội dung mẫu: ${sample}
+
+Xác định các nội dung vi phạm: chính trị/kích động, bạo lực cực đoan, 18+/khiêu dâm, thông tin sai lệch nguy hại, phân biệt chủng tộc/tôn giáo.
+
+Chỉ trả về JSON, không giải thích:
+{"safe":true,"score":0,"issues":[],"recommendation":"an toàn"}`;
+
+  const resp = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+    { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ contents:[{parts:[{text:prompt}]}], generationConfig:{temperature:0.1,maxOutputTokens:200} }) }
+  );
+  if (!resp.ok) { const e=await resp.json().catch(()=>({})); throw new Error(e.error?.message||`HTTP ${resp.status}`); }
+  const data = await resp.json();
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+  const m = text.match(/\{[\s\S]*?\}/);
+  try { return m ? JSON.parse(m[0]) : {safe:true,score:0,issues:[],recommendation:'an toàn'}; }
+  catch { return {safe:true,score:0,issues:[],recommendation:'an toàn'}; }
+}
+
+async function _toggleHideStory(storyId, hide, title) {
+  if (!confirm(hide ? `Ẩn truyện "${title}" khỏi website?\n(Dữ liệu không bị xóa, có thể hiện lại)` : `Hiện lại truyện "${title}"?`)) return;
+  try {
+    const { stories, sha } = await AUTH.loadStories();
+    const idx = stories.findIndex(s => s.id === storyId);
+    if (idx < 0) { alert('Không tìm thấy truyện!'); return; }
+    stories[idx].hidden = hide;
+    await AUTH.saveStories(stories, sha, `${hide?'Ẩn':'Hiện'} truyện: ${stories[idx].title}`);
+    alert(`✅ Đã ${hide?'ẩn':'hiện'} truyện. Web cập nhật sau ~1 phút.`);
+    document.getElementById('_ai_modal')?.remove();
   } catch(e) { alert('❌ ' + e.message); }
 }
 

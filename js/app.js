@@ -69,12 +69,15 @@ async function loadHomePage() {
 
   let all = await fetchStories();
 
-  // Render hero & sidebar with full list (no filter)
-  renderHero(all[0], all);
-  renderSidebar(all);
+  // Filter out admin-hidden stories (AI moderation) — owner still sees all
+  const allVisible = window.AUTH?.isOwner ? all : all.filter(s => !s.hidden);
+
+  // Render hero & sidebar with visible list
+  renderHero(allVisible[0], allVisible);
+  renderSidebar(allVisible);
 
   // Apply filter
-  let stories = [...all];
+  let stories = [...allVisible];
   if (search) {
     stories = stories.filter(s =>
       s.title.toLowerCase().includes(search.toLowerCase()) ||
