@@ -757,6 +757,25 @@ footer {
 .admin-secret-link { text-align:center; margin-top:.6rem; }
 .admin-secret-link a { font-size:.71rem; color:var(--text3); text-decoration:none; }
 .admin-secret-link a:hover { color:var(--primary); }
+/* Role selection cards (register.html) */
+.role-cards { display:flex; flex-direction:column; gap:.55rem; margin-top:.35rem; }
+.role-card {
+  display:flex; align-items:flex-start; gap:.7rem;
+  padding:.65rem .8rem; border-radius:var(--radius);
+  border:2px solid var(--border2); cursor:pointer;
+  transition:border-color .18s, background .18s;
+  background:var(--bg2);
+}
+.role-card input[type=radio] { display:none; }
+.role-card-icon { font-size:1.35rem; flex-shrink:0; margin-top:.05rem; }
+.role-card-body { display:flex; flex-direction:column; gap:.15rem; }
+.role-card-title { font-size:.88rem; font-weight:600; color:var(--text); }
+.role-card-desc  { font-size:.76rem; color:var(--text2); line-height:1.4; }
+.role-card--active {
+  border-color:var(--primary);
+  background:var(--pri-ll,#f0fafd);
+}
+.role-card--active .role-card-title { color:var(--pri-d); }
 /* Password strength */
 .pw-strength-bar { display:flex; gap:3px; margin-top:.32rem; height:4px; }
 .pw-seg { flex:1; border-radius:4px; background:var(--border); transition:background .22s; }

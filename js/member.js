@@ -26,21 +26,52 @@ function _initMemberHeader() {
 
   if (MEMBER.isLoggedIn) {
     const user = MEMBER.user;
-    btn.textContent = '👤 ' + (user.username || user.email || 'Thành viên');
+    const role = user.role || 'reader';
+    const uname = user.username || user.email || 'Thành viên';
+
+    // Role-based label + colour
+    let roleIcon, roleLabel, roleColor;
+    if (role === 'author') {
+      roleIcon  = '✍️'; roleLabel = 'Tác giả';
+      roleColor = 'var(--gold,#e8a800)';
+    } else if (role === 'pending_author') {
+      roleIcon  = '📖'; roleLabel = 'Chờ duyệt';
+      roleColor = 'var(--orange,#e07820)';
+    } else {
+      roleIcon  = '📖'; roleLabel = 'Độc giả';
+      roleColor = 'var(--teal,#0ea5a0)';
+    }
+
+    btn.textContent = roleIcon + ' ' + uname;
+    btn.style.cssText += ';color:' + roleColor + '!important;border-color:' + roleColor + '!important';
 
     // Create dropdown
     const wrap = btn.parentElement;
     const dd = document.createElement('div');
     dd.id = '_mb_dd';
     dd.style.cssText = [
-      'position:absolute','top:calc(100% + 6px)','right:0','min-width:180px',
+      'position:absolute','top:calc(100% + 6px)','right:0','min-width:200px',
       'background:#fff','border:1.5px solid var(--border)','border-radius:var(--radius)',
       'box-shadow:var(--shadow-m)','z-index:9999','display:none','overflow:hidden'
     ].join(';');
 
+    // Identity line
     const emailLine = document.createElement('div');
     emailLine.style.cssText = 'padding:.55rem .9rem;font-size:.75rem;color:var(--text3);border-bottom:1px solid var(--border);word-break:break-all';
     emailLine.textContent = user.email || '';
+
+    // Role badge line
+    const roleLine = document.createElement('div');
+    roleLine.style.cssText = 'padding:.4rem .9rem;font-size:.76rem;font-weight:600;border-bottom:1px solid var(--border);color:' + roleColor;
+    roleLine.textContent = roleIcon + ' ' + roleLabel + (role === 'pending_author' ? ' ⏳' : '');
+
+    // Pending note
+    let pendingNote = null;
+    if (role === 'pending_author') {
+      pendingNote = document.createElement('div');
+      pendingNote.style.cssText = 'padding:.4rem .9rem;font-size:.72rem;color:var(--text3);border-bottom:1px solid var(--border);line-height:1.4';
+      pendingNote.textContent = 'Tài khoản tác giả đang chờ Admin duyệt.';
+    }
 
     const logoutBtn = document.createElement('button');
     logoutBtn.style.cssText = 'width:100%;padding:.55rem .9rem;background:none;border:none;text-align:left;font-size:.83rem;color:var(--red);cursor:pointer;font-family:inherit;';
@@ -50,6 +81,8 @@ function _initMemberHeader() {
     logoutBtn.onclick = function() { MEMBER.logout(); };
 
     dd.appendChild(emailLine);
+    dd.appendChild(roleLine);
+    if (pendingNote) dd.appendChild(pendingNote);
     dd.appendChild(logoutBtn);
 
     // Position wrapper relatively if needed

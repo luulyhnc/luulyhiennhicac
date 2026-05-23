@@ -94,6 +94,33 @@
           </div>
         </div>
 
+        <div class="auth-form-group">
+          <label>Mục đích tham gia *</label>
+          <div class="role-cards" id="role-cards">
+            <label class="role-card role-card--active" id="role-reader-card">
+              <input type="radio" name="reg-role" id="role-reader" value="reader" checked
+                     onchange="onRoleChange()">
+              <span class="role-card-icon">📖</span>
+              <span class="role-card-body">
+                <span class="role-card-title">Chỉ đọc truyện</span>
+                <span class="role-card-desc">Đăng ký làm độc giả, theo dõi và bình luận truyện.</span>
+              </span>
+            </label>
+            <label class="role-card" id="role-author-card">
+              <input type="radio" name="reg-role" id="role-author" value="author"
+                     onchange="onRoleChange()">
+              <span class="role-card-icon">✍️</span>
+              <span class="role-card-body">
+                <span class="role-card-title">Muốn đăng truyện</span>
+                <span class="role-card-desc">Trở thành tác giả. Cần Admin duyệt trước khi đăng bài.</span>
+              </span>
+            </label>
+          </div>
+          <div id="role-author-note" style="display:none;margin-top:.45rem;padding:.45rem .65rem;background:var(--bg2,#f5f6fa);border-left:3px solid var(--gold,#f5a623);border-radius:4px;font-size:.78rem;color:var(--text2)">
+            ⏳ Tài khoản tác giả cần được Admin duyệt. Sau khi đăng ký bạn sẽ ở trạng thái <strong>Chờ duyệt</strong> cho đến khi Admin kích hoạt.
+          </div>
+        </div>
+
         <div class="auth-check-row">
           <input type="checkbox" id="reg-terms">
           <label for="reg-terms">Tôi đã đọc và đồng ý với <a href="#" style="color:var(--primary)">điều khoản sử dụng</a></label>
@@ -187,15 +214,23 @@
     return score;
   }
 
+  function onRoleChange() {
+    const isAuthor = document.getElementById('role-author').checked;
+    document.getElementById('role-reader-card').classList.toggle('role-card--active', !isAuthor);
+    document.getElementById('role-author-card').classList.toggle('role-card--active', isAuthor);
+    document.getElementById('role-author-note').style.display = isAuthor ? 'block' : 'none';
+  }
+
   async function doRegister() {
     clearRegAlert();
-    const username = document.getElementById('reg-username').value.trim();
-    const email    = document.getElementById('reg-email').value.trim();
-    const name     = document.getElementById('reg-name').value.trim();
-    const pw       = document.getElementById('reg-pw').value;
-    const pw2      = document.getElementById('reg-pw2').value;
-    const terms    = document.getElementById('reg-terms').checked;
-    const btn      = document.getElementById('reg-btn');
+    const username    = document.getElementById('reg-username').value.trim();
+    const email       = document.getElementById('reg-email').value.trim();
+    const name        = document.getElementById('reg-name').value.trim();
+    const pw          = document.getElementById('reg-pw').value;
+    const pw2         = document.getElementById('reg-pw2').value;
+    const wantsAuthor = document.getElementById('role-author').checked;
+    const terms       = document.getElementById('reg-terms').checked;
+    const btn         = document.getElementById('reg-btn');
 
     // Validate username
     if (!username) { showRegAlert('Vui lòng nhập tên đăng nhập.'); return; }
@@ -228,7 +263,7 @@
     btn.textContent = 'Đang đăng ký…';
 
     try {
-      const body = { email, username, password: pw };
+      const body = { email, username, password: pw, wantsAuthor };
       if (name) body.fullName = name;
 
       const res  = await fetch(MEMBER.API + '/auth/register', {
