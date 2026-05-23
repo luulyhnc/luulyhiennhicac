@@ -138,7 +138,7 @@ async function _doLogin() {
 function _initHeader() {
   document.querySelectorAll('.btn-login').forEach(btn => {
     if (AUTH.isOwner) {
-      btn.textContent = '👑 Admin';
+      btn.textContent = '👑 Admin ▾';
       btn.style.cssText += ';background:#27ae60!important;border-color:#27ae60!important';
       btn.onclick = e => {
         e.stopPropagation();
@@ -147,7 +147,7 @@ function _initHeader() {
         const rc  = btn.getBoundingClientRect();
         const m   = document.createElement('div');
         m.id = '_omenu';
-        m.style.cssText = `position:fixed;top:${rc.bottom+4}px;right:${window.innerWidth-rc.right}px;background:#fff;border-radius:10px;box-shadow:0 4px 24px rgba(0,0,0,.18);z-index:9998;min-width:196px;overflow:hidden;font-family:'Inter',sans-serif`;
+        m.style.cssText = `position:fixed;top:${rc.bottom+4}px;right:${window.innerWidth-rc.right}px;background:#fff;border-radius:10px;box-shadow:0 4px 24px rgba(0,0,0,.18);z-index:9998;min-width:210px;overflow:hidden;font-family:'Inter',sans-serif`;
         m.innerHTML = `
           <a href="http://localhost:3344" target="_blank" class="_omenu_item">⚙️ Admin Panel (local)</a>
           <button onclick="document.getElementById('_omenu')?.remove();_openAiModeration()" class="_omenu_item" style="background:none;border:none;cursor:pointer;width:100%;text-align:left;font-family:'Inter',sans-serif">🤖 AI Kiểm duyệt nội dung</button>
@@ -160,6 +160,34 @@ function _initHeader() {
         document.body.appendChild(m);
         setTimeout(() => document.addEventListener('click', () => m.remove(), { once:true }), 10);
       };
+
+      // Nút Đăng xuất riêng — luôn hiển thị ngay cạnh Admin
+      if (!document.getElementById('_logout_btn')) {
+        const logoutBtn = document.createElement('button');
+        logoutBtn.id = '_logout_btn';
+        logoutBtn.textContent = '🚪 Đăng xuất';
+        logoutBtn.style.cssText = [
+          'background:transparent',
+          'color:#e05060',
+          'border:1.5px solid #e05060',
+          'border-radius:24px',
+          'padding:.4rem 1rem',
+          'font-size:.83rem',
+          'font-weight:700',
+          'font-family:inherit',
+          'cursor:pointer',
+          'white-space:nowrap',
+          'flex-shrink:0',
+          'transition:all .2s',
+          'margin-left:.4rem',
+        ].join(';');
+        logoutBtn.onmouseenter = () => { logoutBtn.style.background='#e05060'; logoutBtn.style.color='#fff'; };
+        logoutBtn.onmouseleave = () => { logoutBtn.style.background='transparent'; logoutBtn.style.color='#e05060'; };
+        logoutBtn.onclick = () => {
+          if (confirm('Đăng xuất khỏi chế độ Admin?')) AUTH.logout();
+        };
+        btn.insertAdjacentElement('afterend', logoutBtn);
+      }
     } else {
       btn.onclick = () => { document.getElementById('_lm').style.display = 'flex'; };
     }
