@@ -701,6 +701,78 @@ footer {
 .guide-hero h1 span { color:var(--primary); }
 .guide-hero p { color:var(--text2); font-size:1rem; max-width:600px; margin:0 auto; }
 
+/* ── MEMBER AUTH FORMS ── */
+.auth-wrap { display:flex; justify-content:center; padding:1.5rem 1rem 3rem; }
+.auth-card {
+  background:var(--card); border:1.5px solid var(--border);
+  border-radius:var(--radius-l); box-shadow:var(--shadow-m);
+  width:100%; max-width:560px; overflow:hidden;
+}
+.auth-card-title {
+  background:var(--bg3); border-bottom:1.5px solid var(--border);
+  padding:.8rem 1.4rem; font-size:.88rem; font-weight:800;
+  color:var(--primary); letter-spacing:.5px; text-transform:uppercase;
+}
+.auth-card-icon { color:var(--gold); margin-right:.35rem; }
+.auth-card-body { padding:1.5rem 1.8rem; }
+.auth-form-group { margin-bottom:1rem; }
+.auth-form-group > label {
+  display:block; font-size:.82rem; font-weight:600;
+  color:var(--text); margin-bottom:.32rem;
+}
+.auth-input {
+  width:100%; padding:.52rem .75rem;
+  border:1.5px solid var(--border2); border-radius:7px;
+  font-size:.9rem; font-family:inherit; color:var(--text);
+  background:#fff; outline:none; box-sizing:border-box;
+  transition:border-color .2s, box-shadow .2s;
+}
+.auth-input:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(58,179,202,.12); }
+.auth-input.input-error { border-color:var(--red); }
+.auth-hint { font-size:.73rem; color:var(--text3); margin-top:.25rem; }
+.auth-pw-wrap { position:relative; }
+.auth-pw-wrap .auth-input { padding-right:2.6rem; }
+.auth-pw-toggle {
+  position:absolute; right:.6rem; top:50%; transform:translateY(-50%);
+  background:none; border:none; cursor:pointer; color:var(--text3);
+  font-size:.9rem; padding:0; line-height:1; transition:color .15s;
+}
+.auth-pw-toggle:hover { color:var(--primary); }
+.auth-check-row { display:flex; align-items:center; gap:.45rem; margin-bottom:.9rem; }
+.auth-check-row input[type=checkbox] { width:15px; height:15px; accent-color:var(--primary); cursor:pointer; flex-shrink:0; }
+.auth-check-row label { font-size:.83rem; color:var(--text2); cursor:pointer; line-height:1.4; }
+.auth-alert-error { background:#fdecea; color:var(--red); border-radius:7px; padding:.48rem .8rem; font-size:.82rem; margin-bottom:.8rem; }
+.auth-alert-success { background:#e8f5e9; color:#27ae60; border-radius:7px; padding:.48rem .8rem; font-size:.82rem; margin-bottom:.8rem; }
+.btn-auth {
+  width:100%; padding:.62rem; border:none; border-radius:8px;
+  font-size:.92rem; font-weight:700; font-family:inherit;
+  cursor:pointer; transition:all .2s; margin-bottom:.45rem;
+}
+.btn-auth-primary { background:var(--primary); color:#fff; }
+.btn-auth-primary:hover { background:var(--pri-d); }
+.btn-auth-primary:disabled { opacity:.52; cursor:not-allowed; }
+.auth-footer-links { text-align:center; border-top:1px solid var(--border); padding-top:.9rem; margin-top:.3rem; }
+.auth-footer-links a { font-size:.84rem; color:var(--primary); text-decoration:none; display:block; margin-bottom:.32rem; }
+.auth-footer-links a:hover { text-decoration:underline; }
+.admin-secret-link { text-align:center; margin-top:.6rem; }
+.admin-secret-link a { font-size:.71rem; color:var(--text3); text-decoration:none; }
+.admin-secret-link a:hover { color:var(--primary); }
+/* Password strength */
+.pw-strength-bar { display:flex; gap:3px; margin-top:.32rem; height:4px; }
+.pw-seg { flex:1; border-radius:4px; background:var(--border); transition:background .22s; }
+.pw-strength-label { font-size:.71rem; font-weight:700; margin-top:.22rem; color:var(--text3); }
+/* OTP boxes */
+.otp-inputs { display:flex; gap:.5rem; justify-content:center; margin:1.2rem 0; }
+.otp-box {
+  width:50px; height:60px; text-align:center; font-size:1.5rem; font-weight:700;
+  border:2px solid var(--border2); border-radius:9px; outline:none;
+  color:var(--text); background:#fff; font-family:inherit;
+  transition:border-color .18s, box-shadow .18s;
+}
+.otp-box:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(58,179,202,.15); }
+.otp-countdown { font-size:.85rem; text-align:center; color:var(--text2); margin-bottom:.8rem; }
+.otp-countdown span { color:var(--primary); font-weight:700; }
+
 /* ── RESPONSIVE ── */
 @media (max-width:1100px) {
   .page-layout { grid-template-columns:1fr; }

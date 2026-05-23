@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đăng Nhập – Lưu Ly Hiền Nhi Các</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+  <div class="hdr-top">
+    <a href="index.html" class="logo">
+      <span class="logo-main">Lưu Ly Hiền Nhi Các</span>
+      <span class="logo-slogan">Gác ngọc thanh vân, lưu vạn trang mộng</span>
+    </a>
+    <nav class="hdr-nav">
+      <a href="index.html">Trang Chủ</a>
+      <a href="index.html?genre=Tiên+Hiệp">Tiên Hiệp</a>
+      <a href="index.html?genre=Huyền+Huyễn">Huyền Huyễn</a>
+      <a href="index.html?genre=Ngôn+Tình">Ngôn Tình</a>
+      <a href="index.html?genre=Đô+Thị">Đô Thị</a>
+      <a href="index.html?genre=Nữ+Cường">Nữ Cường</a>
+      <a href="index.html?status=Hoàn+thành">Đã Hoàn Thành</a>
+      <a href="guide.html">✍️ Đăng Truyện</a>
+    </nav>
+    <div class="search-bar">
+      <input type="text" id="search-input" placeholder="Tìm kiếm truyện, tác giả..."
+             onkeydown="if(event.key==='Enter')doSearch()">
+      <button onclick="doSearch()">🔍</button>
+    </div>
+    <button class="btn-login" onclick="location.href='login.html'">👤 Đăng nhập</button>
+  </div>
+</header>
+
+<main class="container" style="padding-top:1.5rem">
+  <div class="breadcrumb">
+    <a href="index.html">Trang chủ</a>
+    <span class="sep">›</span>
+    <span>Đăng nhập</span>
+  </div>
+
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-card-title">
+        <span class="auth-card-icon">→</span> ĐĂNG NHẬP
+      </div>
+      <div class="auth-card-body">
+
+        <div class="auth-form-group">
+          <label for="login-id">Tên đăng nhập hoặc Email</label>
+          <input class="auth-input" type="text" id="login-id" placeholder="Nhập tên đăng nhập hoặc email"
+                 onkeydown="if(event.key==='Enter'){document.getElementById('login-pw').focus();}">
+        </div>
+
+        <div class="auth-form-group">
+          <label for="login-pw">Mật khẩu</label>
+          <div class="auth-pw-wrap">
+            <input class="auth-input" type="password" id="login-pw" placeholder="Nhập mật khẩu"
+                   onkeydown="if(event.key==='Enter')doMemberLogin()">
+            <button type="button" class="auth-pw-toggle" id="login-pw-toggle"
+                    onclick="toggleAuthPw('login-pw','login-pw-toggle')" title="Hiện/Ẩn mật khẩu">👁</button>
+          </div>
+        </div>
+
+        <div class="auth-check-row">
+          <input type="checkbox" id="login-remember">
+          <label for="login-remember">Ghi nhớ đăng nhập</label>
+        </div>
+
+        <div id="login-alert"></div>
+
+        <button class="btn-auth btn-auth-primary" id="login-btn" onclick="doMemberLogin()">Đăng nhập</button>
+
+        <div class="auth-footer-links">
+          <a href="forgot-password.html">Quên mật khẩu?</a>
+          <a href="register.html">Chưa có tài khoản? Đăng ký ngay</a>
+        </div>
+
+        <div class="admin-secret-link">
+          <a href="#" onclick="event.preventDefault(); const lm=document.getElementById('_lm'); if(lm) lm.style.display='flex';">
+            Quản trị viên? Đăng nhập tại đây
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-simple">
+    <span>© 2026 Lưu Ly Hiền Nhi Các</span>
+    <span>Liên hệ tác giả | Báo lỗi chương</span>
+  </div>
+</footer>
+
+<script src="js/auth.js"></script>
+<script src="js/app.js"></script>
+<script src="js/member.js"></script>
+<script>
+  function doSearch() {
+    const q = document.getElementById('search-input').value.trim();
+    if (q) location.href = 'index.html?search=' + encodeURIComponent(q);
+  }
+
+  function toggleAuthPw(inputId, btnId) {
+    const inp = document.getElementById(inputId);
+    const btn = document.getElementById(btnId);
+    if (!inp) return;
+    if (inp.type === 'password') {
+      inp.type = 'text';
+      if (btn) btn.textContent = '🙈';
+    } else {
+      inp.type = 'password';
+      if (btn) btn.textContent = '👁';
+    }
+  }
+
+  function showLoginAlert(msg, type) {
+    const el = document.getElementById('login-alert');
+    if (!el) return;
+    el.className = type === 'success' ? 'auth-alert-success' : 'auth-alert-error';
+    el.textContent = msg;
+  }
+
+  function clearLoginAlert() {
+    const el = document.getElementById('login-alert');
+    if (el) { el.className = ''; el.textContent = ''; }
+  }
+
+  async function doMemberLogin() {
+    clearLoginAlert();
+    const identifier = document.getElementById('login-id').value.trim();
+    const password   = document.getElementById('login-pw').value;
+    const remember   = document.getElementById('login-remember').checked;
+    const btn        = document.getElementById('login-btn');
+
+    if (!identifier) { showLoginAlert('Vui lòng nhập tên đăng nhập hoặc email.'); return; }
+    if (!password)   { showLoginAlert('Vui lòng nhập mật khẩu.'); return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Đang đăng nhập…';
+
+    try {
+      const res  = await fetch(MEMBER.API + '/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifier, password }),
+        credentials: 'include'
+      });
+      const data = await res.json();
+
+      if (res.ok && data.sessionToken) {
+        sessionStorage.setItem('_mb_stoken', data.sessionToken);
+        sessionStorage.setItem('_mb_remember', remember ? '1' : '0');
+        location.href = 'otp-verify.html';
+      } else {
+        showLoginAlert(data.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.');
+        btn.disabled = false;
+        btn.textContent = 'Đăng nhập';
+      }
+    } catch (err) {
+      showLoginAlert('Không thể kết nối đến máy chủ. Vui lòng thử lại sau.');
+      btn.disabled = false;
+      btn.textContent = 'Đăng nhập';
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    if (typeof MEMBER !== 'undefined' && MEMBER.isLoggedIn) {
+      location.href = 'index.html';
+    }
+  });
+</script>
+</body>
+</html>

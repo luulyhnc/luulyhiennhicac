@@ -189,7 +189,9 @@ function _initHeader() {
         btn.insertAdjacentElement('afterend', logoutBtn);
       }
     } else {
-      btn.onclick = () => { document.getElementById('_lm').style.display = 'flex'; };
+      // Non-owner: go to member login page
+      // (Admin PAT modal still accessible via "Quản trị viên?" link on login.html)
+      btn.onclick = () => { location.href = 'login.html'; };
     }
   });
 }
