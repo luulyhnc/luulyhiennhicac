@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đăng Ký Thành Viên – Lưu Ly Hiền Nhi Các</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+  <div class="hdr-top">
+    <a href="index.html" class="logo">
+      <span class="logo-main">Lưu Ly Hiền Nhi Các</span>
+      <span class="logo-slogan">Gác ngọc thanh vân, lưu vạn trang mộng</span>
+    </a>
+    <nav class="hdr-nav">
+      <a href="index.html">Trang Chủ</a>
+      <a href="index.html?genre=Tiên+Hiệp">Tiên Hiệp</a>
+      <a href="index.html?genre=Huyền+Huyễn">Huyền Huyễn</a>
+      <a href="index.html?genre=Ngôn+Tình">Ngôn Tình</a>
+      <a href="index.html?genre=Đô+Thị">Đô Thị</a>
+      <a href="index.html?genre=Nữ+Cường">Nữ Cường</a>
+      <a href="index.html?status=Hoàn+thành">Đã Hoàn Thành</a>
+      <a href="guide.html">✍️ Đăng Truyện</a>
+    </nav>
+    <div class="search-bar">
+      <input type="text" id="search-input" placeholder="Tìm kiếm truyện, tác giả..."
+             onkeydown="if(event.key==='Enter')doSearch()">
+      <button onclick="doSearch()">🔍</button>
+    </div>
+    <button class="btn-login" onclick="location.href='login.html'">👤 Đăng nhập</button>
+  </div>
+</header>
+
+<main class="container" style="padding-top:1.5rem">
+  <div class="breadcrumb">
+    <a href="index.html">Trang chủ</a>
+    <span class="sep">›</span>
+    <span>Đăng ký thành viên</span>
+  </div>
+
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-card-title">
+        <span class="auth-card-icon" style="color:var(--gold)">→</span> ĐĂNG KÝ THÀNH VIÊN
+      </div>
+      <div class="auth-card-body">
+
+        <div class="auth-form-group">
+          <label for="reg-username">Tên đăng nhập *</label>
+          <input class="auth-input" type="text" id="reg-username" placeholder="Ví dụ: nguyen_van_a"
+                 onkeydown="if(event.key==='Enter')document.getElementById('reg-email').focus()">
+          <div class="auth-hint">Chỉ chứa chữ, số và dấu gạch dưới. Tối thiểu 3 ký tự.</div>
+        </div>
+
+        <div class="auth-form-group">
+          <label for="reg-email">Email *</label>
+          <input class="auth-input" type="email" id="reg-email" placeholder="email@example.com"
+                 onkeydown="if(event.key==='Enter')document.getElementById('reg-name').focus()">
+        </div>
+
+        <div class="auth-form-group">
+          <label for="reg-name">Họ và tên</label>
+          <input class="auth-input" type="text" id="reg-name" placeholder="Không bắt buộc"
+                 onkeydown="if(event.key==='Enter')document.getElementById('reg-pw').focus()">
+        </div>
+
+        <div class="auth-form-group">
+          <label for="reg-pw">Mật khẩu *</label>
+          <div class="auth-pw-wrap">
+            <input class="auth-input" type="password" id="reg-pw" placeholder="Tối thiểu 8 ký tự"
+                   oninput="updatePwStrength(this.value)"
+                   onkeydown="if(event.key==='Enter')document.getElementById('reg-pw2').focus()">
+            <button type="button" class="auth-pw-toggle" id="reg-pw-toggle"
+                    onclick="toggleAuthPw('reg-pw','reg-pw-toggle')" title="Hiện/Ẩn mật khẩu">👁</button>
+          </div>
+          <div class="pw-strength-bar" id="pw-bar">
+            <div class="pw-seg" id="pw-s1"></div>
+            <div class="pw-seg" id="pw-s2"></div>
+            <div class="pw-seg" id="pw-s3"></div>
+            <div class="pw-seg" id="pw-s4"></div>
+          </div>
+          <div class="pw-strength-label" id="pw-label"></div>
+        </div>
+
+        <div class="auth-form-group">
+          <label for="reg-pw2">Xác nhận mật khẩu *</label>
+          <div class="auth-pw-wrap">
+            <input class="auth-input" type="password" id="reg-pw2" placeholder="Nhập lại mật khẩu"
+                   onkeydown="if(event.key==='Enter')doRegister()">
+            <button type="button" class="auth-pw-toggle" id="reg-pw2-toggle"
+                    onclick="toggleAuthPw('reg-pw2','reg-pw2-toggle')" title="Hiện/Ẩn mật khẩu">👁</button>
+          </div>
+        </div>
+
+        <div class="auth-check-row">
+          <input type="checkbox" id="reg-terms">
+          <label for="reg-terms">Tôi đã đọc và đồng ý với <a href="#" style="color:var(--primary)">điều khoản sử dụng</a></label>
+        </div>
+
+        <div id="reg-alert"></div>
+
+        <button class="btn-auth btn-auth-primary" id="reg-btn" onclick="doRegister()">Đăng ký</button>
+
+        <div class="auth-footer-links">
+          <a href="login.html">Đã có tài khoản? Đăng nhập</a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-simple">
+    <span>© 2026 Lưu Ly Hiền Nhi Các</span>
+    <span>Liên hệ tác giả | Báo lỗi chương</span>
+  </div>
+</footer>
+
+<script src="js/auth.js"></script>
+<script src="js/app.js"></script>
+<script src="js/member.js"></script>
+<script>
+  function doSearch() {
+    const q = document.getElementById('search-input').value.trim();
+    if (q) location.href = 'index.html?search=' + encodeURIComponent(q);
+  }
+
+  function toggleAuthPw(inputId, btnId) {
+    const inp = document.getElementById(inputId);
+    const btn = document.getElementById(btnId);
+    if (!inp) return;
+    if (inp.type === 'password') {
+      inp.type = 'text';
+      if (btn) btn.textContent = '🙈';
+    } else {
+      inp.type = 'password';
+      if (btn) btn.textContent = '👁';
+    }
+  }
+
+  function updatePwStrength(pw) {
+    const segs   = [document.getElementById('pw-s1'), document.getElementById('pw-s2'),
+                    document.getElementById('pw-s3'), document.getElementById('pw-s4')];
+    const label  = document.getElementById('pw-label');
+    if (!segs[0] || !label) return;
+
+    let score = 0;
+    if (pw.length >= 8)             score++;
+    if (/[A-Z]/.test(pw))           score++;
+    if (/[0-9]/.test(pw))           score++;
+    if (/[^A-Za-z0-9]/.test(pw))    score++;
+
+    const colors = ['#e0e0e0', '#e05060', '#f5a623', '#f5c623', '#28b870'];
+    const labels = ['', 'Rất yếu', 'Yếu', 'Trung bình', 'Mạnh', 'Rất mạnh'];
+    const textCols = ['var(--text3)', 'var(--red)', '#e08020', '#c8a800', 'var(--green)'];
+
+    const activeColor = pw.length === 0 ? colors[0] : colors[score];
+    segs.forEach(function(seg, i) {
+      seg.style.background = (pw.length > 0 && i < score) ? activeColor : 'var(--border)';
+    });
+
+    label.textContent  = pw.length === 0 ? '' : labels[score];
+    label.style.color  = pw.length === 0 ? 'var(--text3)' : textCols[score];
+  }
+
+  function showRegAlert(msg, type) {
+    const el = document.getElementById('reg-alert');
+    if (!el) return;
+    el.className = type === 'success' ? 'auth-alert-success' : 'auth-alert-error';
+    el.textContent = msg;
+  }
+
+  function clearRegAlert() {
+    const el = document.getElementById('reg-alert');
+    if (el) { el.className = ''; el.textContent = ''; }
+  }
+
+  function getPwScore(pw) {
+    let score = 0;
+    if (pw.length >= 8)          score++;
+    if (/[A-Z]/.test(pw))        score++;
+    if (/[0-9]/.test(pw))        score++;
+    if (/[^A-Za-z0-9]/.test(pw)) score++;
+    return score;
+  }
+
+  async function doRegister() {
+    clearRegAlert();
+    const username = document.getElementById('reg-username').value.trim();
+    const email    = document.getElementById('reg-email').value.trim();
+    const name     = document.getElementById('reg-name').value.trim();
+    const pw       = document.getElementById('reg-pw').value;
+    const pw2      = document.getElementById('reg-pw2').value;
+    const terms    = document.getElementById('reg-terms').checked;
+    const btn      = document.getElementById('reg-btn');
+
+    // Validate username
+    if (!username) { showRegAlert('Vui lòng nhập tên đăng nhập.'); return; }
+    if (!/^[a-zA-Z0-9_]{3,30}$/.test(username)) {
+      showRegAlert('Tên đăng nhập chỉ được chứa chữ, số và dấu gạch dưới, từ 3–30 ký tự.');
+      return;
+    }
+
+    // Validate email
+    if (!email) { showRegAlert('Vui lòng nhập địa chỉ email.'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showRegAlert('Địa chỉ email không hợp lệ.');
+      return;
+    }
+
+    // Validate password strength
+    if (!pw) { showRegAlert('Vui lòng nhập mật khẩu.'); return; }
+    if (getPwScore(pw) < 3) {
+      showRegAlert('Mật khẩu quá yếu. Vui lòng dùng ít nhất 8 ký tự, bao gồm chữ hoa, số hoặc ký tự đặc biệt.');
+      return;
+    }
+
+    // Validate confirm password
+    if (pw !== pw2) { showRegAlert('Mật khẩu xác nhận không khớp.'); return; }
+
+    // Validate terms
+    if (!terms) { showRegAlert('Bạn cần đồng ý với điều khoản sử dụng.'); return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Đang đăng ký…';
+
+    try {
+      const body = { email, username, password: pw };
+      if (name) body.fullName = name;
+
+      const res  = await fetch(MEMBER.API + '/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        credentials: 'include'
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        showRegAlert('Đăng ký thành công! Đang chuyển hướng đến trang đăng nhập…', 'success');
+        setTimeout(function() { location.href = 'login.html'; }, 2000);
+      } else {
+        showRegAlert(data.message || 'Đăng ký thất bại. Vui lòng thử lại.');
+        btn.disabled = false;
+        btn.textContent = 'Đăng ký';
+      }
+    } catch (err) {
+      showRegAlert('Không thể kết nối đến máy chủ. Vui lòng thử lại sau.');
+      btn.disabled = false;
+      btn.textContent = 'Đăng ký';
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    if (typeof MEMBER !== 'undefined' && MEMBER.isLoggedIn) {
+      location.href = 'index.html';
+    }
+  });
+</script>
+</body>
+</html>
