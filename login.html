@@ -218,7 +218,9 @@
   }
 
   document.addEventListener('DOMContentLoaded', function() {
-    if (typeof MEMBER !== 'undefined' && MEMBER.isLoggedIn) {
+    // Redirect if already logged in (member or admin)
+    if ((typeof AUTH  !== 'undefined' && AUTH.isOwner) ||
+        (typeof MEMBER !== 'undefined' && MEMBER.isLoggedIn)) {
       location.href = 'index.html';
     }
   });
