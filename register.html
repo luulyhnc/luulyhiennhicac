@@ -319,6 +319,31 @@
           fullName: name, wantsAuthor
         });
         if (result.ok) {
+          // Try to sync new member to data/members.json on GitHub
+          // (only works if admin's PAT is present on this device)
+          if (typeof AUTH !== 'undefined' && AUTH.isOwner &&
+              typeof AUTH.loadMembers === 'function') {
+            try {
+              const { members, sha } = await AUTH.loadMembers()
+                .catch(() => ({ members: [], sha: null }));
+              const emailLow = email.toLowerCase();
+              const unameLow = username.toLowerCase();
+              if (!members.find(m =>
+                  m.email === emailLow ||
+                  m.username.toLowerCase() === unameLow)) {
+                members.push({
+                  id:        result.user.id,
+                  email:     result.user.email,
+                  username:  result.user.username,
+                  fullName:  name || '',
+                  role:      result.user.role,
+                  createdAt: new Date().toISOString(),
+                  source:    'local_auth',
+                });
+                await AUTH.saveMembers(members, sha, `Đăng ký: ${username}`);
+              }
+            } catch(_) { /* GitHub sync failed — admin can sync manually */ }
+          }
           showRegAlert('Đăng ký thành công! Đang chuyển hướng đến trang đăng nhập…', 'success');
           setTimeout(function() { location.href = 'login.html'; }, 1800);
         } else {

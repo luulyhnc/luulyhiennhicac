@@ -509,6 +509,46 @@
         <div class="adm-card-title">👥 Danh sách thành viên
           <span style="margin-left:auto;font-size:.78rem;font-weight:400;color:var(--text3)" id="mb-count"></span>
         </div>
+
+        <!-- Action row -->
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.75rem;align-items:center">
+          <button class="ab ab-edit" onclick="reloadMembers()">🔄 Tải lại</button>
+          <button class="ab ab-approve" onclick="toggleAddMemberForm()">➕ Thêm thủ công</button>
+          <span id="mb-sync-notice" style="display:none;font-size:.76rem;color:#e67e22;background:#fff3cd;padding:.22rem .65rem;border-radius:6px;border:1px solid #ffc107">
+            ⚠️ <span id="mb-sync-count">0</span> thành viên cục bộ chưa lên GitHub
+            <button onclick="syncLocalMembers()" style="margin-left:.35rem;padding:.1rem .45rem;font-size:.73rem;background:#f5a623;color:#fff;border:none;border-radius:4px;cursor:pointer;font-family:inherit">Đồng bộ</button>
+          </span>
+        </div>
+
+        <!-- Add member form (collapsed by default) -->
+        <div id="pnl-add-member" style="display:none;background:var(--bg2);border:1.5px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:.85rem">
+          <div style="font-size:.85rem;font-weight:700;color:var(--navy);margin-bottom:.7rem">➕ Thêm thành viên mới</div>
+          <div class="g2" style="margin-bottom:.6rem">
+            <div class="af-g"><label>Tên đăng nhập *</label>
+              <input class="af-inp" id="am-username" placeholder="username"
+                     onkeydown="if(event.key==='Enter')document.getElementById('am-email').focus()"></div>
+            <div class="af-g"><label>Email *</label>
+              <input class="af-inp" id="am-email" type="email" placeholder="email@example.com"
+                     onkeydown="if(event.key==='Enter')document.getElementById('am-fullname').focus()"></div>
+          </div>
+          <div class="g2" style="margin-bottom:.6rem">
+            <div class="af-g"><label>Họ và tên</label>
+              <input class="af-inp" id="am-fullname" placeholder="Không bắt buộc"></div>
+            <div class="af-g"><label>Vai trò</label>
+              <select class="af-inp" id="am-role">
+                <option value="reader">📖 Độc giả</option>
+                <option value="author">✍️ Tác giả</option>
+              </select></div>
+          </div>
+          <div style="font-size:.77rem;color:var(--text3);margin-bottom:.6rem;line-height:1.5">
+            💡 Dùng khi thành viên đã đăng ký từ thiết bị khác. Sau khi thêm, họ đăng nhập bình thường bằng tài khoản đã tạo.
+          </div>
+          <div style="display:flex;gap:.5rem">
+            <button class="ab ab-approve" onclick="doAddMemberManual()">💾 Thêm & Lưu GitHub</button>
+            <button class="ab" style="background:#f0f4f8;border-color:#c5dce9;color:var(--text2)" onclick="toggleAddMemberForm()">Hủy</button>
+          </div>
+        </div>
+
         <div class="flt-row">
           <input class="af-inp" id="m-search" placeholder="🔍 Tìm username / email…" oninput="filterMembers()">
           <select class="af-inp" id="m-frole" onchange="filterMembers()" style="width:auto">
@@ -791,12 +831,11 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ── State ──────────────────────────────────────────────────
-let _S = [], _SHA = null, _M = [];
+let _S = [], _SHA = null, _M = [], _MSHA = null;
 
 // ── Init ───────────────────────────────────────────────────
 async function initAdmin(jumpTab) {
-  _M = typeof LocalAuth !== 'undefined' ? LocalAuth.getAllUsers() : [];
-  await Promise.all([_loadStories(), _loadSeries()]);
+  await Promise.all([_loadStories(), _loadSeries(), _loadMembers()]);
   renderDash();
   renderStoryTbl(_S);
   renderMemberTbl(_M);
@@ -823,6 +862,61 @@ async function _loadStories() {
   catch(e) { _S = []; _SHA = null; }
 }
 async function reloadStories() { await _loadStories(); renderStoryTbl(_S); }
+
+// ── Members (GitHub + local merged) ───────────────────────
+async function _loadMembers() {
+  let ghMembers = [];
+  try {
+    const r = await AUTH.loadMembers();
+    ghMembers = r.members || [];
+    _MSHA     = r.sha;
+  } catch(e) { _MSHA = null; }
+
+  // Merge with device-local members (admin device only)
+  const local       = typeof LocalAuth !== 'undefined' ? LocalAuth.getAllUsers() : [];
+  const merged      = [...ghMembers];
+  const pendingSync = [];
+  for (const lm of local) {
+    const exists = merged.find(m =>
+      m.email === lm.email ||
+      m.username.toLowerCase() === lm.username.toLowerCase()
+    );
+    if (!exists) {
+      merged.push({ ...lm, source: 'local_pending' });
+      pendingSync.push(lm);
+    }
+  }
+  _M = merged;
+
+  // Show/hide sync notice
+  const notice = document.getElementById('mb-sync-notice');
+  const cnt    = document.getElementById('mb-sync-count');
+  if (notice && cnt) {
+    cnt.textContent    = pendingSync.length;
+    notice.style.display = pendingSync.length ? '' : 'none';
+  }
+}
+async function reloadMembers() {
+  await _loadMembers();
+  renderMemberTbl(_M);
+  renderDash();
+}
+
+// Always fetch fresh SHA before saving to avoid conflicts
+async function _saveMembersToGitHub(commitMsg) {
+  try {
+    const fresh = await AUTH.loadMembers();
+    _MSHA = fresh.sha;
+  } catch(_) { _MSHA = null; }
+  const toSave = _M.map(m => ({
+    id: m.id, email: m.email, username: m.username,
+    fullName: m.fullName || '', role: m.role,
+    createdAt: m.createdAt, source: m.source || 'local_auth',
+  }));
+  const res = await AUTH.saveMembers(toSave, _MSHA, commitMsg);
+  _MSHA = res.content.sha;
+  return res;
+}
 
 // ── Dashboard ──────────────────────────────────────────────
 function renderDash() {
@@ -1067,11 +1161,21 @@ function filterMembers() {
   });
 }
 
-function _setRole(id, role, username, msg) {
+async function _setRole(id, role, username, msg) {
+  // 1. Update local storage
   if (typeof LocalAuth !== 'undefined') LocalAuth.setRole(id, role);
-  _M = typeof LocalAuth !== 'undefined' ? LocalAuth.getAllUsers() : [];
+  // 2. Update in-memory list
+  const user = _M.find(u => u.id === id);
+  if (user) user.role = role;
   renderMemberTbl(_M); renderDash();
-  tblAlert('m', msg, true);
+  tblAlert('m', msg + ' — đang đồng bộ…', true);
+  // 3. Save to GitHub
+  try {
+    await _saveMembersToGitHub(`Thay đổi vai trò: ${username} → ${role}`);
+    tblAlert('m', msg + ' ✓ Đã lưu lên GitHub.', true);
+  } catch(e) {
+    tblAlert('m', msg + ` (Lưu GitHub thất bại: ${e.message.slice(0,60)})`, false);
+  }
 }
 function approveAuthor(id, un) {
   if (!confirm(`Phê duyệt "${un}" thành Tác giả?`)) return;
@@ -1088,6 +1192,70 @@ function promoteToAuthor(id, un) {
 function demoteToReader(id, un) {
   if (!confirm(`Chuyển "${un}" về Độc giả?`)) return;
   _setRole(id, 'reader', un, `✅ Đã chuyển ${un} về Độc giả.`);
+}
+
+function toggleAddMemberForm() {
+  const el = document.getElementById('pnl-add-member');
+  if (el) el.style.display = el.style.display === 'none' ? '' : 'none';
+}
+
+async function doAddMemberManual() {
+  const username = (document.getElementById('am-username')?.value || '').trim();
+  const email    = (document.getElementById('am-email')?.value    || '').trim().toLowerCase();
+  const fullName = (document.getElementById('am-fullname')?.value || '').trim();
+  const role     = document.getElementById('am-role')?.value || 'reader';
+
+  if (!username || !email) return tblAlert('m', '❌ Vui lòng nhập tên đăng nhập và email.', false);
+  if (!/^[a-zA-Z0-9_]{3,30}$/.test(username))
+    return tblAlert('m', '❌ Tên đăng nhập chỉ dùng chữ, số, gạch dưới (3–30 ký tự).', false);
+  if (_M.find(m => m.email === email || m.username.toLowerCase() === username.toLowerCase()))
+    return tblAlert('m', '❌ Username hoặc email đã tồn tại trong danh sách.', false);
+
+  const member = {
+    id:        (typeof crypto.randomUUID === 'function') ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36),
+    email, username, fullName, role,
+    createdAt: new Date().toISOString(),
+    source:    'manual',
+  };
+  _M.push(member);
+  renderMemberTbl(_M); renderDash();
+  tblAlert('m', `⏳ Đang lưu "${username}" lên GitHub…`, true);
+  try {
+    await _saveMembersToGitHub(`Thêm thành viên: ${username}`);
+    tblAlert('m', `✅ Đã thêm thành viên "${username}".`, true);
+    ['am-username','am-email','am-fullname'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.value = '';
+    });
+    toggleAddMemberForm();
+    // Update sync notice
+    document.getElementById('mb-sync-notice').style.display = 'none';
+  } catch(e) {
+    _M = _M.filter(m => m.id !== member.id);
+    renderMemberTbl(_M); renderDash();
+    tblAlert('m', '❌ Lưu GitHub thất bại: ' + e.message, false);
+  }
+}
+
+async function syncLocalMembers() {
+  const local = typeof LocalAuth !== 'undefined' ? LocalAuth.getAllUsers() : [];
+  let synced = 0;
+  for (const lm of local) {
+    if (!_M.find(m => m.email === lm.email || m.username.toLowerCase() === lm.username.toLowerCase())) {
+      _M.push({ ...lm, source: 'local_auth' });
+      synced++;
+    }
+  }
+  if (!synced) { tblAlert('m', '✅ Không có thành viên mới cần đồng bộ.', true); return; }
+  tblAlert('m', `⏳ Đang đồng bộ ${synced} thành viên lên GitHub…`, true);
+  try {
+    await _saveMembersToGitHub(`Đồng bộ ${synced} thành viên từ thiết bị admin`);
+    tblAlert('m', `✅ Đã đồng bộ ${synced} thành viên lên GitHub.`, true);
+    const notice = document.getElementById('mb-sync-notice');
+    if (notice) notice.style.display = 'none';
+    renderMemberTbl(_M); renderDash();
+  } catch(e) {
+    tblAlert('m', '❌ Đồng bộ thất bại: ' + e.message, false);
+  }
 }
 
 // ── Interface settings ─────────────────────────────────────

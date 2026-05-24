@@ -7,8 +7,9 @@
 // ── Constants ──────────────────────────────────────────────────
 const OWNER_EMAIL = 'lethuhien211094@gmail.com';
 const GH_REPO     = 'luulyhnc/luulyhiennhicac';
-const DATA_FILE   = 'data/stories.json';
-const _SK         = '_llhnc_s';   // session key
+const DATA_FILE    = 'data/stories.json';
+const MEMBERS_FILE = 'data/members.json';
+const _SK          = '_llhnc_s';   // session key
 const _PK         = '_llhnc_p';   // PAT key
 const _RK         = '_llhnc_r';   // remember key (email + remember flag)
 
@@ -92,6 +93,22 @@ const AUTH = {
 
   async saveStories(stories, sha, msg = 'Online: cập nhật truyện') {
     return this.ghPut(DATA_FILE, JSON.stringify(stories, null, 2), msg, sha);
+  },
+
+  async loadMembers() {
+    try {
+      const info   = await this.ghGet(MEMBERS_FILE);
+      const binary = atob(info.content.replace(/\n/g,''));
+      const json   = decodeURIComponent(escape(binary));
+      return { members: JSON.parse(json), sha: info.sha };
+    } catch(e) {
+      // File may not exist yet — treat as empty list
+      return { members: [], sha: null };
+    }
+  },
+
+  async saveMembers(members, sha, msg = 'Online: cập nhật thành viên') {
+    return this.ghPut(MEMBERS_FILE, JSON.stringify(members, null, 2), msg, sha);
   }
 };
 
