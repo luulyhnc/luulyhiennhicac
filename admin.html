@@ -4,1230 +4,750 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Panel – Lưu Ly Hiền Nhi Các</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  <link rel="stylesheet" href="css/style.css">
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Inter', sans-serif; background: #edf4fb; color: #1a2535; min-height: 100vh; }
-
-    /* ── Header ── */
-    .adm-hdr {
-      background: #fff; border-bottom: 2px solid #3ab3ca;
-      padding: 0 1.25rem; height: 58px;
-      display: flex; align-items: center; gap: .75rem;
-      position: sticky; top: 0; z-index: 100;
-      box-shadow: 0 2px 8px rgba(58,179,202,.12);
-    }
-    .adm-logo { font-size: 1.05rem; font-weight: 700; color: #3ab3ca; text-decoration: none; flex-shrink: 0; }
-    .adm-logo em { color: #7a96b0; font-style: normal; font-weight: 400; font-size: .78rem; margin-left: .3rem; }
+    /* ── Admin layout ── */
+    .admin-wrap { max-width:1120px; margin:0 auto; padding:1.4rem 1rem 3rem; }
+    .admin-hdr-row { display:flex; align-items:center; gap:.7rem; margin-bottom:1.3rem; }
+    .admin-hdr-row h1 { font-size:1.25rem; font-weight:800; color:var(--navy); margin:0; }
+    .adm-badge { background:#27ae60; color:#fff; font-size:.7rem; font-weight:700;
+                 padding:.2rem .55rem; border-radius:20px; }
 
     /* ── Tabs ── */
-    .adm-tabs { display: flex; gap: .2rem; flex: 1; }
-    .adm-tab {
-      padding: .38rem .8rem; border: none; background: transparent;
-      border-radius: 6px; cursor: pointer; font-family: inherit;
-      font-size: .85rem; color: #4a6080; font-weight: 500; transition: all .15s;
-    }
-    .adm-tab:hover { background: #e0f3f8; color: #3ab3ca; }
-    .adm-tab.active { background: #3ab3ca; color: #fff; }
+    .adm-tabs { display:flex; gap:.3rem; flex-wrap:wrap; margin-bottom:1.3rem; border-bottom:2px solid var(--border); padding-bottom:.6rem; }
+    .adm-tab { padding:.46rem 1rem; border-radius:8px 8px 0 0; border:1.5px solid transparent;
+               background:transparent; font-size:.85rem; font-weight:500; cursor:pointer;
+               color:var(--text2); font-family:inherit; transition:all .15s; }
+    .adm-tab:hover { background:var(--pri-l); color:var(--pri-d); }
+    .adm-tab.active { background:#fff; border-color:var(--border) var(--border) #fff;
+                      color:var(--primary); font-weight:700; margin-bottom:-2px; }
 
-    /* ── Settings strip ── */
-    .hdr-settings { display: flex; align-items: center; gap: .45rem; font-size: .8rem; flex-shrink: 0; }
-    .hdr-settings input {
-      padding: .3rem .55rem; border: 1.5px solid #c5dce9; border-radius: 6px;
-      font-size: .8rem; font-family: inherit; outline: none; background: #f7fbfd;
-    }
-    .hdr-settings input:focus { border-color: #3ab3ca; background: #fff; }
-    #inp-apikey { width: 190px; }
-    #inp-model  { width: 140px; }
-    .btn-save-cfg {
-      padding: .3rem .65rem; background: #3ab3ca; color: #fff;
-      border: none; border-radius: 6px; cursor: pointer; font-size: .8rem; font-family: inherit;
-    }
-    .btn-save-cfg:hover { background: #2896ac; }
-    #key-dot { font-size: .9rem; }
+    /* ── Panel card ── */
+    .adm-card { background:var(--card); border:1.5px solid var(--border);
+                border-radius:var(--radius-l); padding:1.3rem 1.4rem; margin-bottom:1rem; }
+    .adm-card-title { font-size:.92rem; font-weight:700; color:var(--navy);
+                      margin:0 0 1rem; padding-bottom:.5rem;
+                      border-bottom:2px solid var(--pri-l); display:flex;
+                      align-items:center; gap:.4rem; }
 
-    /* ── Layout ── */
-    .adm-body { max-width: 1280px; margin: 0 auto; padding: 1.25rem 1rem; }
-    .tab-panel { display: none; }
-    .tab-panel.active { display: block; }
+    /* ── Stat boxes ── */
+    .stat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:.7rem; margin-bottom:1.1rem; }
+    .stat-box { background:var(--bg2); border:1.5px solid var(--border);
+                border-radius:var(--radius); padding:.9rem 1rem; text-align:center; }
+    .stat-num { font-size:1.9rem; font-weight:800; color:var(--primary); line-height:1.1; }
+    .stat-lbl { font-size:.73rem; color:var(--text3); margin-top:.22rem; }
 
-    /* ── Cards ── */
-    .card {
-      background: #fff; border-radius: 12px; padding: 1.2rem;
-      box-shadow: 0 2px 10px rgba(0,50,100,.06);
-    }
-    .card-hd {
-      font-size: .95rem; font-weight: 600; color: #1a2535;
-      margin-bottom: 1rem; display: flex; align-items: center; gap: .4rem;
-    }
+    /* ── Form ── */
+    .af-g { margin-bottom:.85rem; }
+    .af-g label { display:block; font-size:.79rem; font-weight:600; color:var(--text2); margin-bottom:.26rem; }
+    .af-inp { width:100%; padding:.5rem .72rem; border:1.5px solid var(--border2);
+              border-radius:8px; font-size:.87rem; font-family:inherit; outline:none;
+              background:#fff; box-sizing:border-box; color:var(--text);
+              transition:border-color .17s; }
+    .af-inp:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(58,179,202,.12); }
+    textarea.af-inp { resize:vertical; line-height:1.72; }
+    .af-hint { font-size:.72rem; color:var(--text3); margin-top:.2rem; }
+    .g2 { display:grid; grid-template-columns:1fr 1fr; gap:.7rem; }
+    .g3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:.7rem; }
 
-    /* ── Grid helpers ── */
-    .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-    .g3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; }
-    .g4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; }
-    .mt1 { margin-top: .5rem; }
-    .mt2 { margin-top: 1rem; }
-    .flex { display: flex; } .fw { flex-wrap: wrap; } .gap1 { gap: .45rem; } .gap2 { gap: 1rem; }
-    .aic { align-items: center; } .jsb { justify-content: space-between; }
-    .tsmall { font-size: .78rem; } .tmuted { color: #7a96b0; }
+    /* ── Table ── */
+    .adm-tbl { width:100%; border-collapse:collapse; font-size:.83rem; }
+    .adm-tbl th { background:var(--bg2); color:var(--text2); font-weight:600; font-size:.74rem;
+                  padding:.5rem .7rem; text-align:left; border-bottom:2px solid var(--border);
+                  white-space:nowrap; }
+    .adm-tbl td { padding:.5rem .7rem; border-bottom:1px solid var(--border); vertical-align:middle; }
+    .adm-tbl tr:last-child td { border-bottom:none; }
+    .adm-tbl tr:hover td { background:var(--bg2); }
 
-    /* ── Stat cards ── */
-    .stat-card { background: #fff; border-radius: 12px; padding: 1.2rem; text-align: center; box-shadow: 0 2px 10px rgba(0,50,100,.06); }
-    .stat-icon { font-size: 1.8rem; margin-bottom: .35rem; }
-    .stat-num  { font-size: 2rem; font-weight: 700; color: #3ab3ca; line-height: 1; }
-    .stat-lbl  { font-size: .75rem; color: #7a96b0; margin-top: .25rem; }
+    /* ── Badges / pills ── */
+    .rb { display:inline-block; font-size:.69rem; font-weight:700;
+          padding:.13rem .48rem; border-radius:20px; }
+    .rb-reader  { background:#e0f3f8; color:#2896ac; }
+    .rb-author  { background:#fff3cd; color:#a07800; }
+    .rb-pending { background:#fdecea; color:#c0392b; }
+    .rb-ok      { background:#e8f5e9; color:#27ae60; }
+    .rb-hidden  { background:#fdecea; color:#e74c3c; }
 
-    /* ── Buttons ── */
-    .btn {
-      display: inline-flex; align-items: center; gap: .3rem;
-      padding: .42rem .9rem; border: none; border-radius: 7px;
-      cursor: pointer; font-family: inherit; font-size: .84rem; font-weight: 500; transition: all .15s;
-      text-decoration: none;
-    }
-    .btn-primary   { background: #3ab3ca; color: #fff; }
-    .btn-primary:hover { background: #2896ac; }
-    .btn-secondary { background: #e0f3f8; color: #2896ac; }
-    .btn-secondary:hover { background: #c5e8f3; }
-    .btn-danger    { background: #fdecea; color: #e74c3c; }
-    .btn-danger:hover { background: #f5c6c3; }
-    .btn-success   { background: #e8f5e9; color: #27ae60; }
-    .btn-success:hover { background: #c8e6c9; }
-    .btn-sm  { padding: .28rem .6rem; font-size: .77rem; }
-    .btn:disabled { opacity: .45; cursor: not-allowed; }
+    /* ── Action buttons ── */
+    .ab { padding:.24rem .62rem; border-radius:6px; font-size:.74rem; font-weight:600;
+          border:1.5px solid; cursor:pointer; font-family:inherit; transition:opacity .14s; white-space:nowrap; }
+    .ab:hover { opacity:.78; }
+    .ab-approve { background:#e8f5e9; color:#27ae60; border-color:#a8d5b5; }
+    .ab-edit    { background:#e0f3f8; color:#2896ac; border-color:#9dd0e0; }
+    .ab-hide    { background:#fff3cd; color:#a07800; border-color:#f5d67e; }
+    .ab-show    { background:#e8f5e9; color:#27ae60; border-color:#a8d5b5; }
+    .ab-del     { background:#fdecea; color:#e74c3c; border-color:#f0b8bc; }
+    .ab-up      { background:#ede7f6; color:#7b1fa2; border-color:#ce93d8; }
+    .ab-down    { background:#fff3e0; color:#e65100; border-color:#ffcc80; }
 
-    /* ── Forms ── */
-    .fgrp { margin-bottom: .9rem; }
-    .fgrp label { display: block; font-size: .8rem; font-weight: 500; color: #4a6080; margin-bottom: .3rem; }
-    .fctl {
-      width: 100%; padding: .45rem .7rem; border: 1.5px solid #c5dce9; border-radius: 8px;
-      font-size: .87rem; font-family: inherit; color: #1a2535; outline: none; transition: border-color .15s;
-      background: #fafcfe;
-    }
-    .fctl:focus { border-color: #3ab3ca; background: #fff; }
-    textarea.fctl { resize: vertical; min-height: 75px; }
+    /* ── Alert ── */
+    .adm-alert { padding:.5rem .85rem; border-radius:8px; font-size:.82rem;
+                 margin-bottom:.7rem; display:none; }
+    .adm-ok  { background:#e8f5e9; color:#27ae60; border:1.5px solid #a8d5b5; display:block!important; }
+    .adm-err { background:#fdecea; color:#e74c3c; border:1.5px solid #f0b8bc; display:block!important; }
 
-    /* ── Genre checkboxes ── */
-    .genre-group { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .25rem; }
-    .gc { display: none; }
-    .gc + label {
-      padding: .22rem .6rem; border: 1.5px solid #c5dce9; border-radius: 20px;
-      font-size: .76rem; cursor: pointer; transition: all .15s; color: #4a6080; user-select: none;
-    }
-    .gc:checked + label { background: #3ab3ca; color: #fff; border-color: #3ab3ca; }
+    /* ── Filter row ── */
+    .flt-row { display:flex; gap:.55rem; flex-wrap:wrap; margin-bottom:.9rem; align-items:center; }
+    .flt-row .af-inp { flex:1; min-width:160px; }
+    .flt-row select.af-inp { flex:0 0 auto; width:auto; }
 
-    /* ── Upload zone ── */
-    .upload-zone {
-      border: 2.5px dashed #9fcfde; border-radius: 12px;
-      padding: 2.2rem 1.5rem; text-align: center; cursor: pointer;
-      transition: all .2s; background: #f5fafd;
-    }
-    .upload-zone:hover, .upload-zone.drag-over { border-color: #3ab3ca; background: #e0f3f8; }
-    .upload-icon { font-size: 2.2rem; margin-bottom: .6rem; }
-    .upload-txt  { font-size: .92rem; color: #4a6080; }
-    .upload-hint { font-size: .75rem; color: #9fb8cc; margin-top: .3rem; }
+    /* ── Cover thumb ── */
+    .thumb { width:42px; height:58px; object-fit:cover; border-radius:4px; border:1px solid var(--border); }
 
-    /* ── Story items ── */
-    .story-item {
-      background: #fff; border-radius: 10px; padding: .85rem 1rem;
-      display: flex; align-items: center; gap: .7rem;
-      box-shadow: 0 1px 6px rgba(0,50,100,.05); margin-bottom: .55rem; transition: box-shadow .15s;
-    }
-    .story-item:hover { box-shadow: 0 3px 14px rgba(0,50,100,.1); }
-    .s-cover { width: 44px; height: 58px; object-fit: cover; border-radius: 5px; background: #e0f3f8; flex-shrink: 0; }
-    .s-info  { flex: 1; min-width: 0; }
-    .s-title { font-weight: 600; font-size: .92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .s-meta  { font-size: .76rem; color: #7a96b0; margin-top: .18rem; }
-    .s-tags  { display: flex; gap: .35rem; margin-top: .3rem; flex-wrap: wrap; }
-    .tag { padding: .13rem .45rem; background: #e0f3f8; color: #2896ac; border-radius: 4px; font-size: .7rem; }
-    .s-actions { display: flex; gap: .3rem; flex-shrink: 0; }
+    /* ── Tab panels ── */
+    .adm-panel { display:none; }
+    .adm-panel.on { display:block; }
 
-    /* ── Chapter preview list ── */
-    .ch-list { max-height: 220px; overflow-y: auto; border: 1.5px solid #c5dce9; border-radius: 8px; }
-    .ch-item {
-      padding: .45rem .75rem; border-bottom: 1px solid #eef3f7;
-      font-size: .8rem; display: flex; gap: .45rem; align-items: center;
-    }
-    .ch-item:last-child { border-bottom: none; }
-    .ch-num { background: #e0f3f8; color: #2896ac; border-radius: 4px; padding: .08rem .32rem; font-size: .72rem; font-weight: 600; flex-shrink: 0; }
+    /* ── Empty ── */
+    .adm-empty { text-align:center; padding:2.2rem 1rem; color:var(--text3); font-size:.88rem; }
+    .adm-empty .ico { font-size:2rem; margin-bottom:.4rem; }
 
-    /* ── Push area ── */
-    .push-row { display: flex; gap: .6rem; align-items: center; padding: .85rem; background: #f0f9fc; border-radius: 9px; }
-
-    /* ── AI Chat ── */
-    .chat-wrap {
-      display: flex; flex-direction: column;
-      height: calc(100vh - 120px); min-height: 500px;
-      background: #fff; border-radius: 12px; overflow: hidden;
-      box-shadow: 0 2px 10px rgba(0,50,100,.06);
-    }
-    .chat-msgs {
-      flex: 1; overflow-y: auto; padding: 1.1rem;
-      display: flex; flex-direction: column; gap: .65rem;
-    }
-    .msg { max-width: 78%; padding: .7rem .95rem; border-radius: 12px; font-size: .88rem; line-height: 1.65; }
-    .msg-user      { background: #3ab3ca; color: #fff; align-self: flex-end; border-bottom-right-radius: 3px; }
-    .msg-assistant { background: #f0f9fc; color: #1a2535; align-self: flex-start; border-bottom-left-radius: 3px; }
-    .msg-tool {
-      background: #fffde7; color: #6d4c00; align-self: flex-start;
-      border: 1px solid #ffe082; font-size: .76rem; font-family: 'Courier New', monospace;
-      max-width: 88%; border-radius: 8px; padding: .45rem .7rem;
-    }
-    .msg-sys { background: transparent; color: #9fb8cc; align-self: center; font-size: .75rem; padding: .25rem .7rem; border-radius: 20px; border: 1px solid #ddeef5; }
-
-    .typing { display: flex; gap: 4px; align-items: center; padding: .7rem .95rem; background: #f0f9fc; border-radius: 12px; align-self: flex-start; width: fit-content; }
-    .dot { width: 6px; height: 6px; background: #9fcfde; border-radius: 50%; animation: bop .8s infinite; }
-    .dot:nth-child(2) { animation-delay: .14s; }
-    .dot:nth-child(3) { animation-delay: .28s; }
-    @keyframes bop { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
-
-    .chat-bar {
-      padding: .85rem 1rem; border-top: 1.5px solid #e0f0f5;
-      display: flex; gap: .55rem; background: #fff;
-    }
-    .chat-in {
-      flex: 1; padding: .55rem .85rem; border: 1.5px solid #c5dce9; border-radius: 22px;
-      font-family: inherit; font-size: .88rem; outline: none; resize: none; max-height: 110px; line-height: 1.45;
-    }
-    .chat-in:focus { border-color: #3ab3ca; }
-    .btn-send {
-      width: 42px; height: 42px; background: #3ab3ca; color: #fff; border: none;
-      border-radius: 50%; cursor: pointer; font-size: 1rem;
-      display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background .15s;
-    }
-    .btn-send:hover { background: #2896ac; }
-    .btn-send:disabled { opacity: .45; cursor: not-allowed; }
-
-    /* ── Edit Modal ── */
-    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.38); z-index: 200; align-items: center; justify-content: center; }
-    .overlay.open { display: flex; }
-    .modal { background: #fff; border-radius: 14px; padding: 1.4rem; width: 90%; max-width: 580px; max-height: 90vh; overflow-y: auto; }
-    .modal-hd { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.1rem; }
-    .modal-title { font-size: 1rem; font-weight: 600; }
-    .btn-x { width: 30px; height: 30px; border: none; background: #f0f4f8; border-radius: 50%; cursor: pointer; font-size: .95rem; color: #4a6080; display: flex; align-items: center; justify-content: center; }
-
-    /* ── Section header ── */
-    .sec-hd { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
-    .sec-ttl { font-size: 1.05rem; font-weight: 700; color: #1a2535; }
-    .empty-state { text-align: center; padding: 2.5rem; color: #9fb8cc; font-size: .9rem; }
-    .empty-state .ico { font-size: 2.2rem; margin-bottom: .4rem; }
-
-    /* ── Toast ── */
-    .toast {
-      position: fixed; bottom: 1.4rem; right: 1.4rem;
-      background: #1a2535; color: #fff; padding: .65rem 1.1rem;
-      border-radius: 8px; font-size: .85rem; z-index: 999;
-      animation: slup .2s ease; max-width: 300px;
-    }
-    .toast.ok  { background: #27ae60; }
-    .toast.err { background: #e74c3c; }
-    @keyframes slup { from{transform:translateY(16px);opacity:0} to{transform:translateY(0);opacity:1} }
-
-    /* ── Pre/code in chat ── */
-    .msg-assistant code { background: #e0f3f8; padding: .1rem .3rem; border-radius: 3px; font-size: .84em; font-family: 'Courier New', monospace; }
-
-    /* ── Scrollbar ── */
-    ::-webkit-scrollbar { width: 5px; height: 5px; }
-    ::-webkit-scrollbar-track { background: #f0f4f8; }
-    ::-webkit-scrollbar-thumb { background: #9fcfde; border-radius: 3px; }
-
-    @media (max-width: 768px) {
-      .g4 { grid-template-columns: repeat(2,1fr); }
-      .g3 { grid-template-columns: 1fr 1fr; }
-      .g2 { grid-template-columns: 1fr; }
-      #inp-apikey { width: 130px; }
-      #inp-model  { display: none; }
-      .msg { max-width: 90%; }
-    }
+    /* ── Interface settings ── */
+    .iface-section { border:1.5px solid var(--border); border-radius:var(--radius); padding:1rem 1.1rem; margin-bottom:.8rem; }
+    .iface-section h3 { font-size:.85rem; font-weight:700; color:var(--navy); margin:0 0 .7rem; }
+    .color-swatches { display:flex; gap:.5rem; flex-wrap:wrap; margin-top:.4rem; }
+    .swatch { width:32px; height:32px; border-radius:50%; cursor:pointer; border:3px solid transparent;
+              transition:transform .15s; }
+    .swatch:hover { transform:scale(1.15); }
+    .swatch.sel { border-color:var(--navy); }
   </style>
 </head>
 <body>
 
-<!-- ══════════════════ HEADER ══════════════════ -->
-<header class="adm-hdr">
-  <a class="adm-logo" href="index.html" target="_blank">🌸 LLHNC <em>Admin</em></a>
-
-  <nav class="adm-tabs">
-    <button class="adm-tab active" onclick="gotoTab('dashboard',this)">🏠 Tổng Quan</button>
-    <button class="adm-tab"        onclick="gotoTab('upload',this)">📤 Đăng Truyện</button>
-    <button class="adm-tab"        onclick="gotoTab('manage',this)">📚 Quản Lý</button>
-    <button class="adm-tab"        onclick="gotoTab('chat',this)">🤖 AI Chat</button>
-  </nav>
-
-  <div class="hdr-settings">
-    <select id="inp-provider" onchange="onProviderChange()"
-      style="padding:.3rem .5rem;border:1.5px solid #c5dce9;border-radius:6px;font-size:.8rem;font-family:inherit;outline:none;background:#f7fbfd;cursor:pointer">
-      <option value="claude">🤖 Claude</option>
-      <option value="gemini">✨ Gemini (Free)</option>
-    </select>
-    <input type="password" id="inp-apikey" placeholder="Anthropic API Key..." autocomplete="off">
-    <input type="text"     id="inp-model"  placeholder="claude-opus-4-5">
-    <button class="btn-save-cfg" onclick="saveCfg()">Lưu</button>
-    <span id="key-dot" title="Trạng thái API key">⚫</span>
+<header>
+  <div class="hdr-top">
+    <a href="index.html" class="logo">
+      <span class="logo-main">Lưu Ly Hiền Nhi Các</span>
+      <span class="logo-slogan">Gác ngọc thanh vân, lưu vạn trang mộng</span>
+    </a>
+    <nav class="hdr-nav">
+      <a href="index.html">Trang Chủ</a>
+      <a href="index.html?genre=Tiên+Hiệp">Tiên Hiệp</a>
+      <a href="index.html?genre=Huyền+Huyễn">Huyền Huyễn</a>
+      <a href="index.html?genre=Ngôn+Tình">Ngôn Tình</a>
+      <a href="index.html?genre=Đô+Thị">Đô Thị</a>
+      <a href="index.html?genre=Nữ+Cường">Nữ Cường</a>
+    </nav>
+    <div class="search-bar">
+      <input type="text" id="search-input" placeholder="Tìm kiếm..."
+             onkeydown="if(event.key==='Enter')doSearch()">
+      <button onclick="doSearch()">🔍</button>
+    </div>
+    <button class="btn-login">👤</button>
   </div>
 </header>
 
-<!-- ══════════════════ BODY ══════════════════ -->
-<div class="adm-body">
+<main>
 
-  <!-- ── TAB: DASHBOARD ── -->
-  <div class="tab-panel active" id="panel-dashboard">
-    <div class="sec-hd">
-      <div class="sec-ttl">📊 Tổng Quan</div>
-      <div class="flex gap1">
-        <button class="btn btn-secondary btn-sm" onclick="loadDashboard()">🔄 Làm mới</button>
-        <a href="index.html" target="_blank" class="btn btn-secondary btn-sm">🌐 Xem web</a>
-      </div>
-    </div>
-
-    <!-- Stats -->
-    <div class="g4" id="stats-row">
-      <div class="stat-card"><div class="stat-icon">📚</div><div class="stat-num" id="st-stories">–</div><div class="stat-lbl">Truyện</div></div>
-      <div class="stat-card"><div class="stat-icon">📖</div><div class="stat-num" id="st-chapters">–</div><div class="stat-lbl">Chương</div></div>
-      <div class="stat-card"><div class="stat-icon">👁️</div><div class="stat-num" id="st-views">–</div><div class="stat-lbl">Lượt đọc</div></div>
-      <div class="stat-card"><div class="stat-icon">❤️</div><div class="stat-num" id="st-follows">–</div><div class="stat-lbl">Theo dõi</div></div>
-    </div>
-
-    <!-- Story list -->
-    <div class="mt2">
-      <div class="sec-hd"><div class="sec-ttl" style="font-size:.95rem">📋 Danh Sách Truyện</div></div>
-      <div id="dash-list"></div>
-    </div>
-
-    <!-- Deploy -->
-    <div class="mt2">
-      <div class="card">
-        <div class="card-hd">🚀 Deploy Lên GitHub Pages</div>
-        <div class="flex gap1 fw aic">
-          <input type="text" id="push-msg" class="fctl" style="flex:1;min-width:200px"
-                 value="Admin: cập nhật nội dung" placeholder="Commit message...">
-          <button class="btn btn-primary" onclick="doPush()">⬆️ Push GitHub</button>
-        </div>
-        <pre id="push-out" class="mt1 tmuted tsmall" style="display:none;white-space:pre-wrap;font-family:monospace"></pre>
-      </div>
-    </div>
+  <!-- Access guard -->
+  <div id="adm-guard" style="display:none;text-align:center;padding:5rem 1rem">
+    <div style="font-size:2.8rem;margin-bottom:.8rem">🔒</div>
+    <p style="color:var(--text2)">Trang này chỉ dành cho Admin.<br>
+    <a href="login.html" style="color:var(--primary);font-weight:600">Đăng nhập →</a></p>
   </div>
 
-  <!-- ── TAB: UPLOAD ── -->
-  <div class="tab-panel" id="panel-upload">
-    <div class="sec-ttl mt1" style="margin-bottom:1rem">📤 Đăng Truyện Mới</div>
-    <div class="g2" style="gap:1.4rem;align-items:start">
+  <div class="admin-wrap" id="adm-root" style="display:none">
 
-      <!-- Left col -->
-      <div>
-        <div class="card" style="margin-bottom:1rem">
-          <div class="card-hd">📄 Tải File Word (.docx)</div>
-          <div class="upload-zone" id="up-zone" onclick="document.getElementById('file-in').click()">
-            <input type="file" id="file-in" accept=".docx,.doc" style="display:none" onchange="handleFile(this.files[0])">
-            <div class="upload-icon">📄</div>
-            <div class="upload-txt">Nhấp hoặc kéo file .docx vào đây</div>
-            <div class="upload-hint">Tự động nhận diện chương theo "Chương N" hoặc "Chapter N"</div>
-          </div>
-          <div id="up-status" class="mt1 tsmall" style="display:none"></div>
+    <!-- Header -->
+    <div class="admin-hdr-row">
+      <h1>⚙️ Admin Panel</h1>
+      <span class="adm-badge">👑 Owner</span>
+      <span style="flex:1"></span>
+      <a href="index.html" style="font-size:.81rem;color:var(--primary);text-decoration:none;font-weight:500">← Về trang chủ</a>
+    </div>
+
+    <!-- Tabs -->
+    <div class="adm-tabs">
+      <button class="adm-tab active" onclick="showTab('dash')"    id="tbtn-dash">📊 Dashboard</button>
+      <button class="adm-tab"        onclick="showTab('addstory')" id="tbtn-addstory">➕ Đăng truyện</button>
+      <button class="adm-tab"        onclick="showTab('stories')" id="tbtn-stories">📚 Quản lý truyện</button>
+      <button class="adm-tab"        onclick="showTab('members')" id="tbtn-members">
+        👥 Thành viên
+        <span id="pend-dot" style="display:none;background:#e74c3c;color:#fff;border-radius:10px;padding:.04rem .38rem;font-size:.67rem;margin-left:.25rem">0</span>
+      </button>
+      <button class="adm-tab"        onclick="showTab('iface')"   id="tbtn-iface">🎨 Giao diện</button>
+    </div>
+
+    <!-- ══ DASHBOARD ══ -->
+    <div class="adm-panel on" id="pnl-dash">
+      <div class="stat-grid">
+        <div class="stat-box"><div class="stat-num" id="st-st">…</div><div class="stat-lbl">📚 Truyện</div></div>
+        <div class="stat-box"><div class="stat-num" id="st-ch">…</div><div class="stat-lbl">📖 Chương</div></div>
+        <div class="stat-box"><div class="stat-num" id="st-mb">…</div><div class="stat-lbl">👥 Thành viên</div></div>
+        <div class="stat-box"><div class="stat-num" id="st-pd" style="color:var(--red)">…</div><div class="stat-lbl">⏳ Chờ duyệt</div></div>
+      </div>
+
+      <div class="adm-card">
+        <div class="adm-card-title">⏳ Yêu cầu trở thành Tác giả</div>
+        <div id="dash-pend"></div>
+      </div>
+
+      <div class="adm-card">
+        <div class="adm-card-title">📚 5 truyện gần nhất</div>
+        <div id="dash-recent"></div>
+      </div>
+    </div>
+
+    <!-- ══ ĐĂNG TRUYỆN ══ -->
+    <div class="adm-panel" id="pnl-addstory">
+      <div class="adm-card">
+        <div class="adm-card-title">➕ Thêm truyện mới</div>
+        <div id="as-alert" class="adm-alert"></div>
+
+        <div class="g2">
+          <div class="af-g"><label>Tên truyện *</label>
+            <input class="af-inp" id="as-title" placeholder="Nhập tên truyện"></div>
+          <div class="af-g"><label>Tác giả *</label>
+            <input class="af-inp" id="as-author" placeholder="Tên tác giả"></div>
         </div>
 
-        <div class="card">
-          <div class="card-hd">📝 Thông Tin Truyện</div>
-          <div class="fgrp"><label>Tên truyện *</label><input id="f-title"  type="text" class="fctl" placeholder="Tên truyện..."></div>
-          <div class="fgrp"><label>Tác giả *</label><input   id="f-author" type="text" class="fctl" placeholder="Tác giả..."></div>
-          <div class="fgrp">
-            <label>Ảnh bìa</label>
-            <div style="display:flex;gap:.6rem;align-items:flex-start">
-              <div style="flex:1">
-                <input id="f-cover" type="text" class="fctl" placeholder="Nhập URL hoặc tải ảnh từ máy..."
-                       oninput="updateCoverPreview('f-cover','f-cover-prev')">
-                <label class="btn btn-secondary btn-sm" style="margin-top:.4rem;cursor:pointer">
-                  📁 Chọn ảnh từ máy
-                  <input type="file" accept="image/*" style="display:none"
-                         onchange="uploadCover(this,'f-cover','f-cover-prev')">
-                </label>
-              </div>
-              <img id="f-cover-prev" src="" alt="Preview"
-                   style="width:64px;height:86px;object-fit:cover;border-radius:7px;border:1.5px solid #c5dce9;display:none;flex-shrink:0">
-            </div>
+        <div class="af-g"><label>Ảnh bìa (URL hình ảnh)</label>
+          <div style="display:flex;gap:.6rem;align-items:flex-start">
+            <input class="af-inp" id="as-cover" type="url" placeholder="https://…/cover.jpg"
+                   oninput="prevCover(this.value)" style="flex:1">
+            <img id="as-prev" src="" alt="" style="width:48px;height:65px;object-fit:cover;
+                 border-radius:5px;border:1.5px solid var(--border);display:none;flex-shrink:0">
           </div>
+        </div>
+
+        <div class="af-g"><label>Giới thiệu</label>
+          <textarea class="af-inp" id="as-desc" rows="4" placeholder="Mô tả ngắn…"></textarea>
+        </div>
+
+        <div class="g3">
+          <div class="af-g"><label>Trạng thái</label>
+            <select class="af-inp" id="as-status">
+              <option>Đang ra</option><option>Hoàn thành</option><option>Tạm dừng</option>
+            </select></div>
+          <div class="af-g"><label>Nguồn</label>
+            <select class="af-inp" id="as-source">
+              <option>Sáng tác</option><option>Dịch</option><option>ST</option>
+            </select></div>
+          <div class="af-g"><label>Thể loại chính</label>
+            <select class="af-inp" id="as-genre">
+              <option>Tiên Hiệp</option><option>Huyền Huyễn</option><option>Ngôn Tình</option>
+              <option>Đô Thị</option><option>Nữ Cường</option><option>Kiếm Hiệp</option>
+              <option>Lịch Sử</option><option>Khác</option>
+            </select></div>
+        </div>
+
+        <div class="af-g"><label>Tags (phân cách bởi dấu phẩy)</label>
+          <input class="af-inp" id="as-tags" placeholder="Vd: Xuyên không, Nữ chính mạnh, HE…">
+          <div class="af-hint">Dùng dấu phẩy để phân cách nhiều tag.</div>
+        </div>
+
+        <details style="margin-bottom:.9rem">
+          <summary style="cursor:pointer;font-size:.82rem;font-weight:600;color:var(--primary);user-select:none">
+            ➕ Thêm chương đầu tiên (tuỳ chọn)
+          </summary>
+          <div style="margin-top:.65rem">
+            <div class="af-g"><label>Tên chương</label>
+              <input class="af-inp" id="as-ch-t" placeholder="Chương 1: Khởi đầu"></div>
+            <div class="af-g"><label>Nội dung chương</label>
+              <textarea class="af-inp" id="as-ch-c" rows="10"
+                        placeholder="Nhập nội dung chương đầu tiên…"></textarea></div>
+          </div>
+        </details>
+
+        <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+          <button class="btn-auth btn-auth-primary" id="as-btn" onclick="doAddStory()"
+                  style="flex:1;max-width:200px">💾 Lưu & Deploy</button>
+          <button onclick="clearAddForm()"
+                  style="padding:.5rem 1rem;border:1.5px solid var(--border2);border-radius:8px;
+                         background:#fff;cursor:pointer;font-family:inherit;font-size:.85rem">🗑 Xóa form</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ QUẢN LÝ TRUYỆN ══ -->
+    <div class="adm-panel" id="pnl-stories">
+      <div class="adm-card">
+        <div class="adm-card-title">📚 Danh sách truyện
+          <span style="margin-left:auto;font-size:.78rem;font-weight:400;color:var(--text3)" id="story-count"></span>
+        </div>
+        <div class="flt-row">
+          <input class="af-inp" id="s-search" placeholder="🔍 Tìm tên truyện…" oninput="filterStories()">
+          <select class="af-inp" id="s-fstatus" onchange="filterStories()" style="width:auto">
+            <option value="">Tất cả trạng thái</option>
+            <option>Đang ra</option><option>Hoàn thành</option><option>Tạm dừng</option>
+          </select>
+          <button class="ab ab-edit" onclick="reloadStories()">↻ Tải lại</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="adm-tbl">
+            <thead><tr>
+              <th>Bìa</th><th>Tên truyện</th><th>Tác giả</th>
+              <th>Thể loại</th><th>Chương</th><th>Trạng thái</th>
+              <th>Hiển thị</th><th>Hành động</th>
+            </tr></thead>
+            <tbody id="s-tbody"></tbody>
+          </table>
+        </div>
+        <div id="s-alert" class="adm-alert" style="margin-top:.7rem"></div>
+      </div>
+    </div>
+
+    <!-- ══ THÀNH VIÊN ══ -->
+    <div class="adm-panel" id="pnl-members">
+      <div class="adm-card">
+        <div class="adm-card-title">👥 Danh sách thành viên
+          <span style="margin-left:auto;font-size:.78rem;font-weight:400;color:var(--text3)" id="mb-count"></span>
+        </div>
+        <div class="flt-row">
+          <input class="af-inp" id="m-search" placeholder="🔍 Tìm username / email…" oninput="filterMembers()">
+          <select class="af-inp" id="m-frole" onchange="filterMembers()" style="width:auto">
+            <option value="">Tất cả vai trò</option>
+            <option value="reader">📖 Độc giả</option>
+            <option value="pending_author">⏳ Chờ duyệt</option>
+            <option value="author">✍️ Tác giả</option>
+          </select>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="adm-tbl">
+            <thead><tr>
+              <th>#</th><th>Username</th><th>Email</th><th>Họ tên</th>
+              <th>Vai trò</th><th>Ngày đăng ký</th><th>Hành động</th>
+            </tr></thead>
+            <tbody id="m-tbody"></tbody>
+          </table>
+        </div>
+        <div id="m-alert" class="adm-alert" style="margin-top:.7rem"></div>
+      </div>
+    </div>
+
+    <!-- ══ GIAO DIỆN ══ -->
+    <div class="adm-panel" id="pnl-iface">
+      <div class="adm-card">
+        <div class="adm-card-title">🎨 Tuỳ chỉnh giao diện</div>
+        <div id="iface-alert" class="adm-alert"></div>
+
+        <div class="iface-section">
+          <h3>🏷️ Thông tin trang web</h3>
           <div class="g2">
-            <div class="fgrp">
-              <label>Trạng thái</label>
-              <select id="f-status" class="fctl"><option>Đang ra</option><option>Hoàn thành</option><option>Tạm dừng</option></select>
-            </div>
-            <div class="fgrp">
-              <label>Nguồn</label>
-              <select id="f-source" class="fctl"><option>Sáng tác</option><option>Dịch</option><option>ST</option></select>
-            </div>
+            <div class="af-g"><label>Tên website</label>
+              <input class="af-inp" id="if-sitename" value="Lưu Ly Hiền Nhi Các"></div>
+            <div class="af-g"><label>Slogan</label>
+              <input class="af-inp" id="if-slogan" value="Gác ngọc thanh vân, lưu vạn trang mộng"></div>
           </div>
-          <div class="fgrp">
-            <label>Thể loại</label>
-            <div class="genre-group">
-              <input type="checkbox" class="gc" id="g1" value="Tiên Hiệp"><label for="g1">Tiên Hiệp</label>
-              <input type="checkbox" class="gc" id="g2" value="Huyền Huyễn"><label for="g2">Huyền Huyễn</label>
-              <input type="checkbox" class="gc" id="g3" value="Ngôn Tình"><label for="g3">Ngôn Tình</label>
-              <input type="checkbox" class="gc" id="g4" value="Đô Thị"><label for="g4">Đô Thị</label>
-              <input type="checkbox" class="gc" id="g5" value="Nữ Cường"><label for="g5">Nữ Cường</label>
-              <input type="checkbox" class="gc" id="g6" value="Lịch Sử"><label for="g6">Lịch Sử</label>
-              <input type="checkbox" class="gc" id="g7" value="Võ Hiệp"><label for="g7">Võ Hiệp</label>
-              <input type="checkbox" class="gc" id="g8" value="Hệ Thống"><label for="g8">Hệ Thống</label>
-            </div>
-          </div>
-          <div class="fgrp"><label>Giới thiệu</label><textarea id="f-desc" class="fctl" rows="4" placeholder="Tóm tắt nội dung..."></textarea></div>
-        </div>
-      </div>
-
-      <!-- Right col -->
-      <div>
-        <div class="card" style="margin-bottom:1rem">
-          <div class="card-hd">📖 Danh Sách Chương <span id="ch-cnt" class="tmuted tsmall">(0 chương)</span></div>
-          <div class="ch-list" id="ch-preview">
-            <div class="empty-state"><div class="ico">📂</div>Tải file Word để xem danh sách chương.</div>
-          </div>
-          <div id="ch-hint" class="mt1 tsmall tmuted"></div>
+          <div class="af-g"><label>Mô tả (SEO description)</label>
+            <input class="af-inp" id="if-desc" value="Không gian đọc truyện online với các tác phẩm độc quyền từ các tác giả nội địa."></div>
         </div>
 
-        <div class="card">
-          <div class="card-hd">✅ Lưu Truyện</div>
-          <button class="btn btn-primary" style="width:100%" onclick="saveStory(false)">💾 Lưu vào stories.json</button>
-          <div class="push-row mt1">
-            <span class="tsmall" style="flex:1">Sau khi lưu, push lên GitHub để công bố</span>
-            <button class="btn btn-success btn-sm" onclick="saveStory(true)">🚀 Lưu & Push</button>
+        <div class="iface-section">
+          <h3>🌈 Màu chủ đạo</h3>
+          <div class="af-hint" style="margin-bottom:.5rem">Chọn màu sắc chủ đạo cho toàn bộ website.</div>
+          <div class="color-swatches" id="color-swatches">
+            <div class="swatch sel" style="background:#3ab3ca" data-color="#3ab3ca" onclick="pickColor(this)" title="Xanh mặc định"></div>
+            <div class="swatch" style="background:#e74c8b" data-color="#e74c8b" onclick="pickColor(this)" title="Hồng"></div>
+            <div class="swatch" style="background:#8e44ad" data-color="#8e44ad" onclick="pickColor(this)" title="Tím"></div>
+            <div class="swatch" style="background:#27ae60" data-color="#27ae60" onclick="pickColor(this)" title="Xanh lá"></div>
+            <div class="swatch" style="background:#e67e22" data-color="#e67e22" onclick="pickColor(this)" title="Cam"></div>
+            <div class="swatch" style="background:#c0392b" data-color="#c0392b" onclick="pickColor(this)" title="Đỏ"></div>
+            <div class="swatch" style="background:#2c3e50" data-color="#2c3e50" onclick="pickColor(this)" title="Đen xanh"></div>
           </div>
-          <div id="save-st" class="mt1 tsmall" style="display:none"></div>
+          <div style="margin-top:.65rem;display:flex;align-items:center;gap:.5rem">
+            <label style="font-size:.78rem;color:var(--text2)">Màu tuỳ chỉnh:</label>
+            <input type="color" id="if-color" value="#3ab3ca"
+                   style="width:36px;height:36px;border:none;border-radius:6px;cursor:pointer;padding:2px"
+                   oninput="previewColor(this.value)">
+            <span id="if-color-hex" style="font-size:.8rem;color:var(--text3)">#3ab3ca</span>
+          </div>
+        </div>
+
+        <div class="iface-section">
+          <h3>📌 Truyện đề cử (Hero Banner)</h3>
+          <div class="af-g"><label>Chọn truyện hiển thị trên banner trang chủ</label>
+            <select class="af-inp" id="if-hero">
+              <option value="">— Tự động (truyện đầu tiên) —</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+          <button class="btn-auth btn-auth-primary" onclick="saveIfaceSettings()"
+                  style="flex:1;max-width:200px">💾 Lưu cài đặt</button>
+          <button onclick="resetIface()"
+                  style="padding:.5rem 1rem;border:1.5px solid var(--border2);border-radius:8px;
+                         background:#fff;cursor:pointer;font-family:inherit;font-size:.85rem">↩ Đặt lại mặc định</button>
         </div>
       </div>
     </div>
+
+  </div><!-- /adm-root -->
+</main>
+
+<footer>
+  <div class="footer-simple">
+    <span>© 2026 Lưu Ly Hiền Nhi Các</span>
+    <span><a href="chinh-sach-bao-mat.html" style="color:inherit">Chính sách bảo mật</a></span>
   </div>
+</footer>
 
-  <!-- ── TAB: MANAGE ── -->
-  <div class="tab-panel" id="panel-manage">
-    <div class="sec-hd">
-      <div class="sec-ttl">📚 Quản Lý Truyện</div>
-      <div class="flex gap1">
-        <button class="btn btn-secondary btn-sm" onclick="loadManage()">🔄 Tải lại</button>
-        <button class="btn btn-primary   btn-sm" onclick="gotoTabById('upload')">➕ Thêm truyện</button>
-      </div>
-    </div>
-    <div id="manage-list"></div>
-  </div>
-
-  <!-- ── TAB: CHAT ── -->
-  <div class="tab-panel" id="panel-chat">
-    <div class="chat-wrap">
-      <div class="chat-msgs" id="chat-msgs">
-        <div class="msg msg-sys">Nhập API Key ở góc trên để bắt đầu trò chuyện với AI.</div>
-        <div class="msg msg-assistant">Xin chào! Tôi là trợ lý quản trị <strong>Lưu Ly Hiền Nhi Các</strong> 🌸<br><br>
-Tôi có thể giúp bạn:<br>
-• 📚 Xem &amp; quản lý danh sách truyện<br>
-• ✏️ Chỉnh sửa thông tin, thể loại, trạng thái<br>
-• 📊 Thống kê nội dung<br>
-• 🚀 Deploy lên GitHub Pages<br>
-• 💡 Tư vấn cách tổ chức truyện<br><br>
-Hãy đặt câu hỏi hoặc cho tôi một nhiệm vụ!</div>
-      </div>
-      <div class="chat-bar">
-        <textarea class="chat-in" id="chat-in" placeholder="Nhắn tin với AI trợ lý..." rows="1"
-          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}"></textarea>
-        <button class="btn-send" id="btn-send" onclick="sendMsg()" title="Gửi (Enter)">➤</button>
-      </div>
-    </div>
-  </div>
-
-</div><!-- /adm-body -->
-
-<!-- ══════════════════ EDIT MODAL ══════════════════ -->
-<div class="overlay" id="edit-modal">
-  <div class="modal">
-    <div class="modal-hd">
-      <div class="modal-title">✏️ Chỉnh sửa truyện</div>
-      <button class="btn-x" onclick="closeModal()">✕</button>
-    </div>
-    <div class="fgrp"><label>Tên truyện</label><input type="text" id="e-title" class="fctl"></div>
-    <div class="fgrp"><label>Tác giả</label><input type="text" id="e-author" class="fctl"></div>
-    <div class="fgrp">
-      <label>Ảnh bìa</label>
-      <div style="display:flex;gap:.6rem;align-items:flex-start">
-        <div style="flex:1">
-          <input type="text" id="e-cover" class="fctl" placeholder="Nhập URL hoặc tải ảnh từ máy..."
-                 oninput="updateCoverPreview('e-cover','e-cover-prev')">
-          <label class="btn btn-secondary btn-sm" style="margin-top:.4rem;cursor:pointer">
-            📁 Chọn ảnh từ máy
-            <input type="file" accept="image/*" style="display:none"
-                   onchange="uploadCover(this,'e-cover','e-cover-prev')">
-          </label>
-        </div>
-        <img id="e-cover-prev" src="" alt="Preview"
-             style="width:64px;height:86px;object-fit:cover;border-radius:7px;border:1.5px solid #c5dce9;display:none;flex-shrink:0">
-      </div>
-    </div>
-    <div class="g2">
-      <div class="fgrp">
-        <label>Trạng thái</label>
-        <select id="e-status" class="fctl"><option>Đang ra</option><option>Hoàn thành</option><option>Tạm dừng</option></select>
-      </div>
-      <div class="fgrp">
-        <label>Nguồn</label>
-        <select id="e-source" class="fctl"><option>Sáng tác</option><option>Dịch</option><option>ST</option></select>
-      </div>
-    </div>
-    <div class="fgrp">
-      <label>Thể loại</label>
-      <div class="genre-group" id="e-genres">
-        <input type="checkbox" class="gc" id="eg1" value="Tiên Hiệp"><label for="eg1">Tiên Hiệp</label>
-        <input type="checkbox" class="gc" id="eg2" value="Huyền Huyễn"><label for="eg2">Huyền Huyễn</label>
-        <input type="checkbox" class="gc" id="eg3" value="Ngôn Tình"><label for="eg3">Ngôn Tình</label>
-        <input type="checkbox" class="gc" id="eg4" value="Đô Thị"><label for="eg4">Đô Thị</label>
-        <input type="checkbox" class="gc" id="eg5" value="Nữ Cường"><label for="eg5">Nữ Cường</label>
-        <input type="checkbox" class="gc" id="eg6" value="Lịch Sử"><label for="eg6">Lịch Sử</label>
-        <input type="checkbox" class="gc" id="eg7" value="Võ Hiệp"><label for="eg7">Võ Hiệp</label>
-        <input type="checkbox" class="gc" id="eg8" value="Hệ Thống"><label for="eg8">Hệ Thống</label>
-      </div>
-    </div>
-    <div class="fgrp"><label>Giới thiệu</label><textarea id="e-desc" class="fctl" rows="4"></textarea></div>
-    <div class="fgrp"><label>Lượt đọc</label><input type="number" id="e-views" class="fctl"></div>
-    <input type="hidden" id="e-id">
-    <div class="flex gap1" style="justify-content:flex-end;margin-top:.5rem">
-      <button class="btn btn-secondary" onclick="closeModal()">Hủy</button>
-      <button class="btn btn-primary"   onclick="saveEdit()">💾 Lưu thay đổi</button>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════════════ SCRIPT ══════════════════ -->
+<script src="js/auth.js"></script>
+<script src="js/app.js"></script>
+<script src="js/member.js"></script>
+<script src="js/local-auth.js"></script>
 <script>
 'use strict';
 
-// ────────────────── STATE ──────────────────
-let stories      = [];
-let chatMsgs     = [];   // [{role, content}] for Claude API
-let geminiConts  = [];   // [{role, parts}]   for Gemini API
-let chatBusy     = false;
-let pendingChs   = [];   // chapters from parsed docx
-
-// ────────────────── INIT ──────────────────
-(function init() {
-  const key      = ls('api_key')  || '';
-  const provider = ls('provider') || 'claude';
-  const model    = ls('model')    || (provider === 'gemini' ? 'gemini-2.0-flash' : 'claude-opus-4-5');
-  document.getElementById('inp-apikey').value   = key;
-  document.getElementById('inp-model').value    = model;
-  document.getElementById('inp-provider').value = provider;
-  if (provider === 'gemini') {
-    document.getElementById('inp-model').placeholder  = 'gemini-2.0-flash';
-    document.getElementById('inp-apikey').placeholder = 'Google AI Studio API Key...';
-  }
-  setKeyDot(key);
-
-  // Drag & drop
-  const zone = document.getElementById('up-zone');
-  zone.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('drag-over'); });
-  zone.addEventListener('dragleave', ()  => zone.classList.remove('drag-over'));
-  zone.addEventListener('drop', e => {
-    e.preventDefault(); zone.classList.remove('drag-over');
-    if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
-  });
-
-  fetchStories().then(loadDashboard);
-})();
-
-// ────────────────── CONFIG ──────────────────
-function saveCfg() {
-  const key      = document.getElementById('inp-apikey').value.trim();
-  const provider = document.getElementById('inp-provider').value;
-  const defModel = provider === 'gemini' ? 'gemini-2.0-flash' : 'claude-opus-4-5';
-  const model    = document.getElementById('inp-model').value.trim() || defModel;
-  lsSet('api_key',  key);
-  lsSet('model',    model);
-  lsSet('provider', provider);
-  setKeyDot(key);
-  toast(key ? '🔑 Đã lưu cấu hình!' : '⚠️ Đã xóa API Key');
-}
-function setKeyDot(key) {
-  document.getElementById('key-dot').textContent = key ? '🟢' : '🔴';
-}
-
-// ────────────────── TAB NAVIGATION ──────────────────
-function gotoTab(name, el) {
-  document.querySelectorAll('.adm-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('panel-' + name).classList.add('active');
-  if (name === 'dashboard') loadDashboard();
-  if (name === 'manage')    loadManage();
-}
-function gotoTabById(name) {
-  const tabs  = [...document.querySelectorAll('.adm-tab')];
-  const names = ['dashboard','upload','manage','chat'];
-  const idx   = names.indexOf(name);
-  if (idx >= 0) gotoTab(name, tabs[idx]);
-}
-
-// ────────────────── API HELPERS ──────────────────
-async function apiFetch(path, opts = {}) {
-  const r = await fetch(path, opts);
-  const t = await r.text();
-  try { return JSON.parse(t); } catch { return { ok: false, error: t }; }
-}
-async function apiGet(path) {
-  return apiFetch(path);
-}
-async function apiPost(path, body) {
-  return apiFetch(path, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
-}
-
-// ────────────────── STORIES ──────────────────
-async function fetchStories() {
-  try {
-    stories = await apiGet('/api/stories');
-    if (!Array.isArray(stories)) stories = [];
-  } catch(e) {
-    toast('Lỗi tải stories: ' + e.message, 'err');
-    stories = [];
-  }
-}
-
-async function persistStories() {
-  const res = await apiPost('/api/stories', stories);
-  if (res.ok || res.count >= 0) return true;
-  toast('❌ Lỗi lưu: ' + (res.error || ''), 'err');
-  return false;
-}
-
-// ────────────────── DASHBOARD ──────────────────
-async function loadDashboard() {
-  await fetchStories();
-  const totalCh  = stories.reduce((s,t) => s + (t.chapters?.length || 0), 0);
-  const totalV   = stories.reduce((s,t) => s + (t.views    || 0), 0);
-  const totalF   = stories.reduce((s,t) => s + (t.follows  || 0), 0);
-
-  q('#st-stories').textContent  = stories.length;
-  q('#st-chapters').textContent = totalCh;
-  q('#st-views').textContent    = fmt(totalV);
-  q('#st-follows').textContent  = fmt(totalF);
-
-  const el = q('#dash-list');
-  if (!stories.length) {
-    el.innerHTML = '<div class="empty-state"><div class="ico">📭</div>Chưa có truyện nào.</div>';
+// ── Guard ──────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  if (!window.AUTH || !AUTH.isOwner) {
+    document.getElementById('adm-guard').style.display = 'block';
     return;
   }
-  el.innerHTML = stories.map(s => `
-    <div class="story-item">
-      <img class="s-cover" src="${esc(s.cover||'')}" alt="" onerror="this.style.visibility='hidden'">
-      <div class="s-info">
-        <div class="s-title">${esc(s.title)}</div>
-        <div class="s-meta">${esc(s.author)} · ${s.chapters?.length||0} chương · ${fmt(s.views||0)} lượt đọc</div>
-        <div class="s-tags">
-          ${(s.genre||[]).map(g=>`<span class="tag">${g}</span>`).join('')}
-          <span class="tag" style="background:#fff8e1;color:#856404">${s.status||'Đang ra'}</span>
-        </div>
-      </div>
-      <div class="s-actions">
-        <button class="btn btn-secondary btn-sm" onclick="openEdit('${esc(s.id)}')">✏️ Sửa</button>
-        <a href="story.html#${esc(s.id)}" target="_blank" class="btn btn-secondary btn-sm">🔗</a>
-      </div>
-    </div>`).join('');
-}
-
-async function doPush() {
-  const msg = q('#push-msg').value.trim() || 'Admin: cập nhật nội dung';
-  const btn = event.currentTarget;
-  btn.disabled = true; btn.textContent = '⏳ Đang push...';
-  const out = q('#push-out');
-  out.style.display = 'block'; out.textContent = '...';
-
-  const res = await apiPost('/api/push', { message: msg });
-  out.textContent = res.output || (res.ok ? 'OK!' : 'Lỗi: ' + (res.error||''));
-  btn.disabled = false; btn.textContent = '⬆️ Push GitHub';
-  toast(res.ok ? '✅ Push thành công!' : '❌ Push thất bại', res.ok ? 'ok' : 'err');
-}
-
-// ────────────────── DOCX UPLOAD ──────────────────
-async function handleFile(file) {
-  if (!file) return;
-  if (!window.mammoth) { toast('mammoth.js chưa tải. Kiểm tra kết nối!', 'err'); return; }
-
-  const st = q('#up-status');
-  st.style.display = 'block';
-  st.style.color = '#4a6080';
-  st.textContent = '⏳ Đang phân tích...';
-
-  try {
-    const buf = await file.arrayBuffer();
-    const { value: text } = await mammoth.extractRawText({ arrayBuffer: buf });
-
-    // Auto-fill title from filename
-    if (!q('#f-title').value.trim()) {
-      q('#f-title').value = file.name.replace(/\.(docx?)$/i,'').replace(/[-_]+/g,' ');
-    }
-
-    pendingChs = detectChapters(text);
-
-    if (pendingChs.length === 0) {
-      pendingChs = [{ id: 1, title: 'Chương 1', content: text.trim() }];
-      q('#ch-hint').textContent = '⚠️ Không tìm thấy dấu phân chương – đã gom thành 1 chương.';
-    } else {
-      q('#ch-hint').textContent = `✅ Nhận diện qua "Chương N" / "Chapter N"`;
-    }
-
-    st.style.color = '#27ae60';
-    st.textContent = `✅ Đã đọc xong! Phát hiện ${pendingChs.length} chương.`;
-    renderChapters(pendingChs);
-    toast(`📄 ${file.name}: ${pendingChs.length} chương`);
-  } catch(e) {
-    st.style.color = '#e74c3c';
-    st.textContent = '❌ Lỗi: ' + e.message;
-    toast('Lỗi đọc file: ' + e.message, 'err');
-  }
-}
-
-function detectChapters(text) {
-  // Matches: "Chương 1", "Chương 1:", "Chương 1 - Tên", "CHƯƠNG 1", "Chapter 1"
-  const rx = /^(?:chương|chapter)\s+(\d+)[:\-\s]*(.*)$/i;
-  const lines = text.split('\n');
-  const result = [];
-  let cur = null, buf = [];
-
-  for (const raw of lines) {
-    const line = raw.trim();
-    const m    = line.match(rx);
-    if (m) {
-      if (cur !== null) {
-        result.push({ id: cur.n, title: cur.t, content: buf.join('\n').trim() });
-      }
-      const n = parseInt(m[1]);
-      const t = m[2]?.trim() ? `Chương ${n}: ${m[2].trim()}` : `Chương ${n}`;
-      cur = { n, t };
-      buf = [];
-    } else if (cur !== null) {
-      buf.push(raw);
-    }
-  }
-  if (cur !== null) result.push({ id: cur.n, title: cur.t, content: buf.join('\n').trim() });
-  return result;
-}
-
-function renderChapters(chs) {
-  q('#ch-cnt').textContent = `(${chs.length} chương)`;
-  if (!chs.length) { q('#ch-preview').innerHTML = '<div class="empty-state"><div>📂</div>Không có chương</div>'; return; }
-  q('#ch-preview').innerHTML =
-    chs.slice(0, 60).map(c => `
-      <div class="ch-item">
-        <span class="ch-num">${c.id}</span>
-        <span style="flex:1">${esc(c.title)}</span>
-        <span class="tmuted tsmall">${Math.round(c.content.length/500)/2}k</span>
-      </div>`).join('') +
-    (chs.length > 60 ? `<div class="ch-item tmuted">…và ${chs.length - 60} chương nữa</div>` : '');
-}
-
-async function saveStory(andPush) {
-  const title  = q('#f-title').value.trim();
-  const author = q('#f-author').value.trim();
-  if (!title)        { toast('Chưa nhập tên truyện!', 'err'); return; }
-  if (!author)       { toast('Chưa nhập tác giả!',    'err'); return; }
-  if (!pendingChs.length) { toast('Chưa có chương nào!', 'err'); return; }
-
-  const genres = [...document.querySelectorAll('#panel-upload .gc:checked')].map(c => c.value);
-  const id     = slugify(title);
-
-  const story = {
-    id, title, author,
-    cover: q('#f-cover').value.trim() ||
-      `https://placehold.co/200x280/e0f3f8/3ab3ca?text=${encodeURIComponent(title.slice(0,6))}`,
-    genre: genres,
-    status: q('#f-status').value,
-    rating: 0, rateCount: 0, views: 0, follows: 0,
-    source: q('#f-source').value,
-    description: q('#f-desc').value.trim(),
-    chapters: pendingChs
-  };
-
-  const existing = stories.findIndex(s => s.id === id);
-  if (existing >= 0) {
-    if (!confirm(`Truyện "${title}" đã tồn tại. Ghi đè?`)) return;
-    stories[existing] = { ...stories[existing], ...story };
-  } else {
-    stories.unshift(story); // Add to front (newest first)
-  }
-
-  const st = q('#save-st');
-  st.style.display = 'block';
-  st.textContent = '⏳ Đang lưu...';
-  st.style.color = '#4a6080';
-
-  const ok = await persistStories();
-  if (ok) {
-    st.style.color = '#27ae60';
-    st.textContent = `✅ Đã lưu "${title}" (${stories.length} truyện)`;
-    toast('✅ Lưu thành công!', 'ok');
-    if (andPush) {
-      const res = await apiPost('/api/push', { message: `Thêm truyện: ${title}` });
-      toast(res.ok ? '🚀 Push thành công!' : '❌ Push thất bại', res.ok ? 'ok' : 'err');
-    }
-  }
-}
-
-// ────────────────── MANAGE ──────────────────
-async function loadManage() {
-  await fetchStories();
-  const el = q('#manage-list');
-  if (!stories.length) {
-    el.innerHTML = '<div class="empty-state"><div class="ico">📭</div>Chưa có truyện. <a href="#" onclick="gotoTabById(\'upload\');return false">Thêm ngay</a></div>';
-    return;
-  }
-  el.innerHTML = stories.map((s, i) => `
-    <div class="story-item">
-      <img class="s-cover" src="${esc(s.cover||'')}" alt="" onerror="this.style.visibility='hidden'">
-      <div class="s-info">
-        <div class="s-title">${esc(s.title)}</div>
-        <div class="s-meta">${esc(s.author)} · ${s.chapters?.length||0} chương · ${fmt(s.views||0)} lượt</div>
-        <div class="s-tags">
-          ${(s.genre||[]).map(g=>`<span class="tag">${g}</span>`).join('')}
-          <span class="tag" style="background:#fff8e1;color:#856404">${s.status||'Đang ra'}</span>
-          <span class="tag" style="background:#f3f3f3;color:#888">#${i+1}</span>
-        </div>
-      </div>
-      <div class="s-actions">
-        ${i>0 ? `<button class="btn btn-secondary btn-sm" onclick="moveStory('${esc(s.id)}',-1)" title="Lên trên">↑</button>` : ''}
-        ${i<stories.length-1 ? `<button class="btn btn-secondary btn-sm" onclick="moveStory('${esc(s.id)}',1)" title="Xuống dưới">↓</button>` : ''}
-        <button class="btn btn-secondary btn-sm" onclick="openEdit('${esc(s.id)}')">✏️</button>
-        <button class="btn btn-danger    btn-sm" onclick="deleteStory('${esc(s.id)}')">🗑️</button>
-      </div>
-    </div>`).join('');
-}
-
-async function moveStory(id, dir) {
-  const i = stories.findIndex(s => s.id === id);
-  const j = i + dir;
-  if (i < 0 || j < 0 || j >= stories.length) return;
-  [stories[i], stories[j]] = [stories[j], stories[i]];
-  await persistStories();
-  loadManage();
-  toast(dir < 0 ? '⬆️ Đã di chuyển lên' : '⬇️ Đã di chuyển xuống');
-}
-
-async function deleteStory(id) {
-  const s = stories.find(x => x.id === id);
-  if (!confirm(`Xóa truyện "${s?.title}"?\nHành động này không thể hoàn tác!`)) return;
-  stories = stories.filter(x => x.id !== id);
-  await persistStories();
-  loadManage();
-  toast('🗑️ Đã xóa truyện');
-}
-
-// ────────────────── EDIT MODAL ──────────────────
-function openEdit(id) {
-  const s = stories.find(x => x.id === id);
-  if (!s) return;
-  q('#e-id').value     = id;
-  q('#e-title').value  = s.title;
-  q('#e-author').value = s.author;
-  q('#e-cover').value  = s.cover  || '';
-  const ePrev = q('#e-cover-prev');
-  if (s.cover) { ePrev.src = s.cover; ePrev.style.display = 'block'; }
-  else ePrev.style.display = 'none';
-  q('#e-status').value = s.status || 'Đang ra';
-  q('#e-source').value = s.source || 'Sáng tác';
-  q('#e-desc').value   = s.description || '';
-  q('#e-views').value  = s.views  || 0;
-  document.querySelectorAll('#e-genres .gc').forEach(cb => cb.checked = (s.genre||[]).includes(cb.value));
-  q('#edit-modal').classList.add('open');
-}
-function closeModal() { q('#edit-modal').classList.remove('open'); }
-
-async function saveEdit() {
-  const id  = q('#e-id').value;
-  const idx = stories.findIndex(s => s.id === id);
-  if (idx < 0) return;
-  stories[idx] = {
-    ...stories[idx],
-    title:       q('#e-title').value.trim(),
-    author:      q('#e-author').value.trim(),
-    cover:       q('#e-cover').value.trim(),
-    status:      q('#e-status').value,
-    source:      q('#e-source').value,
-    description: q('#e-desc').value.trim(),
-    views:       parseInt(q('#e-views').value) || 0,
-    genre:       [...document.querySelectorAll('#e-genres .gc:checked')].map(c => c.value),
-  };
-  const ok = await persistStories();
-  if (ok) {
-    closeModal();
-    toast('✅ Đã cập nhật', 'ok');
-    if (q('#panel-manage').classList.contains('active'))    loadManage();
-    if (q('#panel-dashboard').classList.contains('active')) loadDashboard();
-  }
-}
-
-// ────────────────── AI CHAT ──────────────────
-const SYS = `Bạn là trợ lý quản trị website "Lưu Ly Hiền Nhi Các" – trang đọc truyện tiếng Việt.
-
-Website: https://luulyhnc.github.io/luulyhiennhicac/
-Dữ liệu: data/stories.json
-
-Công cụ sẵn có:
-• get_stories       – Lấy toàn bộ danh sách truyện
-• save_stories      – Ghi đè stories.json bằng mảng mới
-• push_to_github    – Commit + push lên GitHub Pages
-
-Cấu trúc một truyện:
-{
-  "id": "slug",           // dùng để tạo URL
-  "title": "Tên Truyện",
-  "author": "Tác giả",
-  "cover": "URL ảnh bìa",
-  "genre": ["Tiên Hiệp","Ngôn Tình",...],
-  "status": "Đang ra | Hoàn thành | Tạm dừng",
-  "rating": 0–5,  "rateCount": 0,
-  "views": 0,     "follows": 0,
-  "source": "Sáng tác | Dịch | ST",
-  "description": "Giới thiệu...",
-  "chapters": [{"id":1,"title":"Chương 1","content":"..."}]
-}
-
-Hãy trả lời bằng tiếng Việt, ngắn gọn và rõ ràng.`;
-
-const TOOLS = [
-  { name: 'get_stories',
-    description: 'Lấy danh sách tất cả truyện từ stories.json',
-    input_schema: { type: 'object', properties: {}, required: [] } },
-  { name: 'save_stories',
-    description: 'Lưu (ghi đè) danh sách truyện vào stories.json',
-    input_schema: {
-      type: 'object',
-      properties: { stories: { type: 'array', description: 'Mảng đầy đủ các story object' } },
-      required: ['stories'] } },
-  { name: 'push_to_github',
-    description: 'Commit và push lên GitHub Pages để deploy',
-    input_schema: {
-      type: 'object',
-      properties: { message: { type: 'string', description: 'Commit message (không bắt buộc)' } },
-      required: [] } }
-];
-
-async function runTool(name, input) {
-  switch (name) {
-    case 'get_stories': {
-      await fetchStories();
-      return { ok: true, count: stories.length, stories };
-    }
-    case 'save_stories': {
-      stories = input.stories;
-      const ok = await persistStories();
-      return { ok, count: stories.length };
-    }
-    case 'push_to_github': {
-      const res = await apiPost('/api/push', { message: input.message || 'AI: cập nhật nội dung' });
-      return { ok: res.ok, output: (res.output||'').slice(0, 300) };
-    }
-    default: return { ok: false, error: 'Unknown tool: ' + name };
-  }
-}
-
-async function sendMsg() {
-  if (chatBusy) return;
-  const inp      = q('#chat-in');
-  const txt      = inp.value.trim();
-  if (!txt) return;
-
-  const apiKey   = ls('api_key')  || '';
-  const provider = ls('provider') || 'claude';
-  if (!apiKey) { toast('Vui lòng nhập và lưu API Key trước!', 'err'); return; }
-
-  inp.value = ''; inp.style.height = 'auto';
-  addBubble('user', txt);
-
-  chatBusy = true;
-  q('#btn-send').disabled = true;
-
-  try {
-    if (provider === 'gemini') {
-      geminiConts.push({ role: 'user', parts: [{ text: txt }] });
-      await geminiAgentLoop(apiKey);
-    } else {
-      chatMsgs.push({ role: 'user', content: txt });
-      await agentLoop(apiKey);
-    }
-  } catch(e) {
-    addBubble('assistant', '❌ Lỗi kết nối: ' + e.message);
-  } finally {
-    chatBusy = false;
-    q('#btn-send').disabled = false;
-  }
-}
-
-async function agentLoop(apiKey) {
-  const model = ls('model') || 'claude-opus-4-5';
-  let typing  = addTyping();
-
-  while (true) {
-    const res = await apiPost('/api/claude', {
-      apiKey, model,
-      max_tokens: 4096,
-      system: SYS,
-      tools:  TOOLS,
-      messages: chatMsgs
-    });
-
-    typing?.remove(); typing = null;
-
-    // API / auth error
-    if (res.type === 'error') {
-      addBubble('assistant', '❌ ' + (res.error?.message || JSON.stringify(res.error)));
-      return;
-    }
-    if (!res.content) {
-      addBubble('assistant', '❌ Phản hồi không hợp lệ: ' + JSON.stringify(res).slice(0,200));
-      return;
-    }
-
-    // Push assistant turn
-    chatMsgs.push({ role: 'assistant', content: res.content });
-
-    // Show text
-    const textParts = res.content.filter(b => b.type === 'text').map(b => b.text).join('\n').trim();
-    if (textParts) addBubble('assistant', textParts);
-
-    // Tool use?
-    const uses = res.content.filter(b => b.type === 'tool_use');
-    if (!uses.length) break;
-
-    const results = [];
-    for (const tu of uses) {
-      const inStr = JSON.stringify(tu.input);
-      addBubble('tool', `🔧 ${tu.name}(${inStr.length > 90 ? inStr.slice(0,90)+'…' : inStr})`);
-      const result = await runTool(tu.name, tu.input);
-
-      // Summarise large results
-      let displayRes = result;
-      if (tu.name === 'get_stories' && result.stories) {
-        displayRes = { ok: true, count: result.count, titles: result.stories.map(s => s.title) };
-      }
-      const resStr = JSON.stringify(displayRes);
-      addBubble('tool', `↩️ ${resStr.length > 180 ? resStr.slice(0,180)+'…' : resStr}`);
-
-      results.push({ type: 'tool_result', tool_use_id: tu.id, content: JSON.stringify(result) });
-    }
-
-    chatMsgs.push({ role: 'user', content: results });
-    if (res.stop_reason !== 'tool_use') break;
-    typing = addTyping();
-  }
-}
-
-function addBubble(role, text) {
-  const el  = q('#chat-msgs');
-  const div = document.createElement('div');
-  div.className = 'msg msg-' + role;
-  div.innerHTML  = role === 'tool' ? esc(text) : md(text);
-  el.appendChild(div);
-  el.scrollTop = el.scrollHeight;
-  return div;
-}
-
-function addTyping() {
-  const el  = q('#chat-msgs');
-  const div = document.createElement('div');
-  div.className = 'typing';
-  div.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
-  el.appendChild(div);
-  el.scrollTop = el.scrollHeight;
-  return div;
-}
-
-// ────────────────── UTILS ──────────────────
-function q(sel)  { return document.querySelector(sel); }
-function ls(k)   { return localStorage.getItem(k) || ''; }
-function lsSet(k,v){ localStorage.setItem(k, v); }
-
-function esc(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-// Light markdown: bold, italic, inline code, newlines
-function md(s) {
-  return esc(s)
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g,     '<em>$1</em>')
-    .replace(/`(.+?)`/g,       '<code>$1</code>')
-    .replace(/\n/g,            '<br>');
-}
-
-function fmt(n) {
-  if (n >= 1e6) return (n/1e6).toFixed(1) + 'M';
-  if (n >= 1e3) return (n/1e3).toFixed(1) + 'K';
-  return String(n);
-}
-
-function slugify(text) {
-  const vi = 'àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ';
-  const en = 'aaaaaaaaaaaaaaaaaeeeeeeeeeeeiiiiiooooooooooooooooouuuuuuuuuuuyyyyyyd';
-  let s = text.toLowerCase();
-  for (let i = 0; i < vi.length; i++) s = s.split(vi[i]).join(en[i]);
-  return s.replace(/[^a-z0-9\s-]/g,'').trim().replace(/\s+/g,'-').replace(/-+/g,'-').slice(0,60) || 'truyen-' + Date.now();
-}
-
-function toast(msg, type='') {
-  const d = document.createElement('div');
-  d.className = 'toast' + (type?' '+type:'');
-  d.textContent = msg;
-  document.body.appendChild(d);
-  setTimeout(() => d.remove(), 3000);
-}
-
-// ────────────────── GEMINI TOOLS & LOOP ──────────────────
-const GEMINI_TOOLS = [
-  { name: 'get_stories',
-    description: 'Lấy danh sách tất cả truyện từ stories.json',
-    parameters: { type: 'object', properties: {} } },
-  { name: 'save_stories',
-    description: 'Lưu (ghi đè) danh sách truyện vào stories.json',
-    parameters: {
-      type: 'object',
-      properties: {
-        stories: { type: 'array', items: { type: 'object' }, description: 'Mảng đầy đủ các story object' }
-      },
-      required: ['stories'] } },
-  { name: 'push_to_github',
-    description: 'Commit và push lên GitHub Pages để deploy',
-    parameters: {
-      type: 'object',
-      properties: { message: { type: 'string', description: 'Commit message' } } } }
-];
-
-async function geminiAgentLoop(apiKey) {
-  const model = ls('model') || 'gemini-2.0-flash';
-  let typing  = addTyping();
-
-  while (true) {
-    const res = await apiPost('/api/gemini', {
-      apiKey, model,
-      contents: geminiConts,
-      systemInstruction: { parts: [{ text: SYS }] },
-      tools: [{ functionDeclarations: GEMINI_TOOLS }],
-      generationConfig: { temperature: 0.7, maxOutputTokens: 4096 }
-    });
-
-    typing?.remove(); typing = null;
-
-    // Handle errors
-    if (res.error) {
-      addBubble('assistant', '❌ Gemini lỗi: ' + (res.error.message || JSON.stringify(res.error)));
-      return;
-    }
-    if (!res.candidates?.length) {
-      const reason = res.promptFeedback?.blockReason || JSON.stringify(res).slice(0, 200);
-      addBubble('assistant', '❌ Không có phản hồi: ' + reason);
-      return;
-    }
-
-    const parts = res.candidates[0].content?.parts || [];
-
-    // Push model turn to Gemini history
-    geminiConts.push({ role: 'model', parts });
-
-    // Show text parts
-    const textOut = parts.filter(p => p.text).map(p => p.text).join('\n').trim();
-    if (textOut) addBubble('assistant', textOut);
-
-    // Handle function calls
-    const fnCalls = parts.filter(p => p.functionCall);
-    if (!fnCalls.length) break;
-
-    const fnResults = [];
-    for (const part of fnCalls) {
-      const { name, args } = part.functionCall;
-      addBubble('tool', `🔧 ${name}(${JSON.stringify(args || {}).slice(0, 90)})`);
-      const result = await runTool(name, args || {});
-      let display = result;
-      if (name === 'get_stories' && result.stories) {
-        display = { ok: true, count: result.count, titles: result.stories.map(s => s.title) };
-      }
-      addBubble('tool', `↩️ ${JSON.stringify(display).slice(0, 180)}`);
-      fnResults.push({ functionResponse: { name, response: { result } } });
-    }
-
-    geminiConts.push({ role: 'user', parts: fnResults });
-    typing = addTyping();
-  }
-}
-
-// ────────────────── COVER UPLOAD ──────────────────
-async function uploadCover(input, targetId, previewId) {
-  const file = input.files[0];
-  if (!file) return;
-
-  // Validate: chỉ nhận ảnh, giới hạn 5MB
-  if (!file.type.startsWith('image/')) { toast('Chỉ chấp nhận file ảnh!', 'err'); return; }
-  if (file.size > 5 * 1024 * 1024)     { toast('Ảnh quá lớn (tối đa 5MB)!', 'err'); return; }
-
-  toast('⏳ Đang tải ảnh lên...');
-
-  const reader = new FileReader();
-  reader.onload = async e => {
-    const dataUrl  = e.target.result;
-    const base64   = dataUrl.split(',')[1];
-    const ts       = Date.now();
-    const safeName = ts + '_' + file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-
-    const res = await apiPost('/api/upload-cover', { filename: safeName, base64 });
-    if (res.ok) {
-      document.getElementById(targetId).value = res.path;
-      updateCoverPreview(targetId, previewId);
-      toast('✅ Ảnh đã lưu: ' + res.path, 'ok');
-    } else {
-      toast('❌ Lỗi tải ảnh: ' + (res.error || ''), 'err');
-    }
-  };
-  reader.readAsDataURL(file);
-}
-
-function updateCoverPreview(inputId, previewId) {
-  const val  = document.getElementById(inputId)?.value.trim();
-  const prev = document.getElementById(previewId);
-  if (!prev) return;
-  if (val) {
-    prev.src          = val;
-    prev.style.display = 'block';
-    prev.onerror      = () => { prev.style.display = 'none'; };
-  } else {
-    prev.style.display = 'none';
-  }
-}
-
-// ── Provider switch ──
-function onProviderChange() {
-  const provider = document.getElementById('inp-provider').value;
-  const modelInp = document.getElementById('inp-model');
-  const keyInp   = document.getElementById('inp-apikey');
-
-  if (provider === 'gemini') {
-    modelInp.value       = 'gemini-2.0-flash';
-    modelInp.placeholder = 'gemini-2.0-flash';
-    keyInp.placeholder   = 'Google AI Studio API Key...';
-  } else {
-    modelInp.value       = 'claude-opus-4-5';
-    modelInp.placeholder = 'claude-opus-4-5';
-    keyInp.placeholder   = 'Anthropic API Key...';
-  }
-
-  // Reset both chat histories
-  chatMsgs    = [];
-  geminiConts = [];
-  lsSet('provider', provider);
-  lsSet('model', modelInp.value);
-
-  const pName = provider === 'gemini' ? 'Gemini ✨ (Free)' : 'Claude 🤖';
-  const el = q('#chat-msgs');
-  if (el) el.innerHTML = `
-    <div class="msg msg-sys">Đã chuyển sang ${pName}. Lịch sử chat đã xóa.</div>
-    <div class="msg msg-assistant">Xin chào! Tôi đang chạy trên <strong>${pName}</strong>.<br>Hãy đặt câu hỏi hoặc giao nhiệm vụ!</div>`;
-}
-
-// Close modal on overlay click
-document.getElementById('edit-modal').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
+  document.getElementById('adm-root').style.display = 'block';
+  // Jump to tab if pre-selected from dropdown shortcut
+  const jumpTab = sessionStorage.getItem('_adm_tab');
+  if (jumpTab) { sessionStorage.removeItem('_adm_tab'); }
+  initAdmin(jumpTab);
 });
+
+// ── State ──────────────────────────────────────────────────
+let _S = [], _SHA = null, _M = [];
+
+// ── Init ───────────────────────────────────────────────────
+async function initAdmin(jumpTab) {
+  _M = typeof LocalAuth !== 'undefined' ? LocalAuth.getAllUsers() : [];
+  await _loadStories();
+  renderDash();
+  renderStoryTbl(_S);
+  renderMemberTbl(_M);
+  loadIfaceSettings();
+  populateHeroSelect();
+  if (jumpTab) showTab(jumpTab);
+}
+
+// ── Tab ────────────────────────────────────────────────────
+function showTab(t) {
+  document.querySelectorAll('.adm-panel').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.adm-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('pnl-' + t).classList.add('on');
+  document.getElementById('tbtn-' + t).classList.add('active');
+}
+
+// ── Stories (GitHub) ───────────────────────────────────────
+async function _loadStories() {
+  try { const r = await AUTH.loadStories(); _S = r.stories; _SHA = r.sha; }
+  catch(e) { _S = []; _SHA = null; }
+}
+async function reloadStories() { await _loadStories(); renderStoryTbl(_S); }
+
+// ── Dashboard ──────────────────────────────────────────────
+function renderDash() {
+  const chN = _S.reduce((s,x) => s + (x.chapters?.length||0), 0);
+  const pN  = _M.filter(u => u.role === 'pending_author').length;
+  setText('st-st', _S.length);
+  setText('st-ch', chN);
+  setText('st-mb', _M.length);
+  setText('st-pd', pN);
+  const dot = document.getElementById('pend-dot');
+  if (dot) { dot.textContent = pN; dot.style.display = pN ? 'inline' : 'none'; }
+
+  // Pending panel
+  const pend = _M.filter(u => u.role === 'pending_author');
+  const pdiv = document.getElementById('dash-pend');
+  pdiv.innerHTML = pend.length === 0
+    ? '<div class="adm-empty"><div class="ico">✅</div>Không có yêu cầu nào đang chờ.</div>'
+    : `<table class="adm-tbl"><thead><tr><th>Username</th><th>Email</th><th>Ngày đăng ký</th><th>Hành động</th></tr></thead><tbody>
+       ${pend.map(u=>`<tr>
+         <td><b>${esc(u.username)}</b></td>
+         <td style="color:var(--text2);font-size:.8rem">${esc(u.email)}</td>
+         <td style="color:var(--text3);font-size:.78rem">${fmtD(u.createdAt)}</td>
+         <td style="display:flex;gap:.35rem">
+           <button class="ab ab-approve" onclick="approveAuthor('${u.id}','${esc(u.username)}')">✅ Phê duyệt</button>
+           <button class="ab ab-del"     onclick="rejectAuthor('${u.id}','${esc(u.username)}')">✗ Từ chối</button>
+         </td></tr>`).join('')}
+       </tbody></table>`;
+
+  // Recent stories
+  const rdiv = document.getElementById('dash-recent');
+  const rec  = [..._S].reverse().slice(0, 5);
+  rdiv.innerHTML = rec.length === 0
+    ? '<div class="adm-empty"><div class="ico">📭</div>Chưa có truyện nào.</div>'
+    : `<table class="adm-tbl"><thead><tr><th>Bìa</th><th>Tên</th><th>Tác giả</th><th>Chương</th><th>Trạng thái</th></tr></thead><tbody>
+       ${rec.map(s=>`<tr>
+         <td>${s.cover?`<img class="thumb" src="${esc(s.cover)}" onerror="this.style.display='none'">`:'—'}</td>
+         <td><a href="story.html#${esc(s.id)}" target="_blank" style="color:var(--primary);font-weight:600;text-decoration:none">${esc(s.title)}</a></td>
+         <td>${esc(s.author)}</td><td>${s.chapters?.length||0}</td>
+         <td><span class="rb ${s.status==='Hoàn thành'?'rb-ok':'rb-hidden'}">${esc(s.status||'—')}</span></td>
+       </tr>`).join('')}
+       </tbody></table>`;
+}
+
+// ── Story table ────────────────────────────────────────────
+function renderStoryTbl(list) {
+  const tb = document.getElementById('s-tbody');
+  const ct = document.getElementById('story-count');
+  if (ct) ct.textContent = list.length + ' truyện';
+  if (!list.length) {
+    tb.innerHTML = `<tr><td colspan="8"><div class="adm-empty"><div class="ico">📭</div>Chưa có truyện nào.</div></td></tr>`;
+    return;
+  }
+  tb.innerHTML = list.map(s=>`
+    <tr data-t="${esc(s.title).toLowerCase()}" data-st="${esc(s.status||'')}">
+      <td>${s.cover?`<img class="thumb" src="${esc(s.cover)}" onerror="this.style.display='none'">`:'—'}</td>
+      <td style="max-width:180px"><a href="story.html#${esc(s.id)}" target="_blank"
+          style="color:var(--primary);font-weight:600;text-decoration:none">${esc(s.title)}</a></td>
+      <td>${esc(s.author)}</td>
+      <td style="font-size:.77rem;color:var(--text2)">${Array.isArray(s.genres)?s.genres.slice(0,2).join(', '):esc(s.genre||'—')}</td>
+      <td style="text-align:center">${s.chapters?.length||0}</td>
+      <td><span class="rb ${s.status==='Hoàn thành'?'rb-ok':'rb-hidden'}">${esc(s.status||'—')}</span></td>
+      <td>${s.hidden?'<span class="rb rb-pending">Đã ẩn</span>':'<span class="rb rb-reader">Hiển thị</span>'}</td>
+      <td><div style="display:flex;gap:.3rem;flex-wrap:wrap">
+        <button class="ab ab-edit" onclick="doEditStory('${esc(s.id)}')">✏️ Sửa</button>
+        ${s.hidden
+          ? `<button class="ab ab-show" onclick="doToggleHide('${esc(s.id)}',false,'${esc(s.title)}')">👁 Hiện</button>`
+          : `<button class="ab ab-hide" onclick="doToggleHide('${esc(s.id)}',true,'${esc(s.title)}')">🙈 Ẩn</button>`}
+        <button class="ab ab-del" onclick="doDelStory('${esc(s.id)}','${esc(s.title)}')">🗑</button>
+      </div></td>
+    </tr>`).join('');
+}
+
+function filterStories() {
+  const q  = (document.getElementById('s-search').value||'').toLowerCase();
+  const st = (document.getElementById('s-fstatus').value||'').toLowerCase();
+  document.querySelectorAll('#s-tbody tr[data-t]').forEach(r => {
+    r.style.display = ((!q||r.dataset.t.includes(q)) && (!st||r.dataset.st.toLowerCase()===st)) ? '' : 'none';
+  });
+}
+
+function doEditStory(id) {
+  window._currentStory = _S.find(s => s.id === id);
+  if (typeof openStoryEditor === 'function') openStoryEditor(id);
+}
+
+async function doToggleHide(id, hide, title) {
+  if (!confirm(hide ? `Ẩn truyện "${title}"?` : `Hiện lại truyện "${title}"?`)) return;
+  tblAlert('s', '⏳ Đang cập nhật…', true);
+  try {
+    const { stories, sha } = await AUTH.loadStories();
+    const s = stories.find(x => x.id === id); if (s) s.hidden = hide;
+    await AUTH.saveStories(stories, sha, `${hide?'Ẩn':'Hiện'}: ${title}`);
+    _S = stories; _SHA = sha; renderStoryTbl(_S); renderDash();
+    tblAlert('s', `✅ Đã ${hide?'ẩn':'hiện'} truyện "${title}".`, true);
+  } catch(e) { tblAlert('s', '❌ ' + e.message, false); }
+}
+
+async function doDelStory(id, title) {
+  if (!confirm(`⚠️ Xóa truyện "${title}"?\nHành động không thể hoàn tác!`)) return;
+  tblAlert('s', '⏳ Đang xóa…', true);
+  try {
+    const { stories, sha } = await AUTH.loadStories();
+    const f = stories.filter(s => s.id !== id);
+    await AUTH.saveStories(f, sha, `Xóa truyện: ${title}`);
+    _S = f; _SHA = sha; renderStoryTbl(_S); renderDash();
+    tblAlert('s', `✅ Đã xóa truyện "${title}".`, true);
+  } catch(e) { tblAlert('s', '❌ ' + e.message, false); }
+}
+
+// ── Add story ──────────────────────────────────────────────
+function prevCover(url) {
+  const img = document.getElementById('as-prev');
+  if (!url.trim()) { img.style.display='none'; return; }
+  img.src = url; img.style.display = 'block';
+  img.onerror = () => img.style.display = 'none';
+}
+
+function clearAddForm() {
+  ['as-title','as-author','as-cover','as-desc','as-tags','as-ch-t','as-ch-c'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  document.getElementById('as-prev').style.display = 'none';
+  hideAlert('as-alert');
+}
+
+async function doAddStory() {
+  const title  = v('as-title').trim();
+  const author = v('as-author').trim();
+  if (!title)  return showAlert('as-alert', 'Vui lòng nhập tên truyện.', false);
+  if (!author) return showAlert('as-alert', 'Vui lòng nhập tên tác giả.', false);
+
+  const cover  = v('as-cover').trim();
+  const desc   = v('as-desc').trim();
+  const status = v('as-status');
+  const source = v('as-source');
+  const genre  = v('as-genre');
+  const tags   = v('as-tags').split(',').map(t=>t.trim()).filter(Boolean);
+  const chT    = v('as-ch-t').trim();
+  const chC    = v('as-ch-c').trim();
+
+  const btn = document.getElementById('as-btn');
+  btn.disabled = true; btn.textContent = '⏳ Đang lưu…';
+  showAlert('as-alert', '⏳ Đang tải dữ liệu từ GitHub…', true);
+
+  try {
+    const { stories, sha } = await AUTH.loadStories();
+    // Generate unique slug ID
+    let baseId = title.toLowerCase()
+      .normalize('NFD').replace(/[̀-ͯ]/g,'')
+      .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40) || 'story';
+    let sid = baseId, n = 2;
+    while (stories.find(s => s.id === sid)) sid = baseId + '-' + (n++);
+
+    const chapters = (chT && chC) ? [{ id:1, title:chT, content:chC }] : [];
+    stories.push({ id:sid, title, author, cover, description:desc,
+                   status, source, genre, genres:[genre,...tags], tags,
+                   hidden:false, chapters });
+
+    showAlert('as-alert', '⏳ Đang lưu lên GitHub…', true);
+    await AUTH.saveStories(stories, sha, `Thêm truyện: ${title}`);
+    _S = stories;
+    showAlert('as-alert', `✅ Đã thêm "${title}"! Web cập nhật sau ~1 phút.`, true);
+    clearAddForm();
+    renderDash(); renderStoryTbl(_S); populateHeroSelect();
+    setTimeout(() => showTab('stories'), 1600);
+  } catch(e) { showAlert('as-alert', '❌ ' + e.message, false); }
+  finally { btn.disabled = false; btn.textContent = '💾 Lưu & Deploy'; }
+}
+
+// ── Members ────────────────────────────────────────────────
+function renderMemberTbl(list) {
+  const tb = document.getElementById('m-tbody');
+  const ct = document.getElementById('mb-count');
+  if (ct) ct.textContent = list.length + ' thành viên';
+  if (!list.length) {
+    tb.innerHTML = `<tr><td colspan="7"><div class="adm-empty"><div class="ico">👥</div>Chưa có thành viên nào.</div></td></tr>`;
+    return;
+  }
+  tb.innerHTML = list.map((u,i) => {
+    const rc = u.role==='author'?'rb-author':u.role==='pending_author'?'rb-pending':'rb-reader';
+    const rl = u.role==='author'?'✍️ Tác giả':u.role==='pending_author'?'⏳ Chờ duyệt':'📖 Độc giả';
+    const acts = u.role === 'pending_author'
+      ? `<button class="ab ab-approve" onclick="approveAuthor('${u.id}','${esc(u.username)}')">✅ Duyệt</button>
+         <button class="ab ab-del"     onclick="rejectAuthor('${u.id}','${esc(u.username)}')">✗ Từ chối</button>`
+      : u.role === 'reader'
+      ? `<button class="ab ab-up" onclick="promoteToAuthor('${u.id}','${esc(u.username)}')">↑ Lên Tác giả</button>`
+      : `<button class="ab ab-down" onclick="demoteToReader('${u.id}','${esc(u.username)}')">↓ Về Độc giả</button>`;
+    return `<tr data-u="${esc(u.username).toLowerCase()}" data-e="${esc(u.email).toLowerCase()}" data-r="${u.role}">
+      <td style="color:var(--text3)">${i+1}</td>
+      <td><b>${esc(u.username)}</b></td>
+      <td style="color:var(--text2);font-size:.79rem">${esc(u.email)}</td>
+      <td style="color:var(--text3)">${esc(u.fullName||'—')}</td>
+      <td><span class="rb ${rc}">${rl}</span></td>
+      <td style="color:var(--text3);font-size:.77rem">${fmtD(u.createdAt)}</td>
+      <td><div style="display:flex;gap:.32rem;flex-wrap:wrap">${acts}</div></td>
+    </tr>`;
+  }).join('');
+}
+
+function filterMembers() {
+  const q = (document.getElementById('m-search').value||'').toLowerCase();
+  const r = document.getElementById('m-frole').value;
+  document.querySelectorAll('#m-tbody tr[data-u]').forEach(row => {
+    row.style.display = ((!q||(row.dataset.u+row.dataset.e).includes(q)) && (!r||row.dataset.r===r)) ? '' : 'none';
+  });
+}
+
+function _setRole(id, role, username, msg) {
+  if (typeof LocalAuth !== 'undefined') LocalAuth.setRole(id, role);
+  _M = typeof LocalAuth !== 'undefined' ? LocalAuth.getAllUsers() : [];
+  renderMemberTbl(_M); renderDash();
+  tblAlert('m', msg, true);
+}
+function approveAuthor(id, un) {
+  if (!confirm(`Phê duyệt "${un}" thành Tác giả?`)) return;
+  _setRole(id, 'author', un, `✅ Đã phê duyệt ${un} thành Tác giả.`);
+}
+function rejectAuthor(id, un) {
+  if (!confirm(`Từ chối yêu cầu của "${un}" và đặt lại Độc giả?`)) return;
+  _setRole(id, 'reader', un, `✅ Đã từ chối và chuyển ${un} về Độc giả.`);
+}
+function promoteToAuthor(id, un) {
+  if (!confirm(`Nâng "${un}" lên Tác giả?`)) return;
+  _setRole(id, 'author', un, `✅ Đã nâng ${un} lên Tác giả.`);
+}
+function demoteToReader(id, un) {
+  if (!confirm(`Chuyển "${un}" về Độc giả?`)) return;
+  _setRole(id, 'reader', un, `✅ Đã chuyển ${un} về Độc giả.`);
+}
+
+// ── Interface settings ─────────────────────────────────────
+const IFACE_KEY = '_llhnc_iface';
+function loadIfaceSettings() {
+  try {
+    const s = JSON.parse(localStorage.getItem(IFACE_KEY)||'{}');
+    if (s.sitename) document.getElementById('if-sitename').value = s.sitename;
+    if (s.slogan)   document.getElementById('if-slogan').value   = s.slogan;
+    if (s.desc)     document.getElementById('if-desc').value     = s.desc;
+    if (s.color)    { previewColor(s.color); document.getElementById('if-color').value = s.color; }
+    if (s.hero)     document.getElementById('if-hero').value     = s.hero;
+  } catch {}
+}
+
+function populateHeroSelect() {
+  const sel = document.getElementById('if-hero');
+  if (!sel) return;
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">— Tự động (truyện đầu tiên) —</option>'
+    + _S.map(s=>`<option value="${esc(s.id)}">${esc(s.title)}</option>`).join('');
+  if (cur) sel.value = cur;
+}
+
+function previewColor(hex) {
+  document.documentElement.style.setProperty('--primary', hex);
+  document.documentElement.style.setProperty('--pri-d', hex);
+  const hexEl = document.getElementById('if-color-hex');
+  if (hexEl) hexEl.textContent = hex;
+  document.querySelectorAll('#color-swatches .swatch').forEach(s => {
+    s.classList.toggle('sel', s.dataset.color === hex);
+  });
+}
+
+function pickColor(el) {
+  const hex = el.dataset.color;
+  previewColor(hex);
+  document.getElementById('if-color').value = hex;
+}
+
+function saveIfaceSettings() {
+  const s = {
+    sitename: v('if-sitename'),
+    slogan:   v('if-slogan'),
+    desc:     v('if-desc'),
+    color:    document.getElementById('if-color').value,
+    hero:     v('if-hero'),
+  };
+  localStorage.setItem(IFACE_KEY, JSON.stringify(s));
+  showAlert('iface-alert', '✅ Đã lưu cài đặt giao diện! Áp dụng khi tải lại trang.', true);
+  setTimeout(() => hideAlert('iface-alert'), 3500);
+}
+
+function resetIface() {
+  if (!confirm('Đặt lại về mặc định?')) return;
+  localStorage.removeItem(IFACE_KEY);
+  previewColor('#3ab3ca');
+  document.getElementById('if-color').value = '#3ab3ca';
+  document.getElementById('if-sitename').value = 'Lưu Ly Hiền Nhi Các';
+  document.getElementById('if-slogan').value   = 'Gác ngọc thanh vân, lưu vạn trang mộng';
+  document.getElementById('if-desc').value     = 'Không gian đọc truyện online với các tác phẩm độc quyền từ các tác giả nội địa.';
+  document.getElementById('if-hero').value     = '';
+  showAlert('iface-alert', '✅ Đã đặt lại mặc định.', true);
+  setTimeout(() => hideAlert('iface-alert'), 2500);
+}
+
+// ── Helpers ────────────────────────────────────────────────
+function v(id)    { return (document.getElementById(id)||{}).value||''; }
+function setText(id,val) { const el=document.getElementById(id); if(el) el.textContent=val; }
+function esc(s)   { return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function fmtD(iso){ try { return new Date(iso).toLocaleDateString('vi-VN'); } catch { return (iso||'').slice(0,10)||'—'; } }
+
+function showAlert(id, msg, ok) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = 'adm-alert ' + (ok ? 'adm-ok' : 'adm-err');
+  el.textContent = msg;
+}
+function hideAlert(id) { const el=document.getElementById(id); if(el){el.className='adm-alert';el.textContent='';} }
+function tblAlert(pfx, msg, ok) {
+  showAlert(pfx + '-alert', msg, ok);
+  setTimeout(() => hideAlert(pfx + '-alert'), 4500);
+}
+
+function doSearch() {
+  const q = document.getElementById('search-input').value.trim();
+  if (q) location.href = 'index.html?search=' + encodeURIComponent(q);
+}
 </script>
 </body>
 </html>
