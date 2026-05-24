@@ -562,11 +562,17 @@ async function openChapterEditor(storyId, chapterId) {
       <div id="_ced_pane_word" style="display:none">
         <div style="border:2px dashed #c5dce9;border-radius:10px;padding:1.5rem;text-align:center;background:#fafcff">
           <div style="font-size:2rem;margin-bottom:.4rem">📄</div>
-          <div style="font-size:.84rem;color:#4a6080;margin-bottom:.75rem">Chọn file <b>.docx</b> để thay thế toàn bộ nội dung chương này</div>
-          <label style="cursor:pointer;padding:.45rem 1.3rem;background:#3ab3ca;color:#fff;border-radius:8px;font-size:.84rem;font-weight:600;display:inline-block">
-            📂 Chọn file .docx
-            <input type="file" accept=".docx,.doc" style="display:none" id="_ced_word_inp" onchange="_ceLoadWord(this)">
-          </label>
+          <div style="font-size:.84rem;color:#4a6080;margin-bottom:.75rem">Chọn file <b>.docx</b> hoặc <b>.txt</b> để thay thế toàn bộ nội dung chương này</div>
+          <div style="display:flex;align-items:center;justify-content:center;gap:.65rem;flex-wrap:wrap">
+            <label style="cursor:pointer;padding:.45rem 1.3rem;background:#3ab3ca;color:#fff;border-radius:8px;font-size:.84rem;font-weight:600;display:inline-block">
+              📂 Chọn file
+              <input type="file" accept=".docx,.doc,.txt" style="display:none" id="_ced_word_inp" onchange="_ceLoadWord(this)">
+            </label>
+            <button type="button" onclick="_ceDownloadTemplate()"
+              style="padding:.45rem 1rem;background:#fff;border:1.5px solid #c5dce9;border-radius:8px;font-size:.82rem;font-weight:600;color:#4a6080;cursor:pointer;font-family:inherit">
+              📥 Tải file mẫu
+            </button>
+          </div>
           <div id="_ced_word_st" style="font-size:.76rem;color:#9fb8cc;margin-top:.55rem"></div>
         </div>
         <div id="_ced_word_prev_wrap" style="display:none;margin-top:.85rem">
@@ -665,27 +671,69 @@ async function openChapterEditor(storyId, chapterId) {
     const st   = document.getElementById('_ced_word_st');
     if (!file) return;
     if (st) st.textContent = '⏳ Đang đọc file…';
-    // Load mammoth.js dynamically if not already loaded
-    if (typeof mammoth === 'undefined') {
-      await new Promise((res, rej) => {
-        const s = document.createElement('script');
-        s.src = 'https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js';
-        s.onload = res; s.onerror = () => rej(new Error('Không tải được mammoth.js'));
-        document.head.appendChild(s);
-      });
-    }
+
     try {
-      const buf    = await file.arrayBuffer();
-      const result = await mammoth.extractRawText({ arrayBuffer: buf });
-      window._ceWordText = result.value;
+      // ── .txt: read directly ──────────────────────────────
+      if (file.name.toLowerCase().endsWith('.txt') || file.type === 'text/plain') {
+        window._ceWordText = await file.text();
+      } else {
+        // ── .docx: load mammoth.js dynamically ──────────────
+        if (typeof mammoth === 'undefined') {
+          await new Promise((res, rej) => {
+            const s = document.createElement('script');
+            s.src = 'https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js';
+            s.onload = res; s.onerror = () => rej(new Error('Không tải được mammoth.js'));
+            document.head.appendChild(s);
+          });
+        }
+        const buf    = await file.arrayBuffer();
+        const result = await mammoth.extractRawText({ arrayBuffer: buf });
+        window._ceWordText = result.value;
+      }
+
       const prev = document.getElementById('_ced_word_prev');
       const wrap = document.getElementById('_ced_word_prev_wrap');
       if (prev) prev.textContent = window._ceWordText.slice(0, 4000) + (window._ceWordText.length > 4000 ? '\n…(còn nhiều hơn)' : '');
       if (wrap) wrap.style.display = '';
-      if (st)   st.textContent = `✅ Trích xuất xong · ${window._ceWordText.length.toLocaleString()} ký tự`;
+      if (st)   st.textContent = `✅ Đọc xong · ${window._ceWordText.length.toLocaleString()} ký tự`;
     } catch(e) {
       if (st) st.textContent = '❌ Lỗi: ' + e.message;
     }
+  };
+
+  window._ceDownloadTemplate = function() {
+    const chTitle = document.getElementById('ced_t')?.value?.trim() || 'Chương 1: Tên Chương';
+    const content = [
+      chTitle,
+      '',
+      '─────────────────────────────────────────',
+      '💡 HƯỚNG DẪN:',
+      '  • Xoá dòng hướng dẫn này trước khi upload',
+      '  • Dùng *chữ nghiêng* và **chữ đậm** để định dạng',
+      '  • Mỗi đoạn văn cách nhau bằng 1 dòng trống',
+      '─────────────────────────────────────────',
+      '',
+      '[Bắt đầu nội dung chương ở đây...]',
+      '',
+      'Đoạn đầu tiên của chương. Viết nội dung truyện ở đây.',
+      '',
+      'Đoạn thứ hai. Mỗi đoạn cách nhau một dòng trống.',
+      '',
+      '─ *Hắn nhìn lên bầu trời, lòng tràn đầy quyết tâm.*',
+      '',
+      '**Một đoạn chữ đậm quan trọng.**',
+      '',
+      '[...tiếp tục nội dung...]',
+    ].join('\n');
+
+    const blob = new Blob(['﻿' + content], { type: 'text/plain;charset=utf-8' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url;
+    a.download = (chTitle.replace(/[\\/:*?"<>|]/g, '_').slice(0, 60) || 'chuong') + '.txt';
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
   window._ceApplyWord = function() {
     const ta = document.getElementById('ced_c');
