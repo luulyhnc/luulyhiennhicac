@@ -420,9 +420,10 @@ async function loadHomePage() {
   // Filter out admin-hidden stories (AI moderation) — owner still sees all
   const allVisible = window.AUTH?.isOwner ? all : all.filter(s => !s.hidden);
 
-  // Render hero & sidebar with visible list
+  // Render hero, sidebar and series row with visible list
   renderHero(allVisible[0], allVisible);
   renderSidebar(allVisible);
+  renderSeriesSection(allVisible);
 
   // Apply filter
   let stories = [...allVisible];
@@ -520,6 +521,47 @@ function _renderRankList(el, list) {
         <div class="rank-meta">⭐ ${s.rating||4.5} · 📖 ${s.chapters?.length||0} ch</div>
       </div>
     </a>`).join("");
+}
+
+// ── Series section on homepage ──────────────────────────────────
+async function renderSeriesSection(stories) {
+  const wrap = document.getElementById("series-home-wrap");
+  const row  = document.getElementById("series-home-row");
+  const vall = document.getElementById("series-home-viewall");
+  if (!wrap || !row) return;
+
+  let seriesList = [];
+  try { seriesList = await fetchSeries(); } catch(_) { return; }
+  if (!seriesList || !seriesList.length) { wrap.style.display = "none"; return; }
+
+  wrap.style.display = "";
+
+  row.innerHTML = seriesList.map(ser => {
+    const storyCount = stories.filter(s => s.seriesId === ser.id).length;
+    const volText    = ser.totalVolumes
+      ? `${storyCount}/${ser.totalVolumes} tập`
+      : `${storyCount} tập`;
+    const isDone     = ser.status === "Hoàn thành";
+    const statusCls  = isDone ? "rb-ok" : "rb-reader";
+    const statusLbl  = isDone ? "Hoàn thành" : (ser.status || "Đang ra");
+    const genres     = Array.isArray(ser.genre) ? ser.genre : (ser.genre ? [ser.genre] : []);
+    const genreText  = genres.slice(0,2).join(" · ");
+
+    return `<a class="series-card-h" href="series.html#${ser.id}">
+      ${ser.cover
+        ? `<img src="${ser.cover}" alt="${ser.title}" class="series-card-h-cover" loading="lazy">`
+        : `<div class="series-card-h-ph">📚</div>`}
+      <div class="series-card-h-info">
+        <div class="series-card-h-title">${ser.title}</div>
+        <div class="series-card-h-author">${ser.author || ""}</div>
+        <div class="series-card-h-meta">
+          <span class="rb ${statusCls}">${statusLbl}</span>
+          <span style="font-size:.67rem;color:var(--text3)">📖 ${volText}</span>
+          ${genreText ? `<span style="font-size:.63rem;color:var(--text3)">${genreText}</span>` : ""}
+        </div>
+      </div>
+    </a>`;
+  }).join("");
 }
 
 function switchRankTab(btn, period) {

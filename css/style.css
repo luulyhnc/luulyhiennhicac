@@ -369,6 +369,68 @@ header {
 }
 .trend-tag:hover { background:var(--pri-l); border-color:var(--primary); }
 
+/* ── SERIES HOME ROW ── */
+.series-home-wrap {
+  background:#fff; border-bottom:1.5px solid var(--border);
+  padding:.9rem 0 1.1rem;
+}
+.series-home-inner {
+  max-width:1280px; margin:0 auto; padding:0 1.5rem;
+}
+.series-home-row {
+  display:flex; gap:.85rem; overflow-x:auto;
+  scrollbar-width:thin; scrollbar-color:var(--border) transparent;
+  padding-bottom:.3rem;
+}
+.series-home-row::-webkit-scrollbar { height:4px; }
+.series-home-row::-webkit-scrollbar-thumb { background:var(--border2); border-radius:4px; }
+
+.series-card-h {
+  display:flex; align-items:center; gap:.75rem;
+  background:var(--bg2); border:1.5px solid var(--border);
+  border-radius:var(--radius); padding:.6rem .8rem;
+  min-width:220px; max-width:220px;
+  cursor:pointer; text-decoration:none;
+  transition:box-shadow .18s, border-color .18s, transform .15s;
+  flex-shrink:0;
+}
+.series-card-h:hover {
+  box-shadow:var(--shadow-s); border-color:var(--primary);
+  transform:translateY(-1px);
+}
+.series-card-h-cover {
+  width:52px; min-width:52px; height:72px;
+  border-radius:6px; object-fit:cover;
+  box-shadow:0 2px 8px rgba(0,0,0,.12); flex-shrink:0;
+}
+.series-card-h-ph {
+  width:52px; min-width:52px; height:72px;
+  border-radius:6px; background:linear-gradient(135deg,var(--pri-l),#cce8f4);
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.4rem; flex-shrink:0;
+}
+.series-card-h-info { flex:1; min-width:0; }
+.series-card-h-title {
+  font-size:.82rem; font-weight:700; color:var(--navy);
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  line-height:1.35; margin-bottom:.22rem;
+  transition:color .15s;
+}
+.series-card-h:hover .series-card-h-title { color:var(--primary); }
+.series-card-h-author {
+  font-size:.67rem; color:var(--text3); margin-bottom:.25rem;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.series-card-h-meta {
+  display:flex; align-items:center; gap:.35rem; flex-wrap:wrap;
+}
+.series-card-h-meta .rb {
+  font-size:.6rem; padding:.06rem .38rem; border-radius:20px;
+  font-weight:700;
+}
+.rb-ok     { background:#dbeafe; color:#1d4ed8; }
+.rb-reader { background:#dcfce7; color:#166534; }
+
 /* ── VERTICAL CARD GRID (homepage) ── */
 .story-grid {
   display:grid;
