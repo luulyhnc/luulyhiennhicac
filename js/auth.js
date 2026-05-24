@@ -596,7 +596,10 @@ function _openAiModeration() {
   style="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9998;display:flex;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto;font-family:'Inter',sans-serif">
   <div style="background:#fff;border-radius:14px;padding:1.5rem;width:100%;max-width:780px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem">
-      <b style="font-size:1rem;color:#1a2535">🤖 AI Kiểm duyệt nội dung</b>
+      <div>
+        <b style="font-size:1rem;color:#1a2535">🤖 AI Kiểm duyệt Nội dung &amp; Bản quyền</b>
+        <div style="font-size:.72rem;color:#9fb8cc;margin-top:.1rem">Phân tích 2 nhóm: Nội dung vi phạm · Bản quyền &amp; Đạo văn</div>
+      </div>
       <button onclick="document.getElementById('_ai_modal').remove()"
         style="border:none;background:#f0f4f8;width:30px;height:30px;border-radius:50%;cursor:pointer">✕</button>
     </div>
@@ -683,34 +686,99 @@ async function _runAiCheckAll() {
     const s = stories[i];
     const rid = '_air_' + s.id.replace(/[^a-z0-9]/gi,'_');
     results.insertAdjacentHTML('beforeend', `
-      <div id="${rid}" style="background:#f8fafc;border:1.5px solid #dce8f5;border-radius:9px;padding:.75rem 1rem;margin-bottom:.55rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
-        <div style="flex:1;min-width:160px">
-          <b style="font-size:.87rem;color:#1a2535">${_ea(s.title)}</b>
-          <span style="font-size:.74rem;color:#9fb8cc;margin-left:.35rem">${_ea(s.author)}</span>
-          ${s.hidden?'<span style="font-size:.7rem;background:#fdecea;color:#e74c3c;border-radius:4px;padding:.1rem .35rem;margin-left:.3rem">Đã ẩn</span>':''}
+      <div id="${rid}" style="background:#f8fafc;border:1.5px solid #dce8f5;border-radius:9px;padding:.75rem 1rem;margin-bottom:.6rem">
+        <div style="display:flex;align-items:center;gap:.55rem;flex-wrap:wrap">
+          <div style="flex:1;min-width:160px">
+            <b style="font-size:.87rem;color:#1a2535">${_ea(s.title)}</b>
+            <span style="font-size:.74rem;color:#9fb8cc;margin-left:.35rem">${_ea(s.author)}</span>
+            ${s.hidden?'<span style="font-size:.7rem;background:#fdecea;color:#e74c3c;border-radius:4px;padding:.1rem .35rem;margin-left:.3rem">Đã ẩn</span>':''}
+          </div>
+          <span id="${rid}_badge" style="font-size:.78rem;color:#9fb8cc">⏳ Đang phân tích...</span>
+          <div id="${rid}_act" style="display:flex;gap:.4rem"></div>
         </div>
-        <span id="${rid}_badge" style="font-size:.78rem;color:#9fb8cc">⏳ Đang phân tích...</span>
-        <div id="${rid}_act" style="display:flex;gap:.4rem"></div>
+        <div id="${rid}_detail"></div>
       </div>`);
 
     st.textContent = `Kiểm tra (${i+1}/${stories.length}): ${s.title}`;
     try {
-      const r = await _aiCheckStory(s, apiKey);
-      const badge = document.getElementById(rid+'_badge');
-      const act   = document.getElementById(rid+'_act');
-      const row   = document.getElementById(rid);
+      const r      = await _aiCheckStory(s, apiKey);
+      const badge  = document.getElementById(rid+'_badge');
+      const act    = document.getElementById(rid+'_act');
+      const detail = document.getElementById(rid+'_detail');
       if (!badge) continue;
-      if (r.safe) {
-        badge.innerHTML = `<span style="color:#27ae60">✅ An toàn</span> <span style="font-size:.7rem;color:#b0c4d8">(${r.score}/10)</span>`;
-      } else {
-        badge.innerHTML = `<span style="color:#e74c3c">⚠️ ${_ea(r.recommendation)}</span> <span style="font-size:.7rem;color:#b0c4d8">(${r.score}/10)</span>`;
-        if (r.issues?.length && row)
-          row.insertAdjacentHTML('beforeend',`<div style="width:100%;font-size:.76rem;color:#c0392b;background:#fdecea;padding:.3rem .55rem;border-radius:5px;margin-top:.3rem">${r.issues.map(x=>'• '+_ea(x)).join('<br>')}</div>`);
-        if (act && !s.hidden)
-          act.innerHTML=`<button onclick="_toggleHideStory('${s.id}',true,'${_ea(s.title)}')" style="padding:.22rem .6rem;background:#fdecea;color:#e74c3c;border:1.5px solid #f0b8bc;border-radius:6px;cursor:pointer;font-size:.77rem;font-family:inherit">🙈 Ẩn</button>`;
+
+      // ── Scores ──
+      const cScore  = r.content?.score  ?? 0;
+      const cpScore = r.copyright?.score ?? 0;
+      const overallSafe = r.overall?.safe ?? (cScore <= 3 && cpScore <= 3);
+
+      // ── Copyright type label ──
+      const cpTypeMap = {
+        original:         '🖊 Sáng tác gốc',
+        translation_ok:   '📖 Bản dịch (có nguồn)',
+        translation_risk: '⚠️ Bản dịch (nghi dịch lậu)',
+        fanfiction:       '✍️ Fan fiction',
+        suspected_copy:   '🚨 Nghi đạo văn',
+        unknown:          '❓ Không rõ',
+      };
+      const cpTypeLabel = cpTypeMap[r.copyright?.type] || r.copyright?.type || '❓';
+
+      // ── Score color ──
+      const _sc = n => n <= 3 ? '#27ae60' : n <= 6 ? '#e67e22' : '#e74c3c';
+      const _dot = (label, score) =>
+        `<span style="display:inline-flex;align-items:center;gap:.25rem;font-size:.74rem;padding:.15rem .5rem;border-radius:12px;background:${score<=3?'#e8f5e9':score<=6?'#fff3cd':'#fdecea'};color:${_sc(score)};border:1px solid ${score<=3?'#a8d5b5':score<=6?'#ffc107':'#f0b8bc'}">
+          ${score<=3?'✅':score<=6?'⚠️':'🚨'} ${label} ${score}/10
+        </span>`;
+
+      // ── Summary badge ──
+      badge.innerHTML = overallSafe
+        ? `<span style="color:#27ae60;font-weight:600">✅ Đạt yêu cầu</span>`
+        : `<span style="color:#e74c3c;font-weight:600">🚨 Cần xem xét</span>`;
+
+      // ── Detail row ──
+      if (detail) {
+        const contentIssues   = r.content?.issues  || [];
+        const copyrightIssues = r.copyright?.issues || [];
+        const needsAttr       = r.copyright?.needsAttribution;
+
+        let html = `<div style="margin-top:.55rem;display:flex;flex-wrap:wrap;gap:.35rem;align-items:center">
+          ${_dot('Nội dung', cScore)}
+          ${_dot('Bản quyền', cpScore)}
+          <span style="font-size:.72rem;color:#7a9ab8;background:#f0f4f8;padding:.15rem .5rem;border-radius:12px;border:1px solid #dde8f5">${cpTypeLabel}</span>
+          ${needsAttr ? '<span style="font-size:.72rem;color:#e67e22;background:#fff3cd;padding:.15rem .5rem;border-radius:12px;border:1px solid #ffc107">📌 Cần ghi nguồn</span>' : ''}
+        </div>`;
+
+        // Content issues
+        if (contentIssues.length) {
+          html += `<div style="margin-top:.4rem;background:#fdecea;border-radius:6px;padding:.35rem .6rem;font-size:.75rem;color:#c0392b">
+            <b>Nội dung:</b><br>${contentIssues.map(x=>'• '+_ea(x)).join('<br>')}
+          </div>`;
+        }
+        // Copyright issues
+        if (copyrightIssues.length) {
+          html += `<div style="margin-top:.3rem;background:#fff3cd;border-radius:6px;padding:.35rem .6rem;font-size:.75rem;color:#7d5a00">
+            <b>Bản quyền:</b><br>${copyrightIssues.map(x=>'• '+_ea(x)).join('<br>')}
+          </div>`;
+        }
+        // Recommendation
+        if (r.overall?.recommendation && r.overall.recommendation !== 'an toàn') {
+          html += `<div style="margin-top:.3rem;font-size:.74rem;color:#555;font-style:italic">💬 ${_ea(r.overall.recommendation)}</div>`;
+        }
+        detail.innerHTML = html;
       }
-      if (act && s.hidden)
-        act.innerHTML=`<button onclick="_toggleHideStory('${s.id}',false,'${_ea(s.title)}')" style="padding:.22rem .6rem;background:#e8f5e9;color:#27ae60;border:1.5px solid #a8d5b5;border-radius:6px;cursor:pointer;font-size:.77rem;font-family:inherit">👁 Hiện</button>`;
+
+      // ── Action buttons ──
+      if (act) {
+        const btnHide = `<button onclick="_toggleHideStory('${s.id}',true,'${_ea(s.title)}')"
+          style="padding:.22rem .6rem;background:#fdecea;color:#e74c3c;border:1.5px solid #f0b8bc;border-radius:6px;cursor:pointer;font-size:.77rem;font-family:inherit">🙈 Ẩn</button>`;
+        const btnShow = `<button onclick="_toggleHideStory('${s.id}',false,'${_ea(s.title)}')"
+          style="padding:.22rem .6rem;background:#e8f5e9;color:#27ae60;border:1.5px solid #a8d5b5;border-radius:6px;cursor:pointer;font-size:.77rem;font-family:inherit">👁 Hiện</button>`;
+        if (s.hidden) {
+          act.innerHTML = btnShow;
+        } else if (!overallSafe || cpScore > 3) {
+          act.innerHTML = btnHide;
+        }
+      }
     } catch(e) {
       const badge = document.getElementById(rid+'_badge');
       if (badge) badge.innerHTML=`<span style="color:#e74c3c">❌ ${_ea(e.message)}</span>`;
@@ -802,24 +870,82 @@ async function _getWorkingGeminiModel(apiKey) {
 
 async function _aiCheckStory(story, apiKey) {
   const model  = await _getWorkingGeminiModel(apiKey);
-  const sample = story.chapters.slice(0,2).map(c=>(c.content||'').slice(0,600)).join('\n---\n');
-  const prompt = `Bạn là hệ thống kiểm duyệt nội dung tự động cho website đọc truyện Việt Nam hợp pháp. Phân tích truyện sau:
+  const sample = story.chapters.slice(0,3).map(c=>(c.content||'').slice(0,800)).join('\n---\n');
+  const src    = story.source || 'không rõ';
 
-Tên: ${story.title}
-Tác giả: ${story.author}
-Mô tả: ${story.description}
-Nội dung mẫu: ${sample}
+  const prompt = `Bạn là chuyên gia kiểm duyệt nội dung VÀ bản quyền cho nền tảng đọc truyện Việt Nam hợp pháp. Hãy phân tích tác phẩm sau một cách nghiêm túc và khách quan:
 
-Xác định các nội dung vi phạm: chính trị/kích động, bạo lực cực đoan, 18+/khiêu dâm, thông tin sai lệch nguy hại, phân biệt chủng tộc/tôn giáo.
+THÔNG TIN TÁC PHẨM:
+- Tên: ${story.title}
+- Tác giả khai báo: ${story.author}
+- Nguồn: ${src}
+- Mô tả: ${story.description}
+- Nội dung mẫu (${story.chapters?.length||0} chương, trích 3 chương đầu):
+${sample}
 
-Chỉ trả về JSON, không giải thích:
-{"safe":true,"score":0,"issues":[],"recommendation":"an toàn"}`;
+━━━ NHÓM 1: KIỂM DUYỆT NỘI DUNG ━━━
+Đánh giá từng tiêu chí (điểm rủi ro 0–10):
+1. Chính trị / Kích động: tuyên truyền chống nhà nước, kích động bạo loạn, chia rẽ dân tộc
+2. Bạo lực cực đoan: mô tả tra tấn/giết chóc chi tiết, bạo lực không có giá trị nghệ thuật
+3. Nội dung 18+ / Khiêu dâm: tình dục, khiêu dâm, kể cả ngầm ý rõ ràng
+4. Thông tin nguy hại: hướng dẫn chế vũ khí, chất độc, tự làm hại bản thân
+5. Phân biệt đối xử: kỳ thị sắc tộc, giới tính, tôn giáo, người khuyết tật
+
+━━━ NHÓM 2: BẢN QUYỀN ━━━
+Đánh giá từng tiêu chí (điểm rủi ro 0–10):
+1. Đạo văn / Sao chép: nội dung trùng khớp hoặc phỏng theo sát tác phẩm đã xuất bản
+2. Dịch lậu (Piracy): dịch light novel/web novel/manhwa/manhua nước ngoài không có giấy phép bản dịch hợp pháp tại Việt Nam
+3. Vi phạm nhân vật có bản quyền: dùng nhân vật/thế giới độc quyền (ví dụ Harry Potter, One Piece...) mà không ghi rõ "fan fiction"
+4. Thiếu ghi nhận nguồn: tác phẩm dịch/sưu tầm không ghi tên tác giả gốc, tên bộ gốc, ngôn ngữ gốc
+5. Mạo nhận bản quyền: khai "Sáng tác" nhưng dấu hiệu cho thấy là bản dịch/sao chép
+
+Phân loại tác phẩm:
+- "original"         → Sáng tác gốc, không dấu hiệu sao chép
+- "translation_ok"   → Bản dịch hợp lệ, có ghi nhận tác giả gốc
+- "translation_risk" → Bản dịch nhưng thiếu thông tin nguồn / nghi dịch lậu
+- "fanfiction"       → Fan fiction dựa trên tác phẩm khác, ghi rõ
+- "suspected_copy"   → Nghi đạo văn hoặc sao chép không ghi nguồn
+- "unknown"          → Không đủ thông tin để xác định
+
+Chỉ trả về JSON hợp lệ (không markdown, không giải thích):
+{
+  "content": {
+    "safe": true,
+    "score": 0,
+    "issues": [],
+    "flags": { "politics":0, "violence":0, "adult":0, "harmful":0, "discrimination":0 }
+  },
+  "copyright": {
+    "safe": true,
+    "score": 0,
+    "type": "original",
+    "issues": [],
+    "needsAttribution": false,
+    "flags": { "plagiarism":0, "piracy":0, "charRights":0, "missingSource":0, "falseClaim":0 }
+  },
+  "overall": {
+    "safe": true,
+    "recommendation": "an toàn"
+  }
+}`;
 
   const data = await _geminiRequest(apiKey, model, prompt);
   const text  = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
-  const m     = text.match(/\{[\s\S]*?\}/);
-  try { return m ? JSON.parse(m[0]) : {safe:true,score:0,issues:[],recommendation:'an toàn'}; }
-  catch { return {safe:true,score:0,issues:[],recommendation:'an toàn'}; }
+  // Extract first complete JSON object
+  const m = text.match(/\{[\s\S]*\}/);
+  try {
+    return m ? JSON.parse(m[0]) : _defaultAiResult();
+  } catch {
+    return _defaultAiResult();
+  }
+}
+
+function _defaultAiResult() {
+  return {
+    content:   { safe:true,  score:0, issues:[], flags:{} },
+    copyright: { safe:true,  score:0, type:'unknown', issues:[], needsAttribution:false, flags:{} },
+    overall:   { safe:true,  recommendation:'an toàn' }
+  };
 }
 
 async function _toggleHideStory(storyId, hide, title) {
