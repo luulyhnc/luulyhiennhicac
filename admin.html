@@ -400,6 +400,10 @@
                 style="padding:.3rem .75rem;background:#fff;border:1.5px solid var(--border2);border-radius:7px;cursor:pointer;font-size:.78rem;font-family:inherit;font-weight:500">
                 ⬇ Tải form mẫu (.html)
               </button>
+              <button type="button" onclick="_downloadTxtTemplate()"
+                style="padding:.3rem .75rem;background:#fff;border:1.5px solid var(--border2);border-radius:7px;cursor:pointer;font-size:.78rem;font-family:inherit;font-weight:500">
+                ⬇ Tải form mẫu (.txt)
+              </button>
               <span id="as-word-status" style="font-size:.75rem;color:var(--text3)"></span>
             </div>
 
@@ -1904,33 +1908,173 @@ async function _parseWordDoc(input) {
   if (statusEl) statusEl.textContent = '⏳ Đang đọc file…';
 
   try {
-    // Structured .txt exported from HTML form template
-    if (file.name.endsWith('.txt') || file.type === 'text/plain') {
-      const text = await file.text();
-      if (text.includes('@@TRUYEN')) {
-        _parseStructuredTemplate(text);
-      } else {
-        // Plain text → parse chapters only (legacy format)
-        const parsed = _parseChaptersFromText(text);
-        if (!parsed.length) throw new Error('Không tìm thấy chương nào. Kiểm tra lại format file.');
-        _asChapters = parsed; _renderChapterList();
-        if (statusEl) statusEl.textContent = `✅ Đã tải ${parsed.length} chương.`;
-      }
-      input.value = ''; return;
+    let text = '';
+
+    if (file.name.toLowerCase().endsWith('.txt') || file.type === 'text/plain') {
+      text = await file.text();
+    } else {
+      // .docx / .doc → mammoth.js
+      if (typeof mammoth === 'undefined') throw new Error('Thư viện mammoth chưa tải. Vui lòng tải lại trang.');
+      const arrayBuffer = await file.arrayBuffer();
+      const result = await mammoth.extractRawText({ arrayBuffer });
+      text = result.value;
     }
 
-    // .docx / .doc → mammoth.js
-    if (typeof mammoth === 'undefined') throw new Error('Thư viện mammoth chưa tải. Vui lòng tải lại trang.');
-    const arrayBuffer = await file.arrayBuffer();
-    const result = await mammoth.extractRawText({ arrayBuffer });
-    const parsed = _parseChaptersFromText(result.value);
-    if (!parsed.length) throw new Error('Không tìm thấy chương nào. Kiểm tra lại format file (xem form mẫu).');
-    _asChapters = parsed; _renderChapterList();
-    if (statusEl) statusEl.textContent = `✅ Đã tải ${parsed.length} chương.`;
+    // Route: structured template (has @@TRUYEN marker) OR smart meta-detect
+    if (text.includes('@@TRUYEN')) {
+      _parseStructuredTemplate(text);
+    } else {
+      _parseDocWithMeta(text);
+    }
     input.value = '';
   } catch(e) {
     if (statusEl) statusEl.textContent = '❌ ' + e.message;
   }
+}
+
+// ── Smart meta + chapter parser (plain .txt / .docx without @@TRUYEN) ─────
+// Supports format:
+//   Tên truyện: ...          ← metadata key:value at top of file
+//   Tác giả: ...
+//   Mô tả: ...               ← may span multiple lines until next key
+//   Trạng thái: Đang ra
+//   Tags: ...
+//
+//   Chương 1: Tiêu đề        ← chapter heading → rest is chapter content
+//   ...
+function _parseDocWithMeta(text) {
+  const statusEl = document.getElementById('as-word-status');
+  const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+
+  // Normalize Vietnamese key for lookup (strip diacritics, lowercase, collapse spaces)
+  function normKey(s) {
+    return s.toLowerCase().trim()
+      .normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .replace(/\s+/g, ' ');
+  }
+
+  // Map normalized keys → form field IDs
+  const META_MAP = {
+    'ten truyen':     'as-title',  'tên truyện':    'as-title',
+    'ten':            'as-title',  'tên':            'as-title',
+    'tac gia':        'as-author', 'tác giả':       'as-author',
+    'anh bia':        'as-cover',  'ảnh bìa':       'as-cover',
+    'cover':          'as-cover',
+    'mo ta':          'as-desc',   'mô tả':         'as-desc',
+    'mo ta truyen':   'as-desc',   'mô tả truyện':  'as-desc',
+    'gioi thieu':     'as-desc',   'giới thiệu':    'as-desc',
+    'trang thai':     'as-status', 'trạng thái':    'as-status',
+    'nguon':          'as-source', 'nguồn':         'as-source',
+    'tags':           'as-tags',   'tag':            'as-tags',
+  };
+
+  const isChapterLine = l => /^(chương|chuong|chapter)\s+\d+/i.test(l.trim())
+    || /^@@CHUONG/i.test(l.trim())
+    || /^===/.test(l.trim());
+
+  // Find where chapters begin
+  let chapStart = lines.findIndex(l => isChapterLine(l));
+  if (chapStart < 0) chapStart = lines.length; // no chapters found → treat all as meta
+
+  const metaLines = lines.slice(0, chapStart);
+  const chapText  = lines.slice(chapStart).join('\n');
+
+  // Parse key:value metadata (multi-line values supported)
+  const metaValues = {}; // fieldId → value string
+  let curField = null;
+  let curValLines = [];
+
+  const flushField = () => {
+    if (curField) {
+      const v = curValLines.join('\n').trim();
+      if (v) metaValues[curField] = v;
+    }
+    curField = null; curValLines = [];
+  };
+
+  for (const raw of metaLines) {
+    const trimmed = raw.trim();
+    // Key: value line?
+    const m = trimmed.match(/^([^:：]{1,35})[:：]\s*(.*)/);
+    if (m) {
+      const fieldId = META_MAP[normKey(m[1])];
+      if (fieldId) {
+        flushField();
+        curField = fieldId;
+        if (m[2].trim()) curValLines.push(m[2].trim());
+        continue;
+      }
+    }
+    // Continuation of previous multi-line value
+    if (curField) {
+      curValLines.push(trimmed);
+    }
+  }
+  flushField();
+
+  // Fill form fields
+  let filled = 0;
+  for (const [fieldId, val] of Object.entries(metaValues)) {
+    if (!val) continue;
+    const el = document.getElementById(fieldId);
+    if (!el) continue;
+    if (el.tagName === 'SELECT') {
+      const o = Array.from(el.options).find(o => o.value === val || o.text === val);
+      if (o) { el.value = o.value; filled++; }
+    } else {
+      el.value = val; filled++;
+    }
+  }
+
+  // Cover preview
+  if (metaValues['as-cover']) {
+    const p = document.getElementById('as-prev');
+    if (p) { p.src = metaValues['as-cover']; p.style.display = 'block'; }
+  }
+
+  // Parse chapters from the rest of the document
+  const parsed = _parseChaptersFromText(chapText);
+  _asChapters = parsed;
+  _renderChapterList();
+
+  if (statusEl) statusEl.textContent =
+    `✅ Điền ${filled} trường thông tin + ${parsed.length} chương.`;
+}
+
+// ── Download plain-text (.txt) template ───────────────────────────────────
+function _downloadTxtTemplate() {
+  const sample = [
+    '@@TRUYEN',
+    'TEN: Tên truyện của bạn',
+    'TAC GIA: Tên tác giả',
+    'ANH BIA: https://example.com/cover.jpg',
+    'GIOI THIEU: Mô tả hấp dẫn về nội dung truyện...',
+    'TRANG THAI: Đang ra',
+    'NGUON: Sáng tác',
+    'TAGS: xuyên không, HE, nữ mạnh',
+    '',
+    '@@CHUONG 1',
+    'TEN CHUONG: Tiêu đề chương một',
+    'CAU DAN: Câu trích dẫn đầu chương (tuỳ chọn — xoá dòng này nếu không dùng)',
+    'NOI DUNG:',
+    'Nội dung chương một...',
+    '',
+    '@@CHUONG 2',
+    'TEN CHUONG: Tiêu đề chương hai',
+    'NOI DUNG:',
+    'Nội dung chương hai...',
+    '',
+    '(Thêm @@CHUONG 3, @@CHUONG 4... để thêm chương)',
+  ].join('\n');
+
+  const blob = new Blob(['﻿' + sample], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'form-mau-dang-truyen.txt';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
 }
 
 function _parseChaptersFromText(text) {
