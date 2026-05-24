@@ -88,23 +88,87 @@ const CHAPTERS_PER_PAGE    = 50;
         }
       });
 
-      // Background image
+      // Logo image (replaces text logo with an actual <img> — supports GIF)
+      if (s.logoImg) {
+        const h = s.logoImgH || 48;
+        document.querySelectorAll('.logo-main').forEach(el => {
+          el.innerHTML = '<img src="' + s.logoImg + '" style="height:' + h + 'px;max-width:240px;object-fit:contain;vertical-align:middle;display:inline-block" alt="logo">';
+          el.style.fontWeight = ''; el.style.fontStyle = ''; el.style.textShadow = '';
+          el.style.background = ''; el.style.webkitTextFillColor = '';
+          el.style.animation  = '';
+        });
+        if (s.logoImgSlogan === 'hide') {
+          document.querySelectorAll('.logo-slogan').forEach(el => { el.style.display = 'none'; });
+        }
+      }
+
+      // Background image — use <img> element so GIF animation always works
       if (s.bgImage) {
-        const dim    = (s.bgDim !== undefined ? s.bgDim : 30);
-        const overlay = `rgba(0,0,0,${(dim/100).toFixed(2)})`;
-        const bg     = `${overlay}, url('${s.bgImage}') center/cover no-repeat`;
-        const target = s.bgTarget || 'hero';
+        const dim     = (s.bgDim    !== undefined ? s.bgDim    : 30);
+        const fit     = s.bgFit    || 'cover';
+        const scroll  = s.bgScroll || 'scroll';
+        const opacity = ((100 - dim) / 100).toFixed(2);
+        const target  = s.bgTarget || 'hero';
+
+        // Remove any previously injected bg-img layers
+        document.querySelectorAll('.llhnc-bg-img').forEach(el => el.remove());
+
+        // Build the <img> layer
+        const makeLayer = () => {
+          const wrap = document.createElement('div');
+          wrap.className = 'llhnc-bg-img';
+          const posn = (scroll === 'fixed') ? 'fixed' : 'absolute';
+          wrap.style.cssText = 'position:' + posn + ';inset:0;z-index:0;overflow:hidden;pointer-events:none;';
+          const img = document.createElement('img');
+          img.src = s.bgImage;
+          img.alt = '';
+          img.style.cssText = [
+            'width:100%', 'height:100%', 'display:block',
+            'object-fit:' + (fit === 'repeat' ? 'none' : fit),
+            'object-position:center',
+            'opacity:' + opacity,
+          ].join(';');
+          wrap.appendChild(img);
+          return wrap;
+        };
+
         if (target === 'body') {
-          document.body.style.backgroundImage = `url('${s.bgImage}')`;
-          document.body.style.backgroundSize = 'cover';
-          document.body.style.backgroundAttachment = 'fixed';
+          document.body.style.position = 'relative';
+          document.body.insertBefore(makeLayer(), document.body.firstChild);
         } else if (target === 'header') {
           document.querySelectorAll('header').forEach(h => {
-            h.style.backgroundImage = `url('${s.bgImage}')`; h.style.backgroundSize = 'cover';
+            h.style.position = 'relative'; h.style.overflow = 'hidden';
+            h.insertBefore(makeLayer(), h.firstChild);
           });
         } else {
+          // Hero banner
           const hero = document.querySelector('.hero-banner');
-          if (hero) { hero.style.background = bg; }
+          if (hero) {
+            hero.style.position = 'relative'; hero.style.overflow = 'hidden';
+            hero.insertBefore(makeLayer(), hero.firstChild);
+            // Keep existing content above the bg layer
+            Array.from(hero.children).forEach(child => {
+              if (!child.classList.contains('llhnc-bg-img')) {
+                child.style.position = 'relative'; child.style.zIndex = '1';
+              }
+            });
+          }
+        }
+
+        // Dark overlay on top of animated bg
+        if (dim > 0) {
+          const overlay = document.createElement('div');
+          overlay.className = 'llhnc-bg-img llhnc-bg-overlay';
+          const posn = (scroll === 'fixed') ? 'fixed' : 'absolute';
+          overlay.style.cssText = 'position:' + posn + ';inset:0;z-index:1;pointer-events:none;background:rgba(0,0,0,' + (dim/100).toFixed(2) + ')';
+          if (target === 'body') {
+            document.body.insertBefore(overlay, document.body.children[1] || null);
+          } else if (target === 'header') {
+            document.querySelectorAll('header').forEach(h => h.appendChild(overlay.cloneNode()));
+          } else {
+            const hero = document.querySelector('.hero-banner');
+            if (hero) hero.insertBefore(overlay, hero.children[1] || null);
+          }
         }
       }
     };

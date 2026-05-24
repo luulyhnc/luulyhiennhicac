@@ -121,6 +121,11 @@ header {
 }
 .btn-login:hover { background:var(--pri-d); }
 
+/* ── Animated background layer (injected by applyIfaceSettings) ── */
+.llhnc-bg-img { pointer-events:none; }
+/* Logo image replaces text — keep img inline */
+.logo-main img { display:inline-block; vertical-align:middle; max-width:100%; height:auto; }
+
 /* ── HERO BANNER ── */
 .hero-banner {
   background:linear-gradient(135deg,#bde0ef 0%,#d2eaf7 35%,#e8f5fc 65%,#f2f9fd 100%);
