@@ -936,6 +936,11 @@ async function loadReaderPage() {
   if (bcStory) { bcStory.textContent = story.title; bcStory.href = storyUrl(story.id); }
   if (bcChap)  bcChap.textContent = chapter.title;
 
+  // Label for "next chapter" button: show 🔗 if next chapter has affiliate URL
+  const nextBtnLabel = nextCh?.affiliateUrl
+    ? `<span title="Bấm để ủng hộ tác giả & đọc chương tiếp" style="display:inline-flex;align-items:center;gap:.3em">🔗 Chương tiếp ›</span>`
+    : `Chương tiếp ›`;
+
   const navBtns = (bottom = false) => `
     <div class="reader-nav-${bottom ? "bottom" : "top"}">
       ${prevCh
@@ -943,7 +948,7 @@ async function loadReaderPage() {
         : `<button class="btn btn-outline" disabled style="opacity:.35">‹ Chương trước</button>`}
       <a href="${storyUrl(story.id)}" class="btn btn-outline">📋 Mục lục</a>
       ${nextCh
-        ? `<button class="btn btn-accent" onclick="goToChapter('${story.id}',${nextCh.id})">Chương tiếp ›</button>`
+        ? `<button class="btn btn-accent" onclick="goToChapter('${story.id}',${nextCh.id})">${nextBtnLabel}</button>`
         : `<button class="btn btn-accent" disabled style="opacity:.35">Chương tiếp ›</button>`}
     </div>
   `;
@@ -967,23 +972,24 @@ async function loadReaderPage() {
 //  INTERSTITIAL NAVIGATION
 // ══════════════════════════════════════════════
 function goToChapter(storyId, chapterId) {
-  // Use chapter-specific affiliate URL if available, otherwise fall back to config
-  let ad = AFFILIATE_ADS[Math.floor(Math.random() * AFFILIATE_ADS.length)];
+  // Check for chapter-specific affiliate URL
+  let chapAff = null;
   if (_storiesCache) {
     const story = _storiesCache.find(s => s.id === storyId);
     const ch    = story?.chapters.find(c => c.id === chapterId);
-    if (ch?.affiliateUrl) {
-      const domain = (() => { try { return new URL(ch.affiliateUrl).hostname.replace(/^www\./,''); } catch { return ch.affiliateUrl; } })();
-      ad = {
-        title: "🔗 " + domain,
-        desc:  "Ủng hộ tác giả — nhấn vào để ghé thăm trang đối tác!",
-        url:   ch.affiliateUrl
-      };
-    }
+    if (ch?.affiliateUrl) chapAff = ch.affiliateUrl;
   }
-  showInterstitial(ad, () => {
+
+  if (chapAff) {
+    // Chapter has its own affiliate link:
+    // Open it in a new tab and navigate to the chapter immediately — no popup
+    window.open(chapAff, '_blank', 'noopener,noreferrer');
     location.href = readerUrl(storyId, chapterId);
-  });
+  } else {
+    // No chapter-specific affiliate → use random interstitial as before
+    const ad = AFFILIATE_ADS[Math.floor(Math.random() * AFFILIATE_ADS.length)];
+    showInterstitial(ad, () => { location.href = readerUrl(storyId, chapterId); });
+  }
 }
 
 function showInterstitial(ad, onContinue) {
