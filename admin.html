@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Panel – Lưu Ly Hiền Nhi Các</title>
   <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
   <style>
     /* ── Admin layout ── */
     .admin-wrap { max-width:1120px; margin:0 auto; padding:1.4rem 1rem 3rem; }
@@ -286,40 +287,88 @@
           <div class="af-hint">Dùng dấu phẩy để phân cách nhiều tag.</div>
         </div>
 
-        <details style="margin-bottom:.9rem">
+        <!-- ── Series ── -->
+        <details style="margin-bottom:.9rem" id="as-series-details">
           <summary style="cursor:pointer;font-size:.82rem;font-weight:600;color:var(--primary);user-select:none">
             📚 Thuộc Series (tuỳ chọn)
           </summary>
           <div style="margin-top:.65rem">
             <div class="g2">
               <div class="af-g"><label>Chọn series</label>
-                <select class="af-inp" id="as-series">
-                  <option value="">— Không thuộc series —</option>
-                </select></div>
+                <div style="display:flex;gap:.4rem">
+                  <select class="af-inp" id="as-series" style="flex:1">
+                    <option value="">— Không thuộc series —</option>
+                  </select>
+                  <button type="button" title="Tạo series mới ngay" onclick="_toggleInlineSeries()"
+                    style="flex-shrink:0;padding:.46rem .75rem;background:var(--pri-l);border:1.5px solid var(--primary);border-radius:8px;cursor:pointer;font-size:.82rem;font-weight:700;color:var(--primary)">➕ Mới</button>
+                </div>
+              </div>
               <div class="af-g"><label>Số thứ tự (Tập)</label>
                 <input class="af-inp" id="as-series-order" type="number" min="1" value="1" placeholder="1">
-                <div class="af-hint">Tập 1, 2, 3… trong series</div></div>
+                <div class="af-hint">Tập 1, 2, 3… trong series</div>
+              </div>
+            </div>
+            <!-- Inline series creation -->
+            <div id="as-series-inline" style="display:none;margin-top:.55rem;padding:.85rem;background:var(--bg2);border:1.5px dashed var(--primary);border-radius:10px">
+              <div style="font-size:.78rem;font-weight:700;color:var(--primary);margin-bottom:.6rem">✨ Tạo Series mới</div>
+              <div class="g2" style="margin-bottom:.5rem">
+                <div class="af-g" style="margin-bottom:0"><label>Tên series *</label>
+                  <input class="af-inp" id="as-ser-title" placeholder="VD: Tam Giới Kiếm Thần"></div>
+                <div class="af-g" style="margin-bottom:0"><label>Tác giả</label>
+                  <input class="af-inp" id="as-ser-author" placeholder="Tên tác giả"></div>
+              </div>
+              <div class="g2" style="margin-bottom:.5rem">
+                <div class="af-g" style="margin-bottom:0"><label>Thể loại</label>
+                  <select class="af-inp" id="as-ser-genre">
+                    <option>Tiên Hiệp</option><option>Huyền Huyễn</option><option>Ngôn Tình</option>
+                    <option>Đô Thị</option><option>Nữ Cường</option><option>Kiếm Hiệp</option>
+                    <option>Lịch Sử</option><option>Khác</option>
+                  </select></div>
+                <div class="af-g" style="margin-bottom:0"><label>Trạng thái</label>
+                  <select class="af-inp" id="as-ser-status">
+                    <option>Đang ra</option><option>Hoàn thành</option><option>Tạm dừng</option>
+                  </select></div>
+              </div>
+              <div id="as-ser-alert" style="font-size:.78rem;margin-bottom:.4rem"></div>
+              <div style="display:flex;gap:.4rem">
+                <button type="button" onclick="_createSeriesInline()"
+                  style="padding:.38rem .9rem;background:var(--primary);color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:.82rem;font-weight:600;font-family:inherit">💾 Tạo & Chọn</button>
+                <button type="button" onclick="_toggleInlineSeries(false)"
+                  style="padding:.38rem .75rem;background:#fff;border:1.5px solid var(--border2);border-radius:7px;cursor:pointer;font-size:.82rem;font-family:inherit">Huỷ</button>
+              </div>
             </div>
           </div>
         </details>
 
-        <details style="margin-bottom:.9rem">
+        <!-- ── Chapters ── -->
+        <details open style="margin-bottom:.9rem">
           <summary style="cursor:pointer;font-size:.82rem;font-weight:600;color:var(--primary);user-select:none">
-            ➕ Thêm chương đầu tiên (tuỳ chọn)
+            📖 Danh sách chương <span id="as-ch-count" style="font-weight:400;color:var(--text3);font-size:.75rem">(0 chương)</span>
           </summary>
-          <div style="margin-top:.65rem">
-            <div class="af-g"><label>Tên chương</label>
-              <input class="af-inp" id="as-ch-t" placeholder="Chương 1: Khởi đầu"></div>
-            <div class="af-g">
-              <label>🔗 Link tiếp thị liên kết <span style="font-weight:400;color:var(--text3)">(hiển thị trong màn hình chờ khi chuyển chương)</span></label>
-              <input class="af-inp" id="as-ch-aff" type="url" placeholder="https://shopee.vn/… hoặc link affiliate bất kỳ">
-              <div class="af-hint">Để trống nếu không có. Link sẽ xuất hiện dạng banner quảng cáo trong màn hình đếm ngược giữa các chương.</div>
+          <div style="margin-top:.75rem">
+
+            <!-- Word upload toolbar -->
+            <div style="display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;margin-bottom:.9rem;padding:.65rem .85rem;background:var(--bg2);border:1.5px solid var(--border);border-radius:9px">
+              <span style="font-size:.79rem;font-weight:600;color:var(--text2)">📄 Upload file Word:</span>
+              <label style="display:inline-flex;align-items:center;gap:.3rem;cursor:pointer;padding:.3rem .75rem;background:var(--primary);color:#fff;border-radius:7px;font-size:.79rem;font-weight:600">
+                📂 Chọn file .docx
+                <input type="file" accept=".docx,.doc" style="display:none" id="as-word-input" onchange="_parseWordDoc(this)">
+              </label>
+              <button type="button" onclick="_downloadWordTemplate()"
+                style="padding:.3rem .75rem;background:#fff;border:1.5px solid var(--border2);border-radius:7px;cursor:pointer;font-size:.78rem;font-family:inherit;font-weight:500">
+                ⬇ Tải form mẫu
+              </button>
+              <span id="as-word-status" style="font-size:.75rem;color:var(--text3)"></span>
             </div>
-            <div class="af-g"><label>Nội dung chương</label>
-              <textarea class="af-inp" id="as-ch-c" rows="10"
-                        placeholder="Nhập nội dung chương đầu tiên…"></textarea>
-              <div class="af-hint">Dùng <code style="background:var(--bg2);padding:.1rem .3rem;border-radius:4px">*văn bản*</code> hoặc <code style="background:var(--bg2);padding:.1rem .3rem;border-radius:4px">_văn bản_</code> để in nghiêng khi hiển thị.</div>
-            </div>
+
+            <!-- Dynamic chapter list -->
+            <div id="as-chapters-list"></div>
+
+            <button type="button" onclick="_addChapter()"
+              style="display:flex;align-items:center;gap:.35rem;padding:.45rem 1rem;border:2px dashed var(--primary);background:var(--pri-l);color:var(--primary);border-radius:8px;cursor:pointer;font-size:.83rem;font-weight:600;font-family:inherit;margin-top:.4rem;width:100%;justify-content:center">
+              ➕ Thêm chương
+            </button>
+            <div class="af-hint" style="margin-top:.4rem">Dùng <code style="background:var(--bg2);padding:.1rem .3rem;border-radius:4px">*văn bản*</code> hoặc <code style="background:var(--bg2);padding:.1rem .3rem;border-radius:4px">_văn bản_</code> để in nghiêng khi hiển thị.</div>
           </div>
         </details>
 
@@ -812,10 +861,17 @@ function prevCover(url) {
 }
 
 function clearAddForm() {
-  ['as-title','as-author','as-cover','as-desc','as-tags','as-series-order','as-ch-t','as-ch-aff','as-ch-c'].forEach(id => {
+  ['as-title','as-author','as-cover','as-desc','as-tags','as-series-order'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
+  const serOrd = document.getElementById('as-series-order'); if (serOrd) serOrd.value = '1';
   document.getElementById('as-prev').style.display = 'none';
+  // Reset chapters
+  _asChapters = [];
+  _renderChapterList();
+  // Reset word input
+  const wi = document.getElementById('as-word-input'); if (wi) wi.value = '';
+  const ws = document.getElementById('as-word-status'); if (ws) ws.textContent = '';
   hideAlert('as-alert');
 }
 
@@ -831,11 +887,26 @@ async function doAddStory() {
   const source = v('as-source');
   const genre  = v('as-genre');
   const tags   = v('as-tags').split(',').map(t=>t.trim()).filter(Boolean);
-  const chT      = v('as-ch-t').trim();
-  const chC      = v('as-ch-c').trim();
-  const chAff    = v('as-ch-aff').trim();
+  // Collect chapters from dynamic list
+  const chInputs = document.querySelectorAll('.as-ch-item');
+  const chT      = chInputs.length ? chInputs[0].querySelector('.as-ch-title')?.value?.trim() : '';
+  const chC      = chInputs.length ? chInputs[0].querySelector('.as-ch-content')?.value?.trim() : '';
+  const chAff    = chInputs.length ? chInputs[0].querySelector('.as-ch-aff')?.value?.trim() : '';
   const seriesId = v('as-series').trim();
   const seriesOrder = parseInt(v('as-series-order')) || 1;
+
+  // Build all chapters
+  const allChapters = [];
+  document.querySelectorAll('.as-ch-item').forEach((item, idx) => {
+    const t = item.querySelector('.as-ch-title')?.value?.trim() || '';
+    const c = item.querySelector('.as-ch-content')?.value?.trim() || '';
+    const a = item.querySelector('.as-ch-aff')?.value?.trim() || '';
+    if (t || c) {
+      const ch = { id: idx + 1, title: t || `Chương ${idx + 1}`, content: c };
+      if (a) ch.affiliateUrl = a;
+      allChapters.push(ch);
+    }
+  });
 
   const btn = document.getElementById('as-btn');
   btn.disabled = true; btn.textContent = '⏳ Đang lưu…';
@@ -850,9 +921,7 @@ async function doAddStory() {
     let sid = baseId, n = 2;
     while (stories.find(s => s.id === sid)) sid = baseId + '-' + (n++);
 
-    const ch1 = (chT && chC) ? { id:1, title:chT, content:chC } : null;
-    if (ch1 && chAff) ch1.affiliateUrl = chAff;
-    const chapters = ch1 ? [ch1] : [];
+    const chapters = allChapters.length ? allChapters : [];
     const entry = { id:sid, title, author, cover, description:desc,
                     status, source, genre, genres:[genre,...tags], tags,
                     hidden:false, chapters };
@@ -1136,6 +1205,257 @@ function doSearch() {
   const q = document.getElementById('search-input').value.trim();
   if (q) location.href = 'index.html?search=' + encodeURIComponent(q);
 }
+
+// ══════════════════════════════════════════════════════════════
+// ── Multi-chapter management ──────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+let _asChapters = []; // [{title, content, aff}]
+
+function _renderChapterList() {
+  const wrap  = document.getElementById('as-chapters-list');
+  const count = document.getElementById('as-ch-count');
+  if (!wrap) return;
+  if (count) count.textContent = `(${_asChapters.length} chương)`;
+
+  if (!_asChapters.length) {
+    wrap.innerHTML = `<div style="text-align:center;padding:1rem;color:var(--text3);font-size:.82rem;border:1.5px dashed var(--border);border-radius:8px;margin-bottom:.4rem">
+      Chưa có chương nào. Bấm "➕ Thêm chương" hoặc upload file Word.
+    </div>`;
+    return;
+  }
+
+  wrap.innerHTML = _asChapters.map((ch, i) => `
+    <div class="as-ch-item" data-idx="${i}" style="border:1.5px solid var(--border);border-radius:10px;padding:.85rem .95rem;margin-bottom:.55rem;background:#fff">
+      <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.6rem">
+        <span style="background:var(--primary);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;flex-shrink:0">${i+1}</span>
+        <input class="af-inp as-ch-title" value="${_esc(ch.title)}" placeholder="Tên chương ${i+1}"
+          style="flex:1;padding:.38rem .6rem"
+          oninput="_asChapters[${i}].title=this.value">
+        <button type="button" onclick="_moveChapter(${i},-1)" ${i===0?'disabled':''} title="Lên"
+          style="padding:.25rem .5rem;border:1.5px solid var(--border2);border-radius:6px;background:#fff;cursor:pointer;font-size:.78rem;opacity:${i===0?.4:1}">▲</button>
+        <button type="button" onclick="_moveChapter(${i},1)" ${i===_asChapters.length-1?'disabled':''} title="Xuống"
+          style="padding:.25rem .5rem;border:1.5px solid var(--border2);border-radius:6px;background:#fff;cursor:pointer;font-size:.78rem;opacity:${i===_asChapters.length-1?.4:1}">▼</button>
+        <button type="button" onclick="_removeChapter(${i})" title="Xoá chương"
+          style="padding:.25rem .5rem;border:1.5px solid #fecaca;border-radius:6px;background:#fef2f2;cursor:pointer;font-size:.78rem;color:#dc2626">🗑</button>
+      </div>
+      <div style="margin-bottom:.45rem">
+        <div style="font-size:.73rem;font-weight:600;color:var(--text2);margin-bottom:.2rem">🔗 Link affiliate (tuỳ chọn)</div>
+        <input class="af-inp as-ch-aff" value="${_esc(ch.aff||'')}" type="url" placeholder="https://shopee.vn/…"
+          style="padding:.36rem .6rem;font-size:.81rem"
+          oninput="_asChapters[${i}].aff=this.value">
+      </div>
+      <div>
+        <div style="font-size:.73rem;font-weight:600;color:var(--text2);margin-bottom:.2rem">Nội dung</div>
+        <textarea class="af-inp as-ch-content" rows="6" placeholder="Nội dung chương ${i+1}…"
+          style="font-size:.83rem"
+          oninput="_asChapters[${i}].content=this.value">${_esc(ch.content||'')}</textarea>
+      </div>
+    </div>`).join('');
+}
+
+function _esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function _addChapter(data) {
+  _asChapters.push(data || { title: `Chương ${_asChapters.length + 1}`, content: '', aff: '' });
+  _renderChapterList();
+  // Scroll to the new chapter
+  setTimeout(() => {
+    const items = document.querySelectorAll('.as-ch-item');
+    if (items.length) items[items.length-1].scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }, 50);
+}
+
+function _removeChapter(idx) {
+  _asChapters.splice(idx, 1);
+  _renderChapterList();
+}
+
+function _moveChapter(idx, dir) {
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= _asChapters.length) return;
+  [_asChapters[idx], _asChapters[newIdx]] = [_asChapters[newIdx], _asChapters[idx]];
+  _renderChapterList();
+}
+
+// ══════════════════════════════════════════════════════════════
+// ── Word document parser ──────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+
+async function _parseWordDoc(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const statusEl = document.getElementById('as-word-status');
+  if (statusEl) statusEl.textContent = '⏳ Đang đọc file…';
+
+  try {
+    if (typeof mammoth === 'undefined') throw new Error('Thư viện mammoth chưa tải. Vui lòng tải lại trang.');
+
+    const arrayBuffer = await file.arrayBuffer();
+    const result = await mammoth.extractRawText({ arrayBuffer });
+    const rawText = result.value;
+
+    // Parse chapters: split by "===" separator or heading lines "Chương X"
+    const parsed = _parseChaptersFromText(rawText);
+    if (!parsed.length) throw new Error('Không tìm thấy chương nào. Kiểm tra lại format file (xem form mẫu).');
+
+    _asChapters = parsed;
+    _renderChapterList();
+    if (statusEl) statusEl.textContent = `✅ Đã tải ${parsed.length} chương.`;
+    input.value = '';
+  } catch(e) {
+    if (statusEl) statusEl.textContent = '❌ ' + e.message;
+  }
+}
+
+function _parseChaptersFromText(text) {
+  const chapters = [];
+  // Normalize line endings
+  const lines = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
+
+  let curTitle = '', curAff = '', curLines = [];
+
+  const _flush = () => {
+    const content = curLines.join('\n').trim();
+    if (curTitle || content) {
+      chapters.push({ title: curTitle || `Chương ${chapters.length + 1}`, content, aff: curAff });
+    }
+    curTitle = ''; curAff = ''; curLines = [];
+  };
+
+  // Detect chapter separator: "===" line OR line starting with "Chương "
+  const isChapterHeading = l => /^(===|---chapter|chapter\s*\d)/i.test(l.trim())
+    || /^chương\s+\d+/i.test(l.trim())
+    || /^ch\.\s*\d+/i.test(l.trim());
+
+  const isAffiliate = l => /^(affiliate|link|aff|url)\s*[:：]/i.test(l.trim());
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const trimmed = line.trim();
+
+    if (trimmed === '===') {
+      // Explicit separator: flush current, next non-empty line is title
+      _flush();
+      continue;
+    }
+
+    if (isChapterHeading(trimmed) && curLines.join('').trim() !== '') {
+      // New chapter heading encountered after content → flush previous
+      _flush();
+    }
+
+    if (isChapterHeading(trimmed) && !curTitle) {
+      curTitle = trimmed;
+      continue;
+    }
+
+    if (isAffiliate(trimmed)) {
+      curAff = trimmed.replace(/^[^:：]+[:：]\s*/,'').trim();
+      continue;
+    }
+
+    curLines.push(line);
+  }
+  _flush();
+
+  // Remove leading/trailing empty chapters
+  return chapters.filter(c => c.title || c.content.trim());
+}
+
+function _downloadWordTemplate() {
+  const tpl = `Hướng dẫn: Mỗi chương bắt đầu bằng dòng "Chương X: Tên chương", sau đó là nội dung.
+Tuỳ chọn: thêm dòng AFFILIATE: https://... ngay sau tiêu đề để gắn link.
+Phân cách chương bằng dòng "===" (3 dấu bằng).
+
+===
+Chương 1: Khởi Đầu
+AFFILIATE: https://shopee.vn/...
+
+Nội dung chương 1 ở đây. Bạn có thể viết nhiều đoạn văn.
+Dùng *chữ nghiêng* hoặc _chữ nghiêng_ để in nghiêng.
+Dùng **chữ đậm** để in đậm.
+
+===
+Chương 2: Bước Tiếp Theo
+
+Nội dung chương 2 ở đây...
+
+===
+Chương 3: Hành Trình Mới
+
+Nội dung chương 3...
+`;
+  const blob = new Blob(['﻿' + tpl], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'mau-chuong-truyen.txt';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// ══════════════════════════════════════════════════════════════
+// ── Inline series creation ────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+
+function _toggleInlineSeries(show) {
+  const el = document.getElementById('as-series-inline');
+  if (!el) return;
+  const visible = show !== undefined ? show : el.style.display === 'none';
+  el.style.display = visible ? 'block' : 'none';
+}
+
+async function _createSeriesInline() {
+  const titleEl  = document.getElementById('as-ser-title');
+  const alertEl  = document.getElementById('as-ser-alert');
+  const title    = titleEl?.value?.trim();
+  if (!title) { if (alertEl) alertEl.innerHTML = '<span style="color:#dc2626">❌ Vui lòng nhập tên series.</span>'; return; }
+
+  if (alertEl) alertEl.innerHTML = '<span style="color:var(--text3)">⏳ Đang tạo series…</span>';
+
+  try {
+    // Load latest series data
+    await _loadSeries();
+
+    const author = document.getElementById('as-ser-author')?.value?.trim() || document.getElementById('as-author')?.value?.trim() || '';
+    const genre  = document.getElementById('as-ser-genre')?.value || 'Tiên Hiệp';
+    const status = document.getElementById('as-ser-status')?.value || 'Đang ra';
+
+    // Generate slug ID
+    let baseId = title.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40) || 'series';
+    let sid = baseId, n = 2;
+    while (_SER.find(s => s.id === sid)) sid = baseId + '-' + (n++);
+
+    const entry = { id: sid, title, author, genre: [genre], status, description: '', cover: '' };
+    _SER.push(entry);
+    await _saveSeries(`Tạo series: ${title}`);
+
+    // Update dropdowns
+    populateSeriesSelect();
+    renderSeriesList();
+
+    // Auto-select the new series
+    const sel = document.getElementById('as-series');
+    if (sel) sel.value = sid;
+
+    // Auto-fill order as next tap
+    const storyCount = _S.filter(s => s.seriesId === sid).length;
+    const orderEl = document.getElementById('as-series-order');
+    if (orderEl) orderEl.value = storyCount + 1;
+
+    // Hide inline form
+    _toggleInlineSeries(false);
+    if (titleEl) titleEl.value = '';
+    if (alertEl) alertEl.innerHTML = '';
+    showAlert('as-alert', `✅ Đã tạo series "${title}".`, true);
+  } catch(e) {
+    if (alertEl) alertEl.innerHTML = `<span style="color:#dc2626">❌ ${e.message}</span>`;
+  }
+}
+
+// Init chapter list on load
+document.addEventListener('DOMContentLoaded', () => _renderChapterList());
 
 // ── Series management ──────────────────────────────────────
 const SERIES_FILE = 'data/series.json';
