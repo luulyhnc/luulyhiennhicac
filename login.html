@@ -204,16 +204,63 @@
             sessionStorage.removeItem('_login_redir');
             location.href = redir;
           }, 800);
-        } else {
-          showLoginAlert(result.message || 'Thông tin đăng nhập không chính xác.');
-          btn.disabled = false;
-          btn.textContent = 'Đăng nhập';
+          return;
         }
-      } catch (e) {
-        showLoginAlert('Đã xảy ra lỗi. Vui lòng thử lại.');
-        btn.disabled = false;
-        btn.textContent = 'Đăng nhập';
-      }
+      } catch (e) { /* fall through to GitHub fallback */ }
+
+      // ── GitHub members.json cross-device fallback ─────────
+      // If LocalAuth failed (user not in this device's localStorage),
+      // check data/members.json on GitHub which may have their passwordHash
+      // synced from their original registration device.
+      try {
+        const mbRes = await fetch('data/members.json?_=' + Date.now(), { cache: 'no-store' });
+        if (mbRes.ok) {
+          const members = await mbRes.json();
+          const id = identifier.toLowerCase().trim();
+          const ghUser = members.find(function(m) {
+            return m.email === id || (m.username && m.username.toLowerCase() === id);
+          });
+          if (ghUser && ghUser.passwordHash) {
+            // Hash with same salt as LocalAuth
+            const hash = await LocalAuth.hashPassword(password);
+            if (hash === ghUser.passwordHash) {
+              // Save user to this device's localStorage so future logins work
+              var _lkey = '_llhnc_lusers';
+              var _lusers = [];
+              try { _lusers = JSON.parse(localStorage.getItem(_lkey) || '[]'); } catch(_) {}
+              var _exists = _lusers.find(function(u) {
+                return u.email === ghUser.email || u.username.toLowerCase() === (ghUser.username||'').toLowerCase();
+              });
+              if (!_exists) {
+                _lusers.push({
+                  id:           ghUser.id,
+                  email:        ghUser.email,
+                  username:     ghUser.username,
+                  fullName:     ghUser.fullName || '',
+                  passwordHash: hash,
+                  role:         ghUser.role || 'reader',
+                  createdAt:    ghUser.createdAt || new Date().toISOString(),
+                });
+                localStorage.setItem(_lkey, JSON.stringify(_lusers));
+              }
+              // Generate session token and save session
+              var _tok = 'local_' + (typeof crypto.randomUUID === 'function' ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36));
+              MEMBER.save(_tok, { id: ghUser.id, email: ghUser.email, username: ghUser.username, role: ghUser.role || 'reader' }, remember);
+              showLoginAlert('Đăng nhập thành công! Đang chuyển hướng…', 'success');
+              setTimeout(function() {
+                var redir = sessionStorage.getItem('_login_redir') || 'index.html';
+                sessionStorage.removeItem('_login_redir');
+                location.href = redir;
+              }, 800);
+              return;
+            }
+          }
+        }
+      } catch (_) { /* GitHub fetch failed — show normal error */ }
+
+      showLoginAlert('Thông tin đăng nhập không chính xác. Nếu bạn đã đăng ký trên thiết bị khác, vui lòng đợi Admin đồng bộ tài khoản.');
+      btn.disabled = false;
+      btn.textContent = 'Đăng nhập';
     }
   }
 

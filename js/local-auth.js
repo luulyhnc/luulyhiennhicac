@@ -108,7 +108,13 @@ const LocalAuth = (() => {
     }));
   }
 
-  return { register, login, setRole, getAllUsers };
+  /**
+   * Hash a plain-text password (same algorithm as login).
+   * Used by cross-device login fallback in login.html.
+   */
+  async function hashPassword(pw) { return _hashPw(pw); }
+
+  return { register, login, setRole, getAllUsers, hashPassword };
 })();
 
 window.LocalAuth = LocalAuth;

@@ -64,23 +64,24 @@ const CHAPTERS_PER_PAGE    = 50;
         el.style.overflow = ''; el.style.borderRight = ''; el.style.whiteSpace = '';
 
         const color = s.color || '#3ab3ca';
-        const fx    = s.logoEffect || 'normal';
-        if (fx === 'bold')     { el.style.fontWeight = '900'; }
-        else if (fx === 'italic')  { el.style.fontStyle = 'italic'; }
-        else if (fx === 'bold-i')  { el.style.fontWeight = '900'; el.style.fontStyle = 'italic'; }
-        else if (fx === '3d')      { el.style.textShadow = `2px 2px 0 rgba(0,0,0,.22),4px 4px 0 rgba(0,0,0,.1)`; }
-        else if (fx === 'gradient') {
-          el.style.background = `linear-gradient(135deg,${color} 0%,#e74c8b 50%,${color} 100%)`;
-          el.style.webkitBackgroundClip = 'text'; el.style.webkitTextFillColor = 'transparent';
-          el.style.backgroundClip = 'text';
-        }
-        else if (fx === 'anim') {
+        // Support both legacy string and new array format
+        const fxRaw = s.logoEffect || [];
+        const fx    = Array.isArray(fxRaw) ? fxRaw : (fxRaw === 'normal' ? [] : [fxRaw]);
+        // Apply multiple effects
+        if (fx.includes('bold')   || fx.includes('bold-i')) el.style.fontWeight = '900';
+        if (fx.includes('italic') || fx.includes('bold-i')) el.style.fontStyle  = 'italic';
+        if (fx.includes('3d')) el.style.textShadow = `2px 2px 0 rgba(0,0,0,.22),4px 4px 0 rgba(0,0,0,.1)`;
+        if (fx.includes('anim')) {
           el.style.background = `linear-gradient(90deg,${color},#e74c8b,#8e44ad,${color})`;
           el.style.backgroundSize = '300%';
           el.style.webkitBackgroundClip = 'text'; el.style.webkitTextFillColor = 'transparent';
           el.style.backgroundClip = 'text'; el.style.animation = 'logo-shimmer 3s linear infinite';
+        } else if (fx.includes('gradient')) {
+          el.style.background = `linear-gradient(135deg,${color} 0%,#e74c8b 50%,${color} 100%)`;
+          el.style.webkitBackgroundClip = 'text'; el.style.webkitTextFillColor = 'transparent';
+          el.style.backgroundClip = 'text';
         }
-        else if (fx === 'typing') {
+        if (fx.includes('typing')) {
           el.style.overflow = 'hidden'; el.style.borderRight = `2px solid ${color}`;
           el.style.whiteSpace = 'nowrap'; el.style.display = 'inline-block';
           el.style.animation = 'logo-typing 3.5s steps(20) infinite';
