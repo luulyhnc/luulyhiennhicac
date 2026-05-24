@@ -50,6 +50,12 @@
     .af-hint { font-size:.72rem; color:var(--text3); margin-top:.2rem; }
     .g2 { display:grid; grid-template-columns:1fr 1fr; gap:.7rem; }
     .g3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:.7rem; }
+    @media(max-width:860px) {
+      #pnl-series > div[style*="grid-template-columns:1fr 360px"] {
+        grid-template-columns: 1fr !important;
+      }
+      #pnl-series [style*="position:sticky"] { position:relative !important; top:0 !important; }
+    }
 
     /* ── Table ── */
     .adm-tbl { width:100%; border-collapse:collapse; font-size:.83rem; }
@@ -389,46 +395,70 @@
     <!-- ══ SERIES ══ -->
     <div class="adm-panel" id="pnl-series">
 
-      <!-- Create form -->
-      <div class="adm-card" style="margin-bottom:.8rem">
-        <div class="adm-card-title">➕ Tạo Series mới</div>
-        <div id="ser-alert" class="adm-alert"></div>
-        <div class="g2">
-          <div class="af-g"><label>Tên series *</label>
-            <input class="af-inp" id="ser-title" placeholder="VD: Tam Giới Kiếm Thần"></div>
-          <div class="af-g"><label>Tác giả</label>
-            <input class="af-inp" id="ser-author" placeholder="Tên tác giả"></div>
-        </div>
-        <div class="af-g"><label>Ảnh bìa series</label>
-          <div style="display:flex;gap:.5rem;align-items:flex-start">
-            <div style="flex:1">
-              <input class="af-inp" id="ser-cover" type="url" placeholder="https://…/cover.jpg"
-                     oninput="const p=document.getElementById('ser-prev');p.src=this.value;p.style.display=this.value?'block':'none'">
-              <label style="display:inline-flex;align-items:center;gap:.3rem;cursor:pointer;margin-top:.28rem;padding:.22rem .65rem;background:var(--bg2);border:1.5px solid var(--border2);border-radius:6px;font-size:.75rem;font-weight:600">
-                📂 Upload
-                <input type="file" accept="image/*" style="display:none" onchange="_uploadCoverFile(this,'ser-cover','_ser_cu')">
-              </label>
-              <span id="_ser_cu" style="font-size:.71rem;color:var(--text3);margin-left:.3rem"></span>
+      <!-- Two-column layout: form + live preview -->
+      <div style="display:grid;grid-template-columns:1fr 360px;gap:1rem;align-items:start;margin-bottom:.8rem">
+
+        <!-- LEFT: Create form -->
+        <div class="adm-card">
+          <div class="adm-card-title">➕ Tạo Series mới</div>
+          <div id="ser-alert" class="adm-alert"></div>
+          <div class="g2">
+            <div class="af-g"><label>Tên series *</label>
+              <input class="af-inp" id="ser-title" placeholder="VD: Tam Giới Kiếm Thần"
+                     oninput="renderSeriesPreview()"></div>
+            <div class="af-g"><label>Tác giả</label>
+              <input class="af-inp" id="ser-author" placeholder="Tên tác giả"
+                     oninput="renderSeriesPreview()"></div>
+          </div>
+          <div class="af-g"><label>Ảnh bìa series</label>
+            <div style="display:flex;gap:.5rem;align-items:flex-start">
+              <div style="flex:1">
+                <input class="af-inp" id="ser-cover" type="url" placeholder="https://…/cover.jpg"
+                       oninput="renderSeriesPreview()">
+                <label style="display:inline-flex;align-items:center;gap:.3rem;cursor:pointer;margin-top:.28rem;padding:.22rem .65rem;background:var(--bg2);border:1.5px solid var(--border2);border-radius:6px;font-size:.75rem;font-weight:600">
+                  📂 Upload
+                  <input type="file" accept="image/*" style="display:none" onchange="_uploadCoverFile(this,'ser-cover','_ser_cu');renderSeriesPreview()">
+                </label>
+                <span id="_ser_cu" style="font-size:.71rem;color:var(--text3);margin-left:.3rem"></span>
+              </div>
             </div>
-            <img id="ser-prev" src="" alt="" style="width:44px;height:60px;object-fit:cover;border-radius:4px;border:1.5px solid var(--border);display:none;flex-shrink:0">
+          </div>
+          <div class="af-g"><label>Giới thiệu series</label>
+            <textarea class="af-inp" id="ser-desc" rows="3" placeholder="Mô tả ngắn về series…"
+                      oninput="renderSeriesPreview()"></textarea></div>
+          <div class="g3">
+            <div class="af-g"><label>Thể loại</label>
+              <select class="af-inp" id="ser-genre" onchange="renderSeriesPreview()">
+                <option>Tiên Hiệp</option><option>Huyền Huyễn</option><option>Ngôn Tình</option>
+                <option>Đô Thị</option><option>Nữ Cường</option><option>Kiếm Hiệp</option>
+                <option>Lịch Sử</option><option>Khác</option>
+              </select></div>
+            <div class="af-g"><label>Trạng thái</label>
+              <select class="af-inp" id="ser-status" onchange="renderSeriesPreview()">
+                <option>Đang ra</option><option>Hoàn thành</option><option>Tạm dừng</option>
+              </select></div>
+            <div class="af-g" style="display:flex;align-items:flex-end">
+              <button class="btn-auth btn-auth-primary" id="ser-btn" onclick="doAddSeries()"
+                      style="width:100%">💾 Tạo Series</button>
+            </div>
           </div>
         </div>
-        <div class="af-g"><label>Giới thiệu series</label>
-          <textarea class="af-inp" id="ser-desc" rows="3" placeholder="Mô tả ngắn về series…"></textarea></div>
-        <div class="g3">
-          <div class="af-g"><label>Thể loại</label>
-            <select class="af-inp" id="ser-genre">
-              <option>Tiên Hiệp</option><option>Huyền Huyễn</option><option>Ngôn Tình</option>
-              <option>Đô Thị</option><option>Nữ Cường</option><option>Kiếm Hiệp</option>
-              <option>Lịch Sử</option><option>Khác</option>
-            </select></div>
-          <div class="af-g"><label>Trạng thái</label>
-            <select class="af-inp" id="ser-status">
-              <option>Đang ra</option><option>Hoàn thành</option><option>Tạm dừng</option>
-            </select></div>
-          <div class="af-g" style="display:flex;align-items:flex-end">
-            <button class="btn-auth btn-auth-primary" id="ser-btn" onclick="doAddSeries()"
-                    style="width:100%">💾 Tạo Series</button>
+
+        <!-- RIGHT: Live preview -->
+        <div style="position:sticky;top:80px">
+          <div class="adm-card" style="padding:.85rem">
+            <div style="font-size:.75rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.7rem;display:flex;align-items:center;gap:.4rem">
+              👁 Xem trước trang Series
+            </div>
+            <div id="ser-preview-wrap" style="border:1.5px solid var(--border);border-radius:10px;overflow:hidden;background:#fafbfc">
+              <!-- Rendered by renderSeriesPreview() -->
+              <div style="padding:1.5rem;text-align:center;color:var(--text3);font-size:.8rem">
+                Điền thông tin bên trái để xem preview
+              </div>
+            </div>
+            <div style="margin-top:.6rem;font-size:.7rem;color:var(--text3);text-align:center">
+              Cập nhật tự động · <a id="ser-preview-link" href="#" target="_blank" style="color:var(--primary);display:none">🔗 Mở trang series</a>
+            </div>
           </div>
         </div>
       </div>
@@ -784,6 +814,7 @@ function showTab(t) {
   document.getElementById('pnl-' + t)?.classList.add('on');
   document.getElementById('tbtn-' + t)?.classList.add('active');
   if (t === 'copylogs') _initCopyLogsTab();
+  if (t === 'series')   setTimeout(renderSeriesPreview, 50);
 }
 
 // ── Stories (GitHub) ───────────────────────────────────────
@@ -1722,6 +1753,96 @@ function populateSeriesSelect() {
       + _SER.map(s => `<option value="${esc(s.id)}">${esc(s.title)}</option>`).join('');
     if (cur) sel.value = cur;
   });
+}
+
+// ── Series live preview ────────────────────────────────────────
+function renderSeriesPreview() {
+  const wrap   = document.getElementById('ser-preview-wrap');
+  const link   = document.getElementById('ser-preview-link');
+  if (!wrap) return;
+
+  const title  = (document.getElementById('ser-title')?.value  || '').trim();
+  const author = (document.getElementById('ser-author')?.value || '').trim();
+  const cover  = (document.getElementById('ser-cover')?.value  || '').trim();
+  const desc   = (document.getElementById('ser-desc')?.value   || '').trim();
+  const genre  = document.getElementById('ser-genre')?.value   || '';
+  const status = document.getElementById('ser-status')?.value  || 'Đang ra';
+
+  if (!title && !cover) {
+    wrap.innerHTML = '<div style="padding:1.5rem;text-align:center;color:var(--text3);font-size:.8rem">Điền thông tin bên trái để xem preview</div>';
+    if (link) link.style.display = 'none';
+    return;
+  }
+
+  // Generate slug for preview link
+  const slug = title.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40) || 'series';
+
+  // Sample stories from _S that belong to no series (for preview)
+  const storyCount = _S.filter(s => s.seriesId === slug).length;
+  const sampleStories = _S.slice(0,3);
+
+  const statusColor = status === 'Hoàn thành' ? '#27ae60' : status === 'Tạm dừng' ? '#e67e22' : '#3ab3ca';
+  const statusBg    = status === 'Hoàn thành' ? '#e8f5e9' : status === 'Tạm dừng' ? '#fff3e0' : '#e0f4f8';
+
+  wrap.innerHTML = `
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,#1a2535,#2c3e50);padding:1rem;display:flex;gap:.75rem;align-items:flex-start">
+      ${cover
+        ? `<img src="${esc(cover)}" style="width:56px;height:76px;object-fit:cover;border-radius:5px;border:2px solid rgba(255,255,255,.2);flex-shrink:0"
+              onerror="this.style.display='none'">`
+        : `<div style="width:56px;height:76px;background:rgba(255,255,255,.1);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0">📚</div>`}
+      <div style="min-width:0;flex:1">
+        <div style="font-size:.95rem;font-weight:800;color:#fff;margin-bottom:.25rem;line-height:1.3;word-break:break-word">
+          ${title ? esc(title) : '<span style="opacity:.4;font-style:italic">Tên series…</span>'}
+        </div>
+        ${author ? `<div style="font-size:.72rem;color:rgba(255,255,255,.65);margin-bottom:.3rem">✍️ ${esc(author)}</div>` : ''}
+        <div style="display:flex;gap:.3rem;flex-wrap:wrap;align-items:center">
+          ${genre ? `<span style="font-size:.66rem;background:rgba(255,255,255,.15);color:#fff;padding:.1rem .4rem;border-radius:10px">${esc(genre)}</span>` : ''}
+          <span style="font-size:.66rem;background:${statusBg};color:${statusColor};padding:.1rem .4rem;border-radius:10px;font-weight:600">${esc(status)}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats row -->
+    <div style="display:flex;gap:0;border-bottom:1.5px solid var(--border)">
+      <div style="flex:1;text-align:center;padding:.55rem;border-right:1px solid var(--border)">
+        <div style="font-size:1rem;font-weight:800;color:var(--primary)">${storyCount||0}</div>
+        <div style="font-size:.65rem;color:var(--text3)">Số tập</div>
+      </div>
+      <div style="flex:1;text-align:center;padding:.55rem">
+        <div style="font-size:1rem;font-weight:800;color:var(--primary)">—</div>
+        <div style="font-size:.65rem;color:var(--text3)">Lượt đọc</div>
+      </div>
+    </div>
+
+    <!-- Description -->
+    ${desc ? `<div style="padding:.65rem .85rem;font-size:.76rem;color:var(--text2);line-height:1.6;border-bottom:1.5px solid var(--border)">${esc(desc)}</div>` : ''}
+
+    <!-- Action button -->
+    <div style="padding:.6rem .85rem;border-bottom:1.5px solid var(--border)">
+      <button style="width:100%;padding:.4rem;background:var(--primary);color:#fff;border:none;border-radius:7px;font-size:.78rem;font-weight:600;cursor:default">▶ Đọc từ Tập 1</button>
+    </div>
+
+    <!-- Story list sample -->
+    <div style="padding:.55rem .75rem">
+      <div style="font-size:.7rem;font-weight:700;color:var(--text3);margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.04em">📚 Danh sách tập</div>
+      ${sampleStories.length
+        ? sampleStories.map((s,i) => `
+            <div style="display:flex;gap:.5rem;align-items:center;padding:.35rem .1rem;border-bottom:1px solid var(--border);last-child:border-none">
+              <span style="background:var(--primary);color:#fff;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:700;flex-shrink:0">Tập ${i+1}</span>
+              <div style="min-width:0">
+                <div style="font-size:.74rem;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(s.title)}</div>
+                <div style="font-size:.65rem;color:var(--text3)">${s.chapters?.length||0} chương</div>
+              </div>
+            </div>`).join('')
+        : `<div style="font-size:.73rem;color:var(--text3);text-align:center;padding:.5rem">Chưa có tập nào — thêm truyện vào series sau khi tạo</div>`}
+    </div>`;
+
+  // Update preview link
+  if (link) {
+    link.href = `series.html#${slug}`;
+    link.style.display = 'inline';
+  }
 }
 
 async function doAddSeries() {
