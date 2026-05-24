@@ -203,8 +203,14 @@
 
         <div class="af-g"><label>Ảnh bìa (URL hình ảnh)</label>
           <div style="display:flex;gap:.6rem;align-items:flex-start">
-            <input class="af-inp" id="as-cover" type="url" placeholder="https://…/cover.jpg"
-                   oninput="prevCover(this.value)" style="flex:1">
+            <div style="flex:1">
+              <input class="af-inp" id="as-cover" type="url" placeholder="https://…/cover.jpg"
+                     oninput="prevCover(this.value)">
+              <div class="af-hint" style="margin-top:.3rem">
+                📐 Kích thước khuyến nghị: <strong>300×400px</strong> (tỉ lệ 3:4) — tối thiểu 200×270px.<br>
+                🖼️ Định dạng: JPG / PNG / WebP. Chất lượng tốt nhất: ≥600px chiều rộng, dung lượng &lt;2MB.
+              </div>
+            </div>
             <img id="as-prev" src="" alt="" style="width:48px;height:65px;object-fit:cover;
                  border-radius:5px;border:1.5px solid var(--border);display:none;flex-shrink:0">
           </div>
@@ -243,9 +249,16 @@
           <div style="margin-top:.65rem">
             <div class="af-g"><label>Tên chương</label>
               <input class="af-inp" id="as-ch-t" placeholder="Chương 1: Khởi đầu"></div>
+            <div class="af-g">
+              <label>🔗 Link tiếp thị liên kết <span style="font-weight:400;color:var(--text3)">(hiển thị trong màn hình chờ khi chuyển chương)</span></label>
+              <input class="af-inp" id="as-ch-aff" type="url" placeholder="https://shopee.vn/… hoặc link affiliate bất kỳ">
+              <div class="af-hint">Để trống nếu không có. Link sẽ xuất hiện dạng banner quảng cáo trong màn hình đếm ngược giữa các chương.</div>
+            </div>
             <div class="af-g"><label>Nội dung chương</label>
               <textarea class="af-inp" id="as-ch-c" rows="10"
-                        placeholder="Nhập nội dung chương đầu tiên…"></textarea></div>
+                        placeholder="Nhập nội dung chương đầu tiên…"></textarea>
+              <div class="af-hint">Dùng <code style="background:var(--bg2);padding:.1rem .3rem;border-radius:4px">*văn bản*</code> hoặc <code style="background:var(--bg2);padding:.1rem .3rem;border-radius:4px">_văn bản_</code> để in nghiêng khi hiển thị.</div>
+            </div>
           </div>
         </details>
 
@@ -550,7 +563,7 @@ function prevCover(url) {
 }
 
 function clearAddForm() {
-  ['as-title','as-author','as-cover','as-desc','as-tags','as-ch-t','as-ch-c'].forEach(id => {
+  ['as-title','as-author','as-cover','as-desc','as-tags','as-ch-t','as-ch-aff','as-ch-c'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
   document.getElementById('as-prev').style.display = 'none';
@@ -571,6 +584,7 @@ async function doAddStory() {
   const tags   = v('as-tags').split(',').map(t=>t.trim()).filter(Boolean);
   const chT    = v('as-ch-t').trim();
   const chC    = v('as-ch-c').trim();
+  const chAff  = v('as-ch-aff').trim();
 
   const btn = document.getElementById('as-btn');
   btn.disabled = true; btn.textContent = '⏳ Đang lưu…';
@@ -585,7 +599,9 @@ async function doAddStory() {
     let sid = baseId, n = 2;
     while (stories.find(s => s.id === sid)) sid = baseId + '-' + (n++);
 
-    const chapters = (chT && chC) ? [{ id:1, title:chT, content:chC }] : [];
+    const ch1 = (chT && chC) ? { id:1, title:chT, content:chC } : null;
+    if (ch1 && chAff) ch1.affiliateUrl = chAff;
+    const chapters = ch1 ? [ch1] : [];
     stories.push({ id:sid, title, author, cover, description:desc,
                    status, source, genre, genres:[genre,...tags], tags,
                    hidden:false, chapters });

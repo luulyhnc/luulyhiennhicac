@@ -453,7 +453,8 @@ async function _saveCh(storyId, chapterId) {
 function openChapterEditorInline(storyId, chapterId) {
   const body = document.getElementById('chapter-body');
   if (!body || document.getElementById('_cie')) return;
-  const origText = body.innerText;
+  // Use raw content from context to preserve markdown (*italic*, **bold**)
+  const origText = window._currentReaderCtx?.chapter?.content ?? body.innerText;
   body.style.display = 'none';
   body.insertAdjacentHTML('afterend', `
     <div id="_cie" style="font-family:'Inter',sans-serif">

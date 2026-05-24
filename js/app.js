@@ -377,7 +377,7 @@ async function loadReaderPage() {
 
   root.innerHTML = `
     ${navBtns(false)}
-    <div class="reader-body" id="chapter-body">${escHtml(chapter.content)}</div>
+    <div class="reader-body" id="chapter-body">${renderChapterContent(chapter.content)}</div>
     ${navBtns(true)}
   `;
 
@@ -390,7 +390,20 @@ async function loadReaderPage() {
 //  INTERSTITIAL NAVIGATION
 // ══════════════════════════════════════════════
 function goToChapter(storyId, chapterId) {
-  const ad = AFFILIATE_ADS[Math.floor(Math.random() * AFFILIATE_ADS.length)];
+  // Use chapter-specific affiliate URL if available, otherwise fall back to config
+  let ad = AFFILIATE_ADS[Math.floor(Math.random() * AFFILIATE_ADS.length)];
+  if (_storiesCache) {
+    const story = _storiesCache.find(s => s.id === storyId);
+    const ch    = story?.chapters.find(c => c.id === chapterId);
+    if (ch?.affiliateUrl) {
+      const domain = (() => { try { return new URL(ch.affiliateUrl).hostname.replace(/^www\./,''); } catch { return ch.affiliateUrl; } })();
+      ad = {
+        title: "🔗 " + domain,
+        desc:  "Ủng hộ tác giả — nhấn vào để ghé thăm trang đối tác!",
+        url:   ch.affiliateUrl
+      };
+    }
+  }
   showInterstitial(ad, () => {
     location.href = readerUrl(storyId, chapterId);
   });
@@ -477,6 +490,23 @@ function toggleFollow(id) {
 // ══════════════════════════════════════════════
 function escHtml(s) {
   return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+// Render chapter content with basic Markdown-lite:
+// **text** → <strong>, *text* / _text_ → <em>
+// Newlines preserved via CSS white-space:pre-wrap on .reader-body
+function renderChapterContent(raw) {
+  // 1. Escape HTML entities (XSS-safe)
+  let s = raw
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+  // 2. Bold: **text** (process before single *)
+  s = s.replace(/\*\*([^*\r\n]+)\*\*/g, "<strong>$1</strong>");
+  // 3. Italic: *text* or _text_ (single line only, no nesting)
+  s = s.replace(/\*([^*\r\n]+)\*/g, "<em>$1</em>");
+  s = s.replace(/_([^_\r\n]+)_/g, "<em>$1</em>");
+  return s;
 }
 
 function fmtNum(n) {
