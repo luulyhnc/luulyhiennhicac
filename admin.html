@@ -394,11 +394,11 @@
               <span style="font-size:.79rem;font-weight:600;color:var(--text2)">📄 Upload file Word:</span>
               <label style="display:inline-flex;align-items:center;gap:.3rem;cursor:pointer;padding:.3rem .75rem;background:var(--primary);color:#fff;border-radius:7px;font-size:.79rem;font-weight:600">
                 📂 Chọn file .docx
-                <input type="file" accept=".docx,.doc" style="display:none" id="as-word-input" onchange="_parseWordDoc(this)">
+                <input type="file" accept=".docx,.doc,.txt" style="display:none" id="as-word-input" onchange="_parseWordDoc(this)">
               </label>
               <button type="button" onclick="_downloadWordTemplate()"
                 style="padding:.3rem .75rem;background:#fff;border:1.5px solid var(--border2);border-radius:7px;cursor:pointer;font-size:.78rem;font-family:inherit;font-weight:500">
-                ⬇ Tải form mẫu
+                ⬇ Tải form mẫu (.html)
               </button>
               <span id="as-word-status" style="font-size:.75rem;color:var(--text3)"></span>
             </div>
@@ -1127,9 +1127,11 @@ async function doAddStory() {
     const t = item.querySelector('.as-ch-title')?.value?.trim() || '';
     const c = item.querySelector('.as-ch-content')?.value?.trim() || '';
     const a = item.querySelector('.as-ch-aff')?.value?.trim() || '';
+    const q = item.querySelector('.as-ch-quote')?.value?.trim() || '';
     if (t || c) {
       const ch = { id: idx + 1, title: t || `Chương ${idx + 1}`, content: c };
       if (a) ch.affiliateUrl = a;
+      if (q) ch.chapQuote = q;
       allChapters.push(ch);
     }
   });
@@ -1694,6 +1696,12 @@ function _renderChapterList() {
           style="padding:.25rem .5rem;border:1.5px solid #fecaca;border-radius:6px;background:#fef2f2;cursor:pointer;font-size:.78rem;color:#dc2626">🗑</button>
       </div>
       <div style="margin-bottom:.45rem">
+        <div style="font-size:.73rem;font-weight:600;color:var(--text2);margin-bottom:.2rem">💬 Câu dẫn chương <span style="font-weight:400;color:var(--text3)">(tuỳ chọn — trích dẫn / epigraph đầu chương)</span></div>
+        <input class="af-inp as-ch-quote" value="${_esc(ch.chapQuote||'')}" placeholder="VD: Có những người, gặp một lần là nhớ mãi…"
+          style="padding:.36rem .6rem;font-size:.81rem;font-style:italic"
+          oninput="_asChapters[${i}].chapQuote=this.value">
+      </div>
+      <div style="margin-bottom:.45rem">
         <div style="font-size:.73rem;font-weight:600;color:var(--text2);margin-bottom:.2rem">🔗 Link affiliate (tuỳ chọn)</div>
         <input class="af-inp as-ch-aff" value="${_esc(ch.aff||'')}" type="url" placeholder="https://shopee.vn/…"
           style="padding:.36rem .6rem;font-size:.81rem"
@@ -1713,7 +1721,7 @@ function _esc(s) {
 }
 
 function _addChapter(data) {
-  _asChapters.push(data || { title: `Chương ${_asChapters.length + 1}`, content: '', aff: '' });
+  _asChapters.push(data || { title: `Chương ${_asChapters.length + 1}`, content: '', aff: '', chapQuote: '' });
   _renderChapterList();
   // Scroll to the new chapter
   setTimeout(() => {
@@ -1745,18 +1753,28 @@ async function _parseWordDoc(input) {
   if (statusEl) statusEl.textContent = '⏳ Đang đọc file…';
 
   try {
-    if (typeof mammoth === 'undefined') throw new Error('Thư viện mammoth chưa tải. Vui lòng tải lại trang.');
+    // Structured .txt exported from HTML form template
+    if (file.name.endsWith('.txt') || file.type === 'text/plain') {
+      const text = await file.text();
+      if (text.includes('@@TRUYEN')) {
+        _parseStructuredTemplate(text);
+      } else {
+        // Plain text → parse chapters only (legacy format)
+        const parsed = _parseChaptersFromText(text);
+        if (!parsed.length) throw new Error('Không tìm thấy chương nào. Kiểm tra lại format file.');
+        _asChapters = parsed; _renderChapterList();
+        if (statusEl) statusEl.textContent = `✅ Đã tải ${parsed.length} chương.`;
+      }
+      input.value = ''; return;
+    }
 
+    // .docx / .doc → mammoth.js
+    if (typeof mammoth === 'undefined') throw new Error('Thư viện mammoth chưa tải. Vui lòng tải lại trang.');
     const arrayBuffer = await file.arrayBuffer();
     const result = await mammoth.extractRawText({ arrayBuffer });
-    const rawText = result.value;
-
-    // Parse chapters: split by "===" separator or heading lines "Chương X"
-    const parsed = _parseChaptersFromText(rawText);
+    const parsed = _parseChaptersFromText(result.value);
     if (!parsed.length) throw new Error('Không tìm thấy chương nào. Kiểm tra lại format file (xem form mẫu).');
-
-    _asChapters = parsed;
-    _renderChapterList();
+    _asChapters = parsed; _renderChapterList();
     if (statusEl) statusEl.textContent = `✅ Đã tải ${parsed.length} chương.`;
     input.value = '';
   } catch(e) {
@@ -1820,34 +1838,198 @@ function _parseChaptersFromText(text) {
 }
 
 function _downloadWordTemplate() {
-  const tpl = `Hướng dẫn: Mỗi chương bắt đầu bằng dòng "Chương X: Tên chương", sau đó là nội dung.
-Tuỳ chọn: thêm dòng AFFILIATE: https://... ngay sau tiêu đề để gắn link.
-Phân cách chương bằng dòng "===" (3 dấu bằng).
+  const html = `<!DOCTYPE html>
+<html lang="vi">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Form mẫu đăng truyện – Lưu Ly Hiền Nhi Các</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0f4f8;color:#1a2535;font-size:14px;padding:1rem}
+.w{max-width:760px;margin:0 auto}
+.card{background:#fff;border-radius:12px;padding:1.2rem 1.4rem;margin-bottom:1rem;box-shadow:0 2px 8px rgba(0,0,0,.06);border:1.5px solid #e0e8f0}
+h2{font-size:.9rem;font-weight:700;color:#2c3e50;margin-bottom:.8rem;padding-bottom:.4rem;border-bottom:2px solid #e0e8f0}
+.f{margin-bottom:.75rem}
+label{display:block;font-size:.78rem;font-weight:600;color:#4a6080;margin-bottom:.28rem}
+label small{font-weight:400;color:#9fb8cc;margin-left:.2rem}
+input,textarea,select{width:100%;padding:.48rem .7rem;border:1.5px solid #c5dce9;border-radius:8px;font-size:.87rem;font-family:inherit;outline:none;transition:border-color .15s;color:#1a2535;background:#fff}
+input:focus,textarea:focus,select:focus{border-color:#3ab3ca;box-shadow:0 0 0 3px rgba(58,179,202,.12)}
+textarea{resize:vertical;line-height:1.6;min-height:90px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.7rem}
+.chap{border:1.5px solid #dde8f0;border-radius:10px;padding:.9rem;margin-bottom:.6rem;background:#fafbfc}
+.chap-hdr{display:flex;align-items:center;gap:.45rem;margin-bottom:.6rem}
+.num{background:#3ab3ca;color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0;min-width:24px}
+.del{background:#fdecea;color:#e74c3c;border:1.5px solid #f0b8bc;border-radius:7px;padding:.23rem .55rem;cursor:pointer;font-size:.77rem;font-family:inherit;flex-shrink:0}
+.fl{font-size:.73rem;font-weight:600;color:#4a6080;margin-bottom:.2rem;display:block}
+.fh{font-size:.69rem;color:#9fb8cc}
+.btn{padding:.48rem 1.1rem;border:none;border-radius:8px;cursor:pointer;font-size:.87rem;font-weight:700;font-family:inherit;transition:opacity .14s}
+.btn:hover{opacity:.85}
+.bp{background:#3ab3ca;color:#fff}
+.bs{background:#fff;color:#3ab3ca;border:1.5px solid #3ab3ca}
+.hdr{background:linear-gradient(135deg,#3ab3ca,#2896ac);border-radius:12px;padding:1rem 1.4rem;margin-bottom:1rem;color:#fff}
+.hdr h1{font-size:1.1rem;font-weight:800;margin-bottom:.22rem}
+.hdr p{font-size:.79rem;opacity:.88;line-height:1.5}
+.ftr{text-align:center;font-size:.72rem;color:#9fb8cc;margin-top:.9rem;padding:.6rem 0;border-top:1px solid #e0e8f0}
+@media(max-width:540px){.g2,.g3{grid-template-columns:1fr}}
+</style></head>
+<body><div class="w">
+<div class="hdr"><h1>📖 Form mẫu đăng truyện</h1>
+<p>Điền đầy đủ thông tin · Nhấn <strong>📥 Xuất file</strong> · Upload lên <strong>Admin → Đăng truyện → Upload file Word</strong></p></div>
 
-===
-Chương 1: Khởi Đầu
-AFFILIATE: https://shopee.vn/...
+<div class="card"><h2>📝 Thông tin truyện</h2>
+<div class="g2">
+  <div class="f"><label>Tên truyện <span style="color:#e74c3c">*</span></label><input id="ti" placeholder="VD: Kiếm Thần Vô Song"></div>
+  <div class="f"><label>Tác giả <span style="color:#e74c3c">*</span></label><input id="au" placeholder="VD: Lưu Ly"></div>
+</div>
+<div class="f"><label>Ảnh bìa <small>(URL ảnh — không bắt buộc)</small></label><input id="co" type="url" placeholder="https://example.com/cover.jpg"></div>
+<div class="f"><label>Giới thiệu</label><textarea id="de" rows="4" placeholder="Mô tả ngắn, hấp dẫn về nội dung truyện…"></textarea></div>
+<div class="g3">
+  <div class="f"><label>Trạng thái</label><select id="st"><option>Đang ra</option><option>Hoàn thành</option><option>Tạm dừng</option></select></div>
+  <div class="f"><label>Nguồn</label><select id="so"><option>Sáng tác</option><option>Dịch</option><option>ST</option></select></div>
+  <div class="f"><label>Tags <small>cách bởi dấu phẩy</small></label><input id="ta" placeholder="Xuyên không, HE, Nữ mạnh…"></div>
+</div></div>
 
-Nội dung chương 1 ở đây. Bạn có thể viết nhiều đoạn văn.
-Dùng *chữ nghiêng* hoặc _chữ nghiêng_ để in nghiêng.
-Dùng **chữ đậm** để in đậm.
+<div class="card"><h2>📖 Danh sách chương</h2>
+<div id="cl"></div>
+<button class="btn bs" onclick="addC()" style="margin-top:.35rem">➕ Thêm chương</button>
+<div class="fh" style="margin-top:.5rem">💡 <em>Câu dẫn chương</em>: trích dẫn / epigraph ngắn hiển thị đầu chương (tuỳ chọn)</div>
+</div>
 
-===
-Chương 2: Bước Tiếp Theo
+<div style="text-align:center;margin:.4rem 0 .8rem">
+<button class="btn bp" onclick="expF()" style="min-width:220px;padding:.65rem 1.5rem;font-size:.95rem">📥 Xuất file để upload</button>
+</div>
+<div class="ftr">Lưu Ly Hiền Nhi Các · File .txt xuất ra upload lên Admin Panel → Đăng truyện</div>
+</div>
+<script>
+var C=[{t:'Chuong 1',q:'',c:''}];
+function _e(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function rC(){
+  var h='';
+  C.forEach(function(x,i){
+    h+='<div class="chap"><div class="chap-hdr"><span class="num">'+(i+1)+'</span>';
+    h+='<input style="flex:1;padding:.38rem .65rem;border:1.5px solid #c5dce9;border-radius:8px;font-size:.87rem;font-family:inherit;outline:none;font-weight:600" value="'+_e(x.t)+'" placeholder="Ten chuong '+(i+1)+'" oninput="C['+i+'].t=this.value">';
+    if(C.length>1)h+='<button class="del" onclick="delC('+i+')">🗑 Xóa</button>';
+    h+='</div>';
+    h+='<div style="margin-bottom:.5rem"><span class="fl">💬 Câu dẫn chương <span class="fh">(tuỳ chọn — trích dẫn ngắn đầu chương)</span></span>';
+    h+='<input style="width:100%;padding:.4rem .65rem;border:1.5px solid #c5dce9;border-radius:8px;font-size:.82rem;font-family:inherit;font-style:italic;outline:none;color:#555" value="'+_e(x.q)+'" placeholder="VD: Co nhung nguoi, gap mot lan la nho mai..." oninput="C['+i+'].q=this.value"></div>';
+    h+='<div><span class="fl">Nội dung chương <span style="color:#e74c3c">*</span></span>';
+    h+='<textarea style="width:100%;padding:.5rem .65rem;border:1.5px solid #c5dce9;border-radius:8px;font-size:.83rem;font-family:inherit;outline:none;resize:vertical;line-height:1.65;min-height:160px" placeholder="Noi dung chuong '+(i+1)+'..." oninput="C['+i+'].c=this.value">'+_e(x.c)+'</textarea></div></div>';
+  });
+  document.getElementById('cl').innerHTML=h;
+}
+function addC(){C.push({t:'Chuong '+(C.length+1),q:'',c:''});rC();setTimeout(function(){var e=document.querySelectorAll('.chap');if(e.length)e[e.length-1].scrollIntoView({behavior:'smooth',block:'nearest'});},60);}
+function delC(i){if(C.length<=1)return;if(!confirm('Xoa chuong nay?'))return;C.splice(i,1);rC();}
+function expF(){
+  var ti=document.getElementById('ti').value.trim();
+  var au=document.getElementById('au').value.trim();
+  if(!ti){alert('Vui long nhap Ten truyen!');document.getElementById('ti').focus();return;}
+  if(!au){alert('Vui long nhap Ten tac gia!');document.getElementById('au').focus();return;}
+  var o=[];
+  o.push('@@TRUYEN');
+  o.push('TEN: '+ti);
+  o.push('TAC GIA: '+au);
+  o.push('ANH BIA: '+(document.getElementById('co').value.trim()||''));
+  o.push('GIOI THIEU: '+(document.getElementById('de').value.trim().replace(/\\n/g,' ')||''));
+  o.push('TRANG THAI: '+document.getElementById('st').value);
+  o.push('NGUON: '+document.getElementById('so').value);
+  o.push('TAGS: '+(document.getElementById('ta').value.trim()||''));
+  o.push('');
+  C.forEach(function(x,i){
+    o.push('@@CHUONG '+(i+1));
+    o.push('TEN CHUONG: '+(x.t.trim()||'Chuong '+(i+1)));
+    if(x.q&&x.q.trim())o.push('CAU DAN: '+x.q.trim());
+    o.push('NOI DUNG:');
+    o.push(x.c||'');
+    o.push('');
+  });
+  var blob=new Blob(['﻿'+o.join('\n')],{type:'text/plain;charset=utf-8'});
+  var fn=ti.toLowerCase().replace(/[^a-z0-9]/gi,'-').replace(/-+/g,'-').replace(/^-|-$/g,'').slice(0,40)+'-truyen.txt';
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fn;a.click();URL.revokeObjectURL(a.href);
+}
+rC();
+</script></body></html>`;
 
-Nội dung chương 2 ở đây...
-
-===
-Chương 3: Hành Trình Mới
-
-Nội dung chương 3...
-`;
-  const blob = new Blob(['﻿' + tpl], { type: 'text/plain;charset=utf-8' });
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'mau-chuong-truyen.txt';
+  a.download = 'form-mau-dang-truyen.html';
   a.click();
   URL.revokeObjectURL(a.href);
+}
+
+// ── Structured template parser (.txt exported from HTML form) ──
+function _parseStructuredTemplate(text) {
+  const statusEl = document.getElementById('as-word-status');
+  const normalized = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+  const sections = normalized.split(/^@@/m).filter(s => s.trim());
+
+  const meta = {};
+  const chapters = [];
+
+  for (const section of sections) {
+    const lines = section.split('\n');
+    const header = lines[0].trim().toUpperCase();
+
+    if (header === 'TRUYEN') {
+      for (let i = 1; i < lines.length; i++) {
+        const m = lines[i].match(/^([^:]+):\s*(.*)/);
+        if (!m) continue;
+        const key = m[1].trim().toUpperCase();
+        const val = m[2].trim();
+        if      (key === 'TEN')         meta.title  = val;
+        else if (key === 'TAC GIA')     meta.author = val;
+        else if (key === 'ANH BIA')     meta.cover  = val;
+        else if (key === 'GIOI THIEU')  meta.desc   = val;
+        else if (key === 'TRANG THAI')  meta.status = val;
+        else if (key === 'NGUON')       meta.source = val;
+        else if (key === 'TAGS')        meta.tags   = val;
+      }
+    } else if (/^CHUONG\s+\d+/.test(header)) {
+      const chap = { title: '', chapQuote: '', content: '', aff: '' };
+      let inContent = false;
+      const contentLines = [];
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i];
+        if (inContent) { contentLines.push(line); continue; }
+        const m = line.match(/^([^:]+):\s*(.*)/);
+        if (!m) continue;
+        const key = m[1].trim().toUpperCase();
+        const val = m[2];
+        if      (key === 'TEN CHUONG') chap.title     = val.trim();
+        else if (key === 'CAU DAN')    chap.chapQuote  = val.trim();
+        else if (key === 'NOI DUNG')   { inContent = true; if (val.trim()) contentLines.push(val.trim()); }
+      }
+      chap.content = contentLines.join('\n').trim();
+      if (chap.title || chap.content) chapters.push(chap);
+    }
+  }
+
+  // Fill form fields
+  let filled = 0;
+  const setF = (id, val) => { const el = document.getElementById(id); if (el && val) { el.value = val; filled++; } };
+  setF('as-title',  meta.title);
+  setF('as-author', meta.author);
+  setF('as-cover',  meta.cover);
+  setF('as-desc',   meta.desc);
+  setF('as-tags',   meta.tags);
+  if (meta.status) {
+    const st = document.getElementById('as-status');
+    if (st) { const o = Array.from(st.options).find(o => o.value===meta.status||o.text===meta.status); if(o){st.value=o.value;filled++;} }
+  }
+  if (meta.source) {
+    const src = document.getElementById('as-source');
+    if (src) { const o = Array.from(src.options).find(o => o.value===meta.source||o.text===meta.source); if(o){src.value=o.value;filled++;} }
+  }
+  if (meta.cover) {
+    const p = document.getElementById('as-prev');
+    if (p) { p.src = meta.cover; p.style.display = 'block'; }
+  }
+  _asChapters = chapters.map((c, i) => ({
+    id: i + 1, title: c.title || `Chương ${i + 1}`,
+    content: c.content, aff: c.aff || '', chapQuote: c.chapQuote || '',
+  }));
+  _renderChapterList();
+  if (statusEl) statusEl.textContent = `✅ Điền ${filled} trường thông tin + ${chapters.length} chương.`;
 }
 
 // ══════════════════════════════════════════════════════════════

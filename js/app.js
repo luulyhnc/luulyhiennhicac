@@ -770,8 +770,12 @@ async function loadReaderPage() {
     </div>
   `;
 
+  const _cq = chapter.chapQuote
+    ? `<div style="text-align:center;font-style:italic;color:var(--text2);padding:.85rem 2rem 1rem;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:1.4rem;font-size:.91rem;line-height:1.75;background:var(--bg2)">"${chapter.chapQuote.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}"</div>`
+    : '';
   root.innerHTML = `
     ${navBtns(false)}
+    ${_cq}
     <div class="reader-body" id="chapter-body">${renderChapterContent(chapter.content)}</div>
     ${navBtns(true)}
   `;
