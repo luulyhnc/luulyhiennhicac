@@ -93,6 +93,20 @@
     .adm-ok  { background:#e8f5e9; color:#27ae60; border:1.5px solid #a8d5b5; display:block!important; }
     .adm-err { background:#fdecea; color:#e74c3c; border:1.5px solid #f0b8bc; display:block!important; }
 
+    /* ── Genre pills selector ── */
+    .genre-pills { display:flex; flex-wrap:wrap; gap:.3rem; padding:.18rem 0 .1rem; }
+    .genre-pill  { display:inline-flex; align-items:center; }
+    .genre-pill input[type=checkbox] { display:none; }
+    .genre-pill label {
+      cursor:pointer; padding:.2rem .62rem;
+      border:1.5px solid var(--border2); border-radius:20px;
+      font-size:.77rem; font-weight:600; color:var(--text2);
+      background:#fff; transition:all .14s; user-select:none; white-space:nowrap;
+    }
+    .genre-pill input:checked + label { background:var(--primary); color:#fff; border-color:var(--primary); }
+    .genre-pill label:hover           { border-color:var(--primary); color:var(--primary); }
+    .genre-pill input:checked + label:hover { opacity:.82; color:#fff; }
+
     /* ── Filter row ── */
     .flt-row { display:flex; gap:.55rem; flex-wrap:wrap; margin-bottom:.9rem; align-items:center; }
     .flt-row .af-inp { flex:1; min-width:160px; }
@@ -282,7 +296,7 @@
             <input class="af-inp" id="as-video" type="url" placeholder="https://youtube.com/…"></div>
         </div>
 
-        <div class="g3">
+        <div class="g2">
           <div class="af-g"><label>Trạng thái</label>
             <select class="af-inp" id="as-status">
               <option>Đang ra</option><option>Hoàn thành</option><option>Tạm dừng</option>
@@ -291,12 +305,19 @@
             <select class="af-inp" id="as-source">
               <option>Sáng tác</option><option>Dịch</option><option>ST</option>
             </select></div>
-          <div class="af-g"><label>Thể loại chính <span id="as-ai-genre-st" style="font-size:.69rem;color:var(--text3);font-weight:400;margin-left:.3rem"></span></label>
-            <select class="af-inp" id="as-genre">
-              <option>Tiên Hiệp</option><option>Huyền Huyễn</option><option>Ngôn Tình</option>
-              <option>Đô Thị</option><option>Nữ Cường</option><option>Kiếm Hiệp</option>
-              <option>Lịch Sử</option><option>Khác</option>
-            </select></div>
+        </div>
+
+        <div class="af-g"><label>Thể loại <span id="as-ai-genre-st" style="font-size:.69rem;color:var(--text3);font-weight:400;margin-left:.3rem"></span></label>
+          <div class="genre-pills" id="as-genre">
+            <span class="genre-pill"><input type="checkbox" id="asg0" name="as-genre" value="Tiên Hiệp"><label for="asg0">Tiên Hiệp</label></span>
+            <span class="genre-pill"><input type="checkbox" id="asg1" name="as-genre" value="Huyền Huyễn"><label for="asg1">Huyền Huyễn</label></span>
+            <span class="genre-pill"><input type="checkbox" id="asg2" name="as-genre" value="Ngôn Tình"><label for="asg2">Ngôn Tình</label></span>
+            <span class="genre-pill"><input type="checkbox" id="asg3" name="as-genre" value="Đô Thị"><label for="asg3">Đô Thị</label></span>
+            <span class="genre-pill"><input type="checkbox" id="asg4" name="as-genre" value="Nữ Cường"><label for="asg4">Nữ Cường</label></span>
+            <span class="genre-pill"><input type="checkbox" id="asg5" name="as-genre" value="Kiếm Hiệp"><label for="asg5">Kiếm Hiệp</label></span>
+            <span class="genre-pill"><input type="checkbox" id="asg6" name="as-genre" value="Lịch Sử"><label for="asg6">Lịch Sử</label></span>
+            <span class="genre-pill"><input type="checkbox" id="asg7" name="as-genre" value="Khác"><label for="asg7">Khác</label></span>
+          </div>
         </div>
 
         <div class="af-g"><label>Tags (phân cách bởi dấu phẩy)</label>
@@ -334,18 +355,22 @@
                 <div class="af-g" style="margin-bottom:0"><label>Tác giả</label>
                   <input class="af-inp" id="as-ser-author" placeholder="Tên tác giả"></div>
               </div>
-              <div class="g2" style="margin-bottom:.5rem">
-                <div class="af-g" style="margin-bottom:0"><label>Thể loại</label>
-                  <select class="af-inp" id="as-ser-genre">
-                    <option>Tiên Hiệp</option><option>Huyền Huyễn</option><option>Ngôn Tình</option>
-                    <option>Đô Thị</option><option>Nữ Cường</option><option>Kiếm Hiệp</option>
-                    <option>Lịch Sử</option><option>Khác</option>
-                  </select></div>
-                <div class="af-g" style="margin-bottom:0"><label>Trạng thái</label>
-                  <select class="af-inp" id="as-ser-status">
-                    <option>Đang ra</option><option>Hoàn thành</option><option>Tạm dừng</option>
-                  </select></div>
+              <div class="af-g" style="margin-bottom:.5rem"><label>Thể loại</label>
+                <div class="genre-pills" id="as-ser-genre">
+                  <span class="genre-pill"><input type="checkbox" id="asrg0" name="as-ser-genre" value="Tiên Hiệp"><label for="asrg0">Tiên Hiệp</label></span>
+                  <span class="genre-pill"><input type="checkbox" id="asrg1" name="as-ser-genre" value="Huyền Huyễn"><label for="asrg1">Huyền Huyễn</label></span>
+                  <span class="genre-pill"><input type="checkbox" id="asrg2" name="as-ser-genre" value="Ngôn Tình"><label for="asrg2">Ngôn Tình</label></span>
+                  <span class="genre-pill"><input type="checkbox" id="asrg3" name="as-ser-genre" value="Đô Thị"><label for="asrg3">Đô Thị</label></span>
+                  <span class="genre-pill"><input type="checkbox" id="asrg4" name="as-ser-genre" value="Nữ Cường"><label for="asrg4">Nữ Cường</label></span>
+                  <span class="genre-pill"><input type="checkbox" id="asrg5" name="as-ser-genre" value="Kiếm Hiệp"><label for="asrg5">Kiếm Hiệp</label></span>
+                  <span class="genre-pill"><input type="checkbox" id="asrg6" name="as-ser-genre" value="Lịch Sử"><label for="asrg6">Lịch Sử</label></span>
+                  <span class="genre-pill"><input type="checkbox" id="asrg7" name="as-ser-genre" value="Khác"><label for="asrg7">Khác</label></span>
+                </div>
               </div>
+              <div class="af-g" style="margin-bottom:.5rem"><label>Trạng thái</label>
+                <select class="af-inp" id="as-ser-status">
+                  <option>Đang ra</option><option>Hoàn thành</option><option>Tạm dừng</option>
+                </select></div>
               <div id="as-ser-alert" style="font-size:.78rem;margin-bottom:.4rem"></div>
               <div style="display:flex;gap:.4rem">
                 <button type="button" onclick="_createSeriesInline()"
@@ -433,13 +458,19 @@
           <div class="af-g"><label>Giới thiệu series</label>
             <textarea class="af-inp" id="ser-desc" rows="3" placeholder="Mô tả ngắn về series…"
                       oninput="renderSeriesPreview();_debounceAiGenre('ser')"></textarea></div>
-          <div class="g3">
-            <div class="af-g"><label>Thể loại <span id="ser-ai-genre-st" style="font-size:.69rem;color:var(--text3);font-weight:400;margin-left:.3rem"></span></label>
-              <select class="af-inp" id="ser-genre" onchange="renderSeriesPreview()">
-                <option>Tiên Hiệp</option><option>Huyền Huyễn</option><option>Ngôn Tình</option>
-                <option>Đô Thị</option><option>Nữ Cường</option><option>Kiếm Hiệp</option>
-                <option>Lịch Sử</option><option>Khác</option>
-              </select></div>
+          <div class="af-g"><label>Thể loại <span id="ser-ai-genre-st" style="font-size:.69rem;color:var(--text3);font-weight:400;margin-left:.3rem"></span></label>
+            <div class="genre-pills" id="ser-genre">
+              <span class="genre-pill"><input type="checkbox" id="srg0" name="ser-genre" value="Tiên Hiệp" onchange="renderSeriesPreview()"><label for="srg0">Tiên Hiệp</label></span>
+              <span class="genre-pill"><input type="checkbox" id="srg1" name="ser-genre" value="Huyền Huyễn" onchange="renderSeriesPreview()"><label for="srg1">Huyền Huyễn</label></span>
+              <span class="genre-pill"><input type="checkbox" id="srg2" name="ser-genre" value="Ngôn Tình" onchange="renderSeriesPreview()"><label for="srg2">Ngôn Tình</label></span>
+              <span class="genre-pill"><input type="checkbox" id="srg3" name="ser-genre" value="Đô Thị" onchange="renderSeriesPreview()"><label for="srg3">Đô Thị</label></span>
+              <span class="genre-pill"><input type="checkbox" id="srg4" name="ser-genre" value="Nữ Cường" onchange="renderSeriesPreview()"><label for="srg4">Nữ Cường</label></span>
+              <span class="genre-pill"><input type="checkbox" id="srg5" name="ser-genre" value="Kiếm Hiệp" onchange="renderSeriesPreview()"><label for="srg5">Kiếm Hiệp</label></span>
+              <span class="genre-pill"><input type="checkbox" id="srg6" name="ser-genre" value="Lịch Sử" onchange="renderSeriesPreview()"><label for="srg6">Lịch Sử</label></span>
+              <span class="genre-pill"><input type="checkbox" id="srg7" name="ser-genre" value="Khác" onchange="renderSeriesPreview()"><label for="srg7">Khác</label></span>
+            </div>
+          </div>
+          <div class="g2">
             <div class="af-g"><label>Trạng thái</label>
               <select class="af-inp" id="ser-status" onchange="renderSeriesPreview()">
                 <option>Đang ra</option><option>Hoàn thành</option><option>Tạm dừng</option>
@@ -1053,6 +1084,7 @@ function clearAddForm() {
   const serOrd = document.getElementById('as-series-order'); if (serOrd) serOrd.value = '1';
   document.getElementById('as-prev').style.display = 'none';
   ['as-audio','as-video'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  _setGenres('as-genre', []);
   // Reset chapters
   _asChapters = [];
   _renderChapterList();
@@ -1072,7 +1104,8 @@ async function doAddStory() {
   const desc     = v('as-desc').trim();
   const status   = v('as-status');
   const source   = v('as-source');
-  const genre    = v('as-genre');
+  const genres   = _getGenres('as-genre');
+  const genre    = genres.length ? genres[0] : 'Tiên Hiệp';
   const tags     = v('as-tags').split(',').map(t=>t.trim()).filter(Boolean);
   const audioUrl = (document.getElementById('as-audio')?.value || '').trim();
   const videoUrl = (document.getElementById('as-video')?.value || '').trim();
@@ -1112,7 +1145,10 @@ async function doAddStory() {
 
     const chapters = allChapters.length ? allChapters : [];
     const entry = { id:sid, title, author, cover, description:desc,
-                    status, source, genre, genres:[genre,...tags], tags,
+                    status, source,
+                    genre:  genres.length ? genres : [genre],
+                    genres: genres.length ? genres : [genre],
+                    tags,
                     hidden:false, chapters,
                     ...(audioUrl ? { audioUrl } : {}),
                     ...(videoUrl ? { videoUrl } : {}) };
@@ -1834,7 +1870,8 @@ async function _createSeriesInline() {
     await _loadSeries();
 
     const author = document.getElementById('as-ser-author')?.value?.trim() || document.getElementById('as-author')?.value?.trim() || '';
-    const genre  = document.getElementById('as-ser-genre')?.value || 'Tiên Hiệp';
+    const genreArr = _getGenres('as-ser-genre');
+    const genre    = genreArr.length ? genreArr : ['Tiên Hiệp'];
     const status = document.getElementById('as-ser-status')?.value || 'Đang ra';
 
     // Generate slug ID
@@ -1842,7 +1879,7 @@ async function _createSeriesInline() {
     let sid = baseId, n = 2;
     while (_SER.find(s => s.id === sid)) sid = baseId + '-' + (n++);
 
-    const entry = { id: sid, title, author, genre: [genre], status, description: '', cover: '' };
+    const entry = { id: sid, title, author, genre, status, description: '', cover: '' };
     _SER.push(entry);
     await _saveSeries(`Tạo series: ${title}`);
 
@@ -1908,7 +1945,7 @@ function renderSeriesList() {
           : `<div style="width:38px;height:52px;background:var(--pri-l);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0">📚</div>`}
         <div style="flex:1;min-width:0">
           <div style="font-weight:700;color:var(--navy);font-size:.92rem">${esc(s.title)}</div>
-          <div style="font-size:.77rem;color:var(--text2);margin-top:.1rem">${esc(s.author||'')}${s.author&&s.genre?' · ':''}${Array.isArray(s.genre)?s.genre[0]:esc(s.genre||'')}</div>
+          <div style="font-size:.77rem;color:var(--text2);margin-top:.1rem">${esc(s.author||'')}${s.author&&s.genre?' · ':''}${Array.isArray(s.genre)?s.genre.join(' · '):esc(s.genre||'')}</div>
           <div style="margin-top:.2rem;display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
             <span class="rb ${s.status==='Hoàn thành'?'rb-ok':'rb-reader'}">${esc(s.status||'Đang ra')}</span>
             <span style="font-size:.73rem;color:var(--text3)">📖 ${storyCount} tập</span>
@@ -1945,7 +1982,8 @@ function renderSeriesPreview() {
   const author = (document.getElementById('ser-author')?.value || '').trim();
   const cover  = (document.getElementById('ser-cover')?.value  || '').trim();
   const desc   = (document.getElementById('ser-desc')?.value   || '').trim();
-  const genre  = document.getElementById('ser-genre')?.value   || '';
+  const genreArr = _getGenres('ser-genre');
+  const genre    = genreArr.join(' · ');
   const status = document.getElementById('ser-status')?.value  || 'Đang ra';
 
   if (!title && !cover) {
@@ -2039,7 +2077,7 @@ async function doAddSeries() {
     while (_SER.find(s => s.id === sid)) sid = baseId + '-' + (n++);
     _SER.push({ id:sid, title, author:v('ser-author').trim(),
       cover:v('ser-cover').trim(), description:v('ser-desc').trim(),
-      genre:v('ser-genre'), status:v('ser-status') });
+      genre:_getGenres('ser-genre'), status:v('ser-status') });
     await _saveSeries('Thêm series: ' + title);
     ['ser-title','ser-author','ser-cover','ser-desc'].forEach(id => { const el=document.getElementById(id); if(el)el.value=''; });
     const _sp = document.getElementById('ser-prev'); if (_sp) _sp.style.display = 'none';
@@ -2072,7 +2110,22 @@ function tblAlert(pfx, msg, ok) {
   setTimeout(() => { el.className='adm-alert'; el.textContent=''; }, 4500);
 }
 
-// ── AI genre suggestion ─────────────────────────────────────
+// ── Multi-genre helpers ──────────────────────────────────────────
+const _GENRES = ['Tiên Hiệp','Huyền Huyễn','Ngôn Tình','Đô Thị','Nữ Cường','Kiếm Hiệp','Lịch Sử','Khác'];
+
+function _getGenres(id) {
+  const el = document.getElementById(id);
+  if (!el) return [];
+  return Array.from(el.querySelectorAll('input[type=checkbox]:checked')).map(c => c.value);
+}
+
+function _setGenres(id, genres) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const arr = Array.isArray(genres) ? genres : (genres ? [genres] : []);
+  el.querySelectorAll('input[type=checkbox]').forEach(c => { c.checked = arr.includes(c.value); });
+}
+
 const _aiGenreTimer = {};
 function _debounceAiGenre(prefix) {
   clearTimeout(_aiGenreTimer[prefix]);
@@ -2082,7 +2135,6 @@ function _debounceAiGenre(prefix) {
 async function _aiSuggestGenre(prefix) {
   const descEl   = document.getElementById(prefix + '-desc');
   const titleEl  = document.getElementById(prefix + '-title');
-  const genreEl  = document.getElementById(prefix + '-genre');
   const statusEl = document.getElementById(prefix + '-ai-genre-st');
   const tagsEl   = document.getElementById(prefix + '-tags');
 
@@ -2113,13 +2165,10 @@ Chỉ trả về JSON hợp lệ (không markdown, không giải thích):
     const r = JSON.parse(m[0]);
     if (!r?.genre) { if (statusEl) statusEl.textContent = ''; return; }
 
-    // Auto-set genre select
-    if (genreEl) {
-      const opts = Array.from(genreEl.options).map(o => o.value);
-      if (opts.includes(r.genre)) {
-        genreEl.value = r.genre;
-        if (prefix === 'ser') renderSeriesPreview(); // update preview
-      }
+    // Auto-set genre pills
+    if (_GENRES.includes(r.genre)) {
+      _setGenres(prefix + '-genre', [r.genre]);
+      if (prefix === 'ser') renderSeriesPreview(); // update preview
     }
     // Auto-fill tags if field is empty
     if (tagsEl && r.tags?.length && !tagsEl.value.trim()) {

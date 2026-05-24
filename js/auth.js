@@ -438,10 +438,21 @@ function openStoryEditor(storyId) {
       </div>
     </div>
     ${_fld('Giới thiệu','se_d',s.description||'','textarea')}
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.7rem;margin-bottom:.85rem">
+    <style>.se-gpill input{display:none}.se-gpill label{cursor:pointer;padding:.2rem .6rem;border:1.5px solid #c5dce9;border-radius:20px;font-size:.77rem;font-weight:600;color:#4a6080;background:#fff;transition:all .14s;user-select:none;white-space:nowrap;display:inline-block}.se-gpill input:checked+label{background:#3ab3ca;color:#fff;border-color:#3ab3ca}.se-gpill label:hover{border-color:#3ab3ca;color:#3ab3ca}.se-gpill input:checked+label:hover{opacity:.82;color:#fff}</style>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:.85rem">
       ${_sel('Trạng thái','se_st',['Đang ra','Hoàn thành','Tạm dừng'],s.status)}
       ${_sel('Nguồn','se_src',['Sáng tác','Dịch','ST'],s.source||'Sáng tác')}
-      ${_sel('Thể loại chính','se_genre',['Tiên Hiệp','Huyền Huyễn','Ngôn Tình','Đô Thị','Nữ Cường','Kiếm Hiệp','Lịch Sử','Khác'],Array.isArray(s.genre)?s.genre[0]:(s.genre||'Tiên Hiệp'))}
+    </div>
+    <div style="margin-bottom:.85rem">
+      <div style="font-size:.78rem;font-weight:500;color:#4a6080;margin-bottom:.28rem">Thể loại</div>
+      <div id="se_genre" style="display:flex;flex-wrap:wrap;gap:.3rem">${
+        (() => {
+          const cur = Array.isArray(s.genre) ? s.genre : (s.genre ? [s.genre] : []);
+          return ['Tiên Hiệp','Huyền Huyễn','Ngôn Tình','Đô Thị','Nữ Cường','Kiếm Hiệp','Lịch Sử','Khác'].map((g,i) =>
+            `<span class="se-gpill"><input type="checkbox" id="seg${i}" name="se_genre" value="${g}"${cur.includes(g)?' checked':''}><label for="seg${i}">${g}</label></span>`
+          ).join('');
+        })()
+      }</div>
     </div>
     ${_fld('Tags phụ (phân cách bởi dấu phẩy)','se_tags',(s.tags||[]).join(', '))}
     <div id="_se_msg" style="display:none;padding:.45rem .7rem;border-radius:7px;font-size:.8rem;margin-bottom:.7rem"></div>
@@ -463,7 +474,8 @@ async function _saveStoryEdits(storyId) {
     const { stories, sha } = await AUTH.loadStories();
     const idx = stories.findIndex(s => s.id === storyId);
     if (idx < 0) { _s('Không tìm thấy truyện!', false); return; }
-    const newGenre = document.getElementById('se_genre')?.value || '';
+    const seEl     = document.getElementById('se_genre');
+    const newGenre = seEl ? Array.from(seEl.querySelectorAll('input:checked')).map(c=>c.value) : [];
     const newTags  = (document.getElementById('se_tags')?.value||'').split(',').map(t=>t.trim()).filter(Boolean);
     stories[idx] = { ...stories[idx],
       title:       document.getElementById('se_t').value.trim(),
@@ -472,8 +484,8 @@ async function _saveStoryEdits(storyId) {
       description: document.getElementById('se_d').value.trim(),
       status:      document.getElementById('se_st').value,
       source:      document.getElementById('se_src').value,
-      genre:       newGenre ? [newGenre, ...newTags] : stories[idx].genre,
-      genres:      newGenre ? [newGenre, ...newTags] : stories[idx].genres,
+      genre:       newGenre.length ? newGenre : stories[idx].genre,
+      genres:      newGenre.length ? newGenre : stories[idx].genres,
       tags:        newTags,
     };
     _s('⏳ Đang lưu lên GitHub...', true);
