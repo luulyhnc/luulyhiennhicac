@@ -2456,67 +2456,129 @@ function doEditSeries(id) {
   if (!s) return;
   if (document.getElementById('_sedit_modal')) return;
 
-  // Build modal skeleton (NO data interpolation here to avoid any encoding issues)
-  document.body.insertAdjacentHTML('beforeend',
-    '<div id="_sedit_modal" onclick="if(event.target===this)this.remove()"' +
-    ' style="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9998;display:flex;align-items:center;justify-content:center;font-family:inherit;overflow-y:auto;padding:1rem">' +
-    '<div style="background:#fff;border-radius:14px;padding:1.5rem;width:90%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)">' +
-    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.1rem">' +
-    '<b style="font-size:1rem">✏️ Sửa Series</b>' +
-    '<button onclick="document.getElementById(\'_sedit_modal\').remove()" style="border:none;background:var(--bg2);width:30px;height:30px;border-radius:50%;cursor:pointer">✕</button>' +
-    '</div>' +
-    '<div id="_sedit_msg" style="display:none;padding:.45rem .7rem;border-radius:7px;font-size:.8rem;margin-bottom:.7rem"></div>' +
-    '<div class="g2" style="margin-bottom:.65rem">' +
-    '<div class="af-g" style="margin-bottom:0"><label>Tên series *</label><input class="af-inp" id="sed_title"></div>' +
-    '<div class="af-g" style="margin-bottom:0"><label>Tác giả</label><input class="af-inp" id="sed_author"></div>' +
-    '</div>' +
-    '<div class="af-g"><label>Ảnh bìa</label><input class="af-inp" id="sed_cover" type="url" placeholder="https://…/cover.jpg"></div>' +
-    '<div class="af-g"><label>Giới thiệu</label><textarea class="af-inp" id="sed_desc" rows="3" style="resize:vertical"></textarea></div>' +
-    '<div class="af-g"><label>Thể loại</label><div class="genre-pills" id="sed_genre"></div></div>' +
-    '<div class="g3" style="margin-bottom:.8rem">' +
-    '<div class="af-g" style="margin-bottom:0"><label>Tổng số tập <span style="font-weight:400;font-size:.72rem;color:var(--text3)">(dự kiến)</span></label>' +
-    '<input class="af-inp" id="sed_total" type="number" min="1"></div>' +
-    '<div class="af-g" style="margin-bottom:0"><label>Trạng thái</label>' +
-    '<select class="af-inp" id="sed_status"><option>Đang ra</option><option>Hoàn thành</option><option>Tạm dừng</option></select></div>' +
-    '<div></div></div>' +
-    '<div style="display:flex;gap:.5rem;justify-content:flex-end">' +
-    '<button onclick="document.getElementById(\'_sedit_modal\').remove()" style="padding:.5rem 1rem;border:1.5px solid var(--border2);border-radius:7px;cursor:pointer;background:#fff;font-family:inherit">Hủy</button>' +
-    '<button id="_sedit_save_btn" style="padding:.5rem 1.1rem;background:var(--primary);color:#fff;border:none;border-radius:7px;cursor:pointer;font-family:inherit;font-weight:600">💾 Lưu & Deploy</button>' +
-    '</div></div></div>'
-  );
+  // Helper: create element with styles and optionally a text label
+  function el(tag, css, text) {
+    const e = document.createElement(tag);
+    if (css)  e.style.cssText = css;
+    if (text !== undefined) e.textContent = text;
+    return e;
+  }
+  function inp(id, type, placeholder) {
+    const i = document.createElement('input');
+    i.className = 'af-inp'; i.id = id;
+    if (type) i.type = type;
+    if (placeholder) i.placeholder = placeholder;
+    return i;
+  }
+  function fldWrap(labelText, child, marginBottom) {
+    const wrap = document.createElement('div');
+    wrap.className = 'af-g';
+    if (marginBottom !== undefined) wrap.style.marginBottom = marginBottom;
+    const lbl = document.createElement('label');
+    lbl.textContent = labelText;
+    wrap.appendChild(lbl);
+    wrap.appendChild(child);
+    return wrap;
+  }
 
-  // ── Populate form values via DOM API (never via string interpolation) ──
-  document.getElementById('sed_title').value  = s.title  || '';
-  document.getElementById('sed_author').value = s.author || '';
-  document.getElementById('sed_cover').value  = s.cover  || '';
-  document.getElementById('sed_desc').value   = s.description || '';
-  document.getElementById('sed_total').value  = s.totalVolumes || '';
+  // ── Overlay ───────────────────────────────────────────────
+  const overlay = document.createElement('div');
+  overlay.id = '_sedit_modal';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9998;display:flex;align-items:center;justify-content:center;font-family:inherit;overflow-y:auto;padding:1rem';
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.remove(); });
 
-  // Status dropdown
-  const stEl = document.getElementById('sed_status');
-  Array.from(stEl.options).forEach(o => { o.selected = (o.value === s.status); });
+  // ── White box ─────────────────────────────────────────────
+  const box = document.createElement('div');
+  box.style.cssText = 'background:#fff;border-radius:14px;padding:1.5rem;width:90%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)';
 
-  // Genre checkboxes
+  // Header row
+  const hdr = el('div', 'display:flex;justify-content:space-between;align-items:center;margin-bottom:1.1rem');
+  const ttl = el('b', 'font-size:1rem');
+  ttl.textContent = '✏️ Sửa Series';
+  const closeBtn = el('button', 'border:none;background:var(--bg2);width:30px;height:30px;border-radius:50%;cursor:pointer', '✕');
+  closeBtn.addEventListener('click', function(){ overlay.remove(); });
+  hdr.appendChild(ttl); hdr.appendChild(closeBtn);
+
+  // Message bar
+  const msg = el('div', 'display:none;padding:.45rem .7rem;border-radius:7px;font-size:.8rem;margin-bottom:.7rem');
+  msg.id = '_sedit_msg';
+
+  // Title + Author row
+  const g2 = el('div', 'margin-bottom:.65rem'); g2.className = 'g2';
+  const titleInp  = inp('sed_title');
+  const authorInp = inp('sed_author');
+  g2.appendChild(fldWrap('Tên series *', titleInp, '0'));
+  g2.appendChild(fldWrap('Tác giả', authorInp, '0'));
+
+  // Cover
+  const coverInp = inp('sed_cover', 'url', 'https://…/cover.jpg');
+
+  // Description
+  const descTA = document.createElement('textarea');
+  descTA.className = 'af-inp'; descTA.id = 'sed_desc';
+  descTA.rows = 3; descTA.style.resize = 'vertical';
+
+  // Genre pills
+  const genreWrap = document.createElement('div');
+  genreWrap.className = 'genre-pills'; genreWrap.id = 'sed_genre';
   const genres = ['Tiên Hiệp','Huyền Huyễn','Ngôn Tình','Đô Thị','Nữ Cường','Kiếm Hiệp','Lịch Sử','Khác'];
-  const cur    = Array.isArray(s.genre) ? s.genre : (s.genre ? [s.genre] : []);
-  const genreEl = document.getElementById('sed_genre');
-  genreEl.innerHTML = '';
-  genres.forEach((g, i) => {
-    const span = document.createElement('span');
-    span.className = 'genre-pill';
-    const cb  = document.createElement('input');
-    cb.type = 'checkbox'; cb.id = 'seg_e' + i;
-    cb.name = 'se_genre_e'; cb.value = g;
+  const cur = Array.isArray(s.genre) ? s.genre : (s.genre ? [s.genre] : []);
+  genres.forEach(function(g, i) {
+    const span = document.createElement('span'); span.className = 'genre-pill';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox'; cb.id = 'seg_e' + i; cb.name = 'se_genre_e'; cb.value = g;
     cb.checked = cur.includes(g);
     const lbl = document.createElement('label');
-    lbl.htmlFor = 'seg_e' + i;
-    lbl.textContent = g;
+    lbl.htmlFor = 'seg_e' + i; lbl.textContent = g;
     span.appendChild(cb); span.appendChild(lbl);
-    genreEl.appendChild(span);
+    genreWrap.appendChild(span);
   });
 
-  // Save button — store id via closure (no string interpolation in onclick)
-  document.getElementById('_sedit_save_btn').onclick = function() { _saveSeriesEdits(id); };
+  // Total + Status row
+  const g3 = el('div', 'margin-bottom:.8rem'); g3.className = 'g3';
+  const totalInp = inp('sed_total', 'number'); totalInp.min = '1';
+  const totalLbl = document.createElement('label');
+  totalLbl.textContent = 'Tổng số tập ';
+  const totalSub = el('span', 'font-weight:400;font-size:.72rem;color:var(--text3)', '(dự kiến)');
+  totalLbl.appendChild(totalSub);
+  const totalWrap = document.createElement('div'); totalWrap.className = 'af-g'; totalWrap.style.marginBottom = '0';
+  totalWrap.appendChild(totalLbl); totalWrap.appendChild(totalInp);
+
+  const sel = document.createElement('select');
+  sel.className = 'af-inp'; sel.id = 'sed_status';
+  ['Đang ra','Hoàn thành','Tạm dừng'].forEach(function(v){ const o = document.createElement('option'); o.textContent = v; sel.appendChild(o); });
+  Array.from(sel.options).forEach(function(o){ o.selected = (o.value === s.status); });
+
+  g3.appendChild(totalWrap);
+  g3.appendChild(fldWrap('Trạng thái', sel, '0'));
+  g3.appendChild(document.createElement('div'));
+
+  // Button row
+  const btnRow = el('div', 'display:flex;gap:.5rem;justify-content:flex-end');
+  const cancelBtn = el('button', 'padding:.5rem 1rem;border:1.5px solid var(--border2);border-radius:7px;cursor:pointer;background:#fff;font-family:inherit', 'Hủy');
+  cancelBtn.addEventListener('click', function(){ overlay.remove(); });
+  const saveBtn = el('button', 'padding:.5rem 1.1rem;background:var(--primary);color:#fff;border:none;border-radius:7px;cursor:pointer;font-family:inherit;font-weight:600');
+  saveBtn.textContent = '💾 Lưu & Deploy';
+  saveBtn.addEventListener('click', function(){ _saveSeriesEdits(id); });
+  btnRow.appendChild(cancelBtn); btnRow.appendChild(saveBtn);
+
+  // ── Assemble ──────────────────────────────────────────────
+  [hdr, msg, g2,
+   fldWrap('Ảnh bìa', coverInp),
+   fldWrap('Giới thiệu', descTA),
+   fldWrap('Thể loại', genreWrap),
+   g3, btnRow
+  ].forEach(function(c){ box.appendChild(c); });
+
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+
+  // ── Populate values ───────────────────────────────────────
+  titleInp.value  = s.title        || '';
+  authorInp.value = s.author       || '';
+  coverInp.value  = s.cover        || '';
+  descTA.value    = s.description  || '';
+  totalInp.value  = s.totalVolumes || '';
 }
 
 async function _saveSeriesEdits(id) {
