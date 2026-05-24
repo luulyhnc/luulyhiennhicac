@@ -404,7 +404,10 @@ function initReaderEditMode(story, chapter, idx) {
 }
 
 // ── Story editor modal ─────────────────────────────────────────
+window._seNewChapters = []; // buffer for bulk-uploaded chapters
+
 function openStoryEditor(storyId) {
+  window._seNewChapters = [];
   const s = window._currentStory;
   if (!s) { alert('Không tải được dữ liệu. Thử tải lại trang.'); return; }
   if (document.getElementById('_se_modal')) return;
@@ -455,6 +458,39 @@ function openStoryEditor(storyId) {
       }</div>
     </div>
     ${_fld('Tags phụ (phân cách bởi dấu phẩy)','se_tags',(s.tags||[]).join(', '))}
+
+    <!-- ── Upload chapters ── -->
+    <div style="border:1.5px solid #dce8f5;border-radius:10px;overflow:hidden;margin-bottom:.85rem">
+      <div style="background:#f0f7fc;padding:.5rem .9rem;font-size:.78rem;font-weight:700;color:#3a5a80;border-bottom:1.5px solid #dce8f5;display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none"
+           onclick="const a=document.getElementById('_se_chap_area');a.style.display=a.style.display==='none'?'':'none'">
+        📚 Upload / Nhập chương
+        <span style="font-weight:400;font-size:.68rem;color:#9fb8cc">Nhấn để mở ▼</span>
+      </div>
+      <div id="_se_chap_area" style="display:none;padding:.8rem">
+        <div style="font-size:.73rem;color:#9fb8cc;margin-bottom:.55rem;line-height:1.6">
+          Chọn nhiều file <b>.txt / .docx</b> (1 file = 1 chương), hoặc 1 file <b>.txt</b> có các khối
+          <code style="background:#f0f4f8;padding:.05rem .3rem;border-radius:3px;font-size:.7rem">@@CHUONG 1</code> … để nhập nhiều chương cùng lúc.
+        </div>
+        <div style="display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;margin-bottom:.55rem">
+          <label style="cursor:pointer;padding:.34rem .85rem;background:#3ab3ca;color:#fff;border-radius:7px;font-size:.79rem;font-weight:600;display:inline-block;white-space:nowrap">
+            📂 Chọn file(s)
+            <input type="file" id="_se_chap_inp" multiple accept=".txt,.docx,.doc" style="display:none" onchange="_seParseChapFiles(this)">
+          </label>
+          <button type="button" onclick="_seDownloadChapTemplate()"
+            style="padding:.34rem .8rem;background:#fff;border:1.5px solid #c5dce9;border-radius:7px;font-size:.78rem;font-weight:600;color:#4a6080;cursor:pointer;font-family:inherit;white-space:nowrap">
+            📥 File mẫu
+          </button>
+          <select id="_se_chap_mode"
+            style="padding:.34rem .6rem;border:1.5px solid #c5dce9;border-radius:7px;font-size:.78rem;color:#4a6080;background:#fff;font-family:inherit;cursor:pointer">
+            <option value="append">➕ Thêm vào cuối</option>
+            <option value="replace">🔄 Thay thế tất cả chương cũ</option>
+          </select>
+        </div>
+        <div id="_se_chap_st" style="font-size:.73rem;color:#9fb8cc;margin-bottom:.35rem"></div>
+        <div id="_se_chap_preview" style="display:none;max-height:180px;overflow-y:auto;border:1.5px solid #dce8f5;border-radius:8px;background:#fafcff;padding:.5rem .7rem;font-size:.76rem;color:#4a6080"></div>
+      </div>
+    </div>
+
     <div id="_se_msg" style="display:none;padding:.45rem .7rem;border-radius:7px;font-size:.8rem;margin-bottom:.7rem"></div>
     <div style="display:flex;gap:.5rem;justify-content:flex-end">
       <button onclick="document.getElementById('_se_modal').remove()"
@@ -488,12 +524,160 @@ async function _saveStoryEdits(storyId) {
       genres:      newGenre.length ? newGenre : stories[idx].genres,
       tags:        newTags,
     };
+
+    // ── Bulk chapter upload ───────────────────────────────────
+    if (window._seNewChapters && window._seNewChapters.length > 0) {
+      const mode = document.getElementById('_se_chap_mode')?.value || 'append';
+      const existing = stories[idx].chapters || [];
+      let maxId = existing.length ? Math.max(...existing.map(c => c.id || 0)) : 0;
+      const chaptersToAdd = window._seNewChapters.map(c => {
+        maxId++;
+        return { id: maxId, title: c.title, content: c.content };
+      });
+      if (mode === 'replace') {
+        stories[idx].chapters = chaptersToAdd;
+      } else {
+        stories[idx].chapters = [...existing, ...chaptersToAdd];
+      }
+    }
+
     _s('⏳ Đang lưu lên GitHub...', true);
     await AUTH.saveStories(stories, sha, `Online: sửa "${stories[idx].title}"`);
     _s('✅ Đã lưu! Web cập nhật trong ~1 phút.', true);
     setTimeout(() => { document.getElementById('_se_modal')?.remove(); location.reload(); }, 1400);
   } catch(e) { _s('❌ ' + e.message, false); }
 }
+
+// ── Story editor: bulk chapter upload helpers ──────────────────
+
+/**
+ * Parse one or more .txt / .docx files into chapter objects.
+ * Single .txt with @@CHUONG markers → multiple chapters.
+ * Multiple files → one chapter per file.
+ */
+async function _seParseChapFiles(input) {
+  const stEl  = document.getElementById('_se_chap_st');
+  const prvEl = document.getElementById('_se_chap_preview');
+  stEl.textContent = '⏳ Đang phân tích file...';
+  prvEl.style.display = 'none';
+  window._seNewChapters = [];
+
+  const files = Array.from(input.files || []);
+  if (!files.length) { stEl.textContent = ''; return; }
+
+  const chapters = [];
+
+  for (const file of files) {
+    const name = file.name;
+    const ext  = name.split('.').pop().toLowerCase();
+
+    try {
+      if (ext === 'txt') {
+        const raw = await file.text();
+        const parsed = _seParseTextChapters(raw, name);
+        chapters.push(...parsed);
+
+      } else if (ext === 'docx' || ext === 'doc') {
+        // Load mammoth.js on demand
+        if (typeof mammoth === 'undefined') {
+          await new Promise((res, rej) => {
+            const s = document.createElement('script');
+            s.src = 'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js';
+            s.onload = res; s.onerror = rej;
+            document.head.appendChild(s);
+          });
+        }
+        const arrayBuf = await file.arrayBuffer();
+        const result   = await mammoth.extractRawText({ arrayBuffer: arrayBuf });
+        const parsed   = _seParseTextChapters(result.value, name.replace(/\.[^.]+$/, ''));
+        chapters.push(...parsed);
+
+      } else {
+        stEl.textContent = `⚠️ Bỏ qua "${name}" — chỉ hỗ trợ .txt, .docx`;
+        continue;
+      }
+    } catch(e) {
+      stEl.textContent = `❌ Lỗi đọc "${name}": ${e.message}`;
+      return;
+    }
+  }
+
+  if (!chapters.length) {
+    stEl.textContent = '⚠️ Không tìm thấy nội dung chương nào.';
+    return;
+  }
+
+  window._seNewChapters = chapters;
+  const mode = document.getElementById('_se_chap_mode')?.value || 'append';
+  stEl.innerHTML = `✅ Tìm thấy <b>${chapters.length}</b> chương — nhấn <b>Lưu & Deploy</b> để ${mode === 'replace' ? 'thay thế toàn bộ' : 'thêm vào cuối'}.`;
+
+  // Preview list
+  prvEl.style.display = '';
+  prvEl.innerHTML = chapters.map((c, i) =>
+    `<div style="padding:.22rem 0;border-bottom:1px solid #eef3f7">
+       <b style="color:#3ab3ca">${i+1}.</b> ${_esc(c.title)}
+       <span style="color:#bbb;font-size:.68rem;margin-left:.4rem">(${c.content.length} ký tự)</span>
+     </div>`
+  ).join('');
+}
+
+/**
+ * Parse plain text into chapter array.
+ * If text contains @@CHUONG N markers → split into multiple chapters.
+ * Otherwise the whole text is treated as one chapter (title = filename).
+ */
+function _seParseTextChapters(raw, fallbackName) {
+  const text = raw.replace(/\r\n/g, '\n').trim();
+
+  // Detect @@CHUONG N markers (case-insensitive, flexible spacing)
+  const markerRe = /^@@CHUONG\s+(\d+)\s*(.*)?$/im;
+  if (markerRe.test(text)) {
+    const parts   = text.split(/^@@CHUONG\s+\d+/im);
+    const headers = [...text.matchAll(/^@@CHUONG\s+(\d+)\s*(.*)?$/gim)];
+    const chapters = [];
+    // parts[0] is text before first marker — skip if empty
+    for (let i = 0; i < headers.length; i++) {
+      const rawTitle = (headers[i][2] || '').trim();
+      const num      = headers[i][1];
+      const title    = rawTitle || `Chương ${num}`;
+      const content  = (parts[i + 1] || '').trim();
+      if (content) chapters.push({ title, content });
+    }
+    return chapters;
+  }
+
+  // Single chapter: use first non-empty line as title candidate
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  const title = lines[0]?.length <= 120 ? lines[0] : (fallbackName || 'Chương mới');
+  const content = lines[0]?.length <= 120 ? lines.slice(1).join('\n') : text;
+  return [{ title, content: content.trim() }];
+}
+
+/** Download a sample .txt template showing the @@CHUONG N format. */
+function _seDownloadChapTemplate() {
+  const sample =
+`@@CHUONG 1 Tựa đề chương một (viết sau dấu cách)
+Nội dung chương một viết ở đây.
+Có thể xuống dòng nhiều lần.
+
+Đây vẫn là nội dung chương 1.
+
+@@CHUONG 2 Tựa đề chương hai
+Nội dung chương hai bắt đầu sau dòng @@CHUONG 2.
+
+@@CHUONG 3
+Nếu không có tên thì hệ thống tự đặt "Chương 3".
+`;
+  const blob = new Blob([sample], { type: 'text/plain;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = 'mau_nhap_chuong.txt';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+// helper (avoid collision with global esc)
+function _esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 // ── Chapter editor (from story.html chapter list) ──────────────
 async function openChapterEditor(storyId, chapterId) {
