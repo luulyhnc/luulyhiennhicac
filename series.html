@@ -163,12 +163,6 @@
       .filter(s => s.seriesId === seriesId)
       .sort((a, b) => (a.seriesOrder || 0) - (b.seriesOrder || 0));
 
-    // Determine the first story and its first chapter for the "Đọc từ Tập 1" button
-    const firstStory   = seriesStories[0] || null;
-    const firstChapter = firstStory && firstStory.chapters && firstStory.chapters[0]
-      ? firstStory.chapters[0]
-      : null;
-
     const statusCls = _statusClass(series.status);
 
     // ── Series header block ───────────────────────────────────────────────
@@ -182,14 +176,27 @@
         ).join("")
       : "";
 
-    const readBtn = firstStory && firstChapter
-      ? `<a href="reader.html#${_escHtml(firstStory.id)}/${firstChapter.id}" class="btn btn-accent">▶ Đọc từ Tập 1</a>`
-      : `<button class="btn btn-accent" disabled style="opacity:.45">▶ Đọc từ Tập 1</button>`;
+    // ── Inline story list (replaces single "Đọc từ Tập 1" button) ──────────
+    const storyListInlineHtml = seriesStories.length
+      ? `<div style="margin-top:1rem;border:1.5px solid var(--border);border-radius:10px;overflow:hidden">
+          <div style="background:var(--bg2);padding:.45rem .85rem;font-size:.78rem;font-weight:700;color:var(--text2);border-bottom:1.5px solid var(--border)">
+            📚 Danh sách truyện · ${seriesStories.length} tập${series.totalVolumes && series.totalVolumes > seriesStories.length ? ` / ${series.totalVolumes} tập` : ''}
+          </div>
+          ${seriesStories.map((s, i) => {
+            const ch1     = s.chapters?.[0];
+            const tapLabel = s.seriesOrder != null ? `Tập ${s.seriesOrder}` : `Tập ${i + 1}`;
+            const href    = ch1 ? `reader.html#${_escHtml(s.id)}/${ch1.id}` : `story.html#${_escHtml(s.id)}`;
+            const border  = i < seriesStories.length - 1 ? 'border-bottom:1px solid var(--border);' : '';
+            return `<a href="${href}" style="display:flex;align-items:center;gap:.6rem;padding:.55rem .85rem;${border}text-decoration:none;color:inherit;transition:background .12s" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background='transparent'">
+              <span style="background:var(--primary);color:#fff;font-size:.67rem;font-weight:700;padding:.13rem .45rem;border-radius:10px;flex-shrink:0;min-width:2.8rem;text-align:center">${_escHtml(tapLabel)}</span>
+              <span style="font-size:.87rem;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--navy)">${_escHtml(s.title)}</span>
+              <span style="font-size:.71rem;color:var(--text3);flex-shrink:0;white-space:nowrap">📖 ${s.chapters?.length || 0} chương</span>
+              <span style="font-size:.8rem;color:var(--primary);flex-shrink:0;font-weight:700">›</span>
+            </a>`;
+          }).join('')}
+        </div>`
+      : `<p style="margin-top:.9rem;font-size:.83rem;color:var(--text3)">Chưa có tập nào trong series này.</p>`;
 
-    // ── Story cards ───────────────────────────────────────────────────────
-    const storyCardsHtml = seriesStories.length
-      ? seriesStories.map(s => _seriesStoryCard(s)).join("")
-      : `<div class="empty-state"><div class="icon">📭</div><p>Chưa có tập nào trong series này.</p></div>`;
 
     root.innerHTML = `
       <!-- Series detail block -->
@@ -203,7 +210,7 @@
 
           <div class="stat-row">
             <div class="stat-item">
-              <div class="val">${seriesStories.length}</div>
+              <div class="val">${series.totalVolumes || seriesStories.length}</div>
               <div class="key">Số tập</div>
             </div>
           </div>
@@ -227,19 +234,7 @@
 
           <div class="desc-box">${_escHtml(series.description)}</div>
 
-          <div class="action-btns">
-            ${readBtn}
-          </div>
-        </div>
-      </div>
-
-      <!-- Story list in series -->
-      <div class="chap-list-wrap">
-        <div class="chap-list-header">
-          <span class="title">📚 Danh Sách Tập (${seriesStories.length} tập)</span>
-        </div>
-        <div class="story-list" style="padding:.75rem">
-          ${storyCardsHtml}
+          ${storyListInlineHtml}
         </div>
       </div>
     `;

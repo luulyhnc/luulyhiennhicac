@@ -470,7 +470,11 @@
               <span class="genre-pill"><input type="checkbox" id="srg7" name="ser-genre" value="Khác" onchange="renderSeriesPreview()"><label for="srg7">Khác</label></span>
             </div>
           </div>
-          <div class="g2">
+          <div class="g3">
+            <div class="af-g"><label>Tổng số tập <span style="font-weight:400;font-size:.72rem;color:var(--text3)">(dự kiến)</span></label>
+              <input class="af-inp" id="ser-total" type="number" min="1" placeholder="VD: 6"
+                     oninput="renderSeriesPreview()">
+            </div>
             <div class="af-g"><label>Trạng thái</label>
               <select class="af-inp" id="ser-status" onchange="renderSeriesPreview()">
                 <option>Đang ra</option><option>Hoàn thành</option><option>Tạm dừng</option>
@@ -1948,7 +1952,7 @@ function renderSeriesList() {
           <div style="font-size:.77rem;color:var(--text2);margin-top:.1rem">${esc(s.author||'')}${s.author&&s.genre?' · ':''}${Array.isArray(s.genre)?s.genre.join(' · '):esc(s.genre||'')}</div>
           <div style="margin-top:.2rem;display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
             <span class="rb ${s.status==='Hoàn thành'?'rb-ok':'rb-reader'}">${esc(s.status||'Đang ra')}</span>
-            <span style="font-size:.73rem;color:var(--text3)">📖 ${storyCount} tập</span>
+            <span style="font-size:.73rem;color:var(--text3)">📖 ${s.totalVolumes ? `${storyCount}/${s.totalVolumes}` : storyCount} tập</span>
           </div>
           ${s.description?`<div style="font-size:.75rem;color:var(--text3);margin-top:.2rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:360px">${esc(s.description)}</div>`:''}
         </div>
@@ -1996,7 +2000,8 @@ function renderSeriesPreview() {
   const slug = title.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40) || 'series';
 
   // Sample stories from _S that belong to no series (for preview)
-  const storyCount = _S.filter(s => s.seriesId === slug).length;
+  const storyCount  = _S.filter(s => s.seriesId === slug).length;
+  const totalVols   = parseInt(document.getElementById('ser-total')?.value) || storyCount || 0;
   const sampleStories = _S.slice(0,3);
 
   const statusColor = status === 'Hoàn thành' ? '#27ae60' : status === 'Tạm dừng' ? '#e67e22' : '#3ab3ca';
@@ -2024,7 +2029,7 @@ function renderSeriesPreview() {
     <!-- Stats row -->
     <div style="display:flex;gap:0;border-bottom:1.5px solid var(--border)">
       <div style="flex:1;text-align:center;padding:.55rem;border-right:1px solid var(--border)">
-        <div style="font-size:1rem;font-weight:800;color:var(--primary)">${storyCount||0}</div>
+        <div style="font-size:1rem;font-weight:800;color:var(--primary)">${totalVols}</div>
         <div style="font-size:.65rem;color:var(--text3)">Số tập</div>
       </div>
       <div style="flex:1;text-align:center;padding:.55rem">
@@ -2075,9 +2080,11 @@ async function doAddSeries() {
       .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40) || 'series';
     let sid = baseId, n = 2;
     while (_SER.find(s => s.id === sid)) sid = baseId + '-' + (n++);
+    const _tv = parseInt(v('ser-total')) || 0;
     _SER.push({ id:sid, title, author:v('ser-author').trim(),
       cover:v('ser-cover').trim(), description:v('ser-desc').trim(),
-      genre:_getGenres('ser-genre'), status:v('ser-status') });
+      genre:_getGenres('ser-genre'), status:v('ser-status'),
+      ...(_tv ? { totalVolumes: _tv } : {}) });
     await _saveSeries('Thêm series: ' + title);
     ['ser-title','ser-author','ser-cover','ser-desc'].forEach(id => { const el=document.getElementById(id); if(el)el.value=''; });
     const _sp = document.getElementById('ser-prev'); if (_sp) _sp.style.display = 'none';
