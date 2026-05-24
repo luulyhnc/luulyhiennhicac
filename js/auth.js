@@ -70,9 +70,23 @@ const AUTH = {
   },
 
   async loadStories() {
-    const info = await this.ghGet(DATA_FILE);
-    const json = atob(info.content.replace(/\n/g,''));
+    const info   = await this.ghGet(DATA_FILE);
+    const binary = atob(info.content.replace(/\n/g,''));
+    const json   = decodeURIComponent(escape(binary)); // proper UTF-8 decode
     return { stories: JSON.parse(json), sha: info.sha };
+  },
+
+  // PUT a pre-base64-encoded binary file (images, etc.) directly
+  async ghPutRaw(path, b64content, msg, sha) {
+    const body = { message: msg, content: b64content };
+    if (sha) body.sha = sha;
+    const r = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${path}`, {
+      method: 'PUT',
+      headers: { Authorization:`token ${this.pat}`, Accept:'application/vnd.github.v3+json', 'Content-Type':'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!r.ok) { const e = await r.json().catch(()=>({})); throw new Error(e.message||`GitHub PUT error (${r.status})`); }
+    return r.json();
   },
 
   async saveStories(stories, sha, msg = 'Online: cập nhật truyện') {
@@ -348,12 +362,31 @@ function openStoryEditor(storyId) {
     </div>
     ${_fld('Tên truyện','se_t',s.title)}
     ${_fld('Tác giả','se_a',s.author)}
-    ${_fld('Ảnh bìa (URL)','se_c',s.cover||'')}
+    <div style="margin-bottom:.85rem">
+      <div style="font-size:.78rem;font-weight:500;color:#4a6080;margin-bottom:.28rem">Ảnh bìa</div>
+      <div style="display:flex;gap:.5rem;align-items:flex-start">
+        <div style="flex:1">
+          <input id="se_c" type="text" value="${_ea(s.cover||'')}" placeholder="https://…/cover.jpg"
+            oninput="const p=document.getElementById('se_prev');p.src=this.value;p.style.display=this.value?'block':'none'"
+            style="width:100%;padding:.5rem .72rem;border:1.5px solid #c5dce9;border-radius:8px;font-size:.87rem;font-family:inherit;outline:none;box-sizing:border-box">
+          <div style="display:flex;gap:.4rem;margin-top:.28rem;align-items:center">
+            <label style="cursor:pointer;padding:.22rem .65rem;background:#f0f4f8;border:1.5px solid #c5dce9;border-radius:6px;font-size:.75rem;font-weight:600;white-space:nowrap">
+              📂 Upload ảnh
+              <input type="file" accept="image/*" style="display:none" onchange="_uploadCoverFile(this,'se_c','_se_cu')">
+            </label>
+            <span id="_se_cu" style="font-size:.71rem;color:#9fb8cc"></span>
+          </div>
+        </div>
+        <img id="se_prev" src="${_ea(s.cover||'')}" alt="" style="width:44px;height:60px;object-fit:cover;border-radius:4px;border:1.5px solid #c5dce9;flex-shrink:0;${s.cover?'':'display:none'}">
+      </div>
+    </div>
     ${_fld('Giới thiệu','se_d',s.description||'','textarea')}
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:.85rem">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.7rem;margin-bottom:.85rem">
       ${_sel('Trạng thái','se_st',['Đang ra','Hoàn thành','Tạm dừng'],s.status)}
       ${_sel('Nguồn','se_src',['Sáng tác','Dịch','ST'],s.source||'Sáng tác')}
+      ${_sel('Thể loại chính','se_genre',['Tiên Hiệp','Huyền Huyễn','Ngôn Tình','Đô Thị','Nữ Cường','Kiếm Hiệp','Lịch Sử','Khác'],Array.isArray(s.genre)?s.genre[0]:(s.genre||'Tiên Hiệp'))}
     </div>
+    ${_fld('Tags phụ (phân cách bởi dấu phẩy)','se_tags',(s.tags||[]).join(', '))}
     <div id="_se_msg" style="display:none;padding:.45rem .7rem;border-radius:7px;font-size:.8rem;margin-bottom:.7rem"></div>
     <div style="display:flex;gap:.5rem;justify-content:flex-end">
       <button onclick="document.getElementById('_se_modal').remove()"
@@ -373,6 +406,8 @@ async function _saveStoryEdits(storyId) {
     const { stories, sha } = await AUTH.loadStories();
     const idx = stories.findIndex(s => s.id === storyId);
     if (idx < 0) { _s('Không tìm thấy truyện!', false); return; }
+    const newGenre = document.getElementById('se_genre')?.value || '';
+    const newTags  = (document.getElementById('se_tags')?.value||'').split(',').map(t=>t.trim()).filter(Boolean);
     stories[idx] = { ...stories[idx],
       title:       document.getElementById('se_t').value.trim(),
       author:      document.getElementById('se_a').value.trim(),
@@ -380,6 +415,9 @@ async function _saveStoryEdits(storyId) {
       description: document.getElementById('se_d').value.trim(),
       status:      document.getElementById('se_st').value,
       source:      document.getElementById('se_src').value,
+      genre:       newGenre ? [newGenre, ...newTags] : stories[idx].genre,
+      genres:      newGenre ? [newGenre, ...newTags] : stories[idx].genres,
+      tags:        newTags,
     };
     _s('⏳ Đang lưu lên GitHub...', true);
     await AUTH.saveStories(stories, sha, `Online: sửa "${stories[idx].title}"`);
@@ -705,6 +743,37 @@ function _ea(s) { return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot
 
 // Expose globally so other scripts (member.js) can check AUTH.isOwner
 window.AUTH = AUTH;
+
+// ── Cover / Background image upload via GitHub API ─────────────
+async function _uploadCoverFile(input, urlInputId, statusId, previewId) {
+  const file = input.files[0];
+  if (!file) return;
+  const statusEl = document.getElementById(statusId);
+  const urlInput = document.getElementById(urlInputId);
+  if (statusEl) statusEl.textContent = '⏳ Đang upload…';
+  const reader = new FileReader();
+  reader.onload = async e => {
+    try {
+      const b64   = e.target.result.split(',')[1];
+      const ext   = (file.name.split('.').pop() || 'jpg').toLowerCase();
+      const fname = 'images/covers/' + Date.now() + '-' + Math.random().toString(36).slice(2,6) + '.' + ext;
+      await AUTH.ghPutRaw(fname, b64, 'Upload: ' + file.name);
+      const url = 'https://raw.githubusercontent.com/' + GH_REPO + '/main/' + fname;
+      if (urlInput) urlInput.value = url;
+      if (statusEl) statusEl.textContent = '✅ Upload xong!';
+      // Update preview images
+      const ids = [previewId, 'se_prev', 'as-prev'].filter(Boolean);
+      ids.forEach(pid => {
+        const img = document.getElementById(pid);
+        if (img) { img.src = url; img.style.display = 'block'; }
+      });
+    } catch(err) {
+      if (statusEl) statusEl.textContent = '❌ ' + err.message;
+    }
+  };
+  reader.readAsDataURL(file);
+}
+window._uploadCoverFile = _uploadCoverFile;
 
 // ── Boot ───────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {

@@ -102,14 +102,51 @@
     .adm-empty { text-align:center; padding:2.2rem 1rem; color:var(--text3); font-size:.88rem; }
     .adm-empty .ico { font-size:2rem; margin-bottom:.4rem; }
 
-    /* ── Interface settings ── */
-    .iface-section { border:1.5px solid var(--border); border-radius:var(--radius); padding:1rem 1.1rem; margin-bottom:.8rem; }
-    .iface-section h3 { font-size:.85rem; font-weight:700; color:var(--navy); margin:0 0 .7rem; }
+    /* ── Interface layout ── */
+    .iface-layout { display:grid; grid-template-columns:1fr 320px; gap:1rem; align-items:start; }
+    .iface-controls { display:flex; flex-direction:column; gap:.8rem; }
+    .iface-preview-wrap { }
+    @media(max-width:900px){ .iface-layout{ grid-template-columns:1fr; } .iface-preview-wrap{ order:-1; } }
+
+    /* ── Color swatches ── */
     .color-swatches { display:flex; gap:.5rem; flex-wrap:wrap; margin-top:.4rem; }
     .swatch { width:32px; height:32px; border-radius:50%; cursor:pointer; border:3px solid transparent;
               transition:transform .15s; }
     .swatch:hover { transform:scale(1.15); }
     .swatch.sel { border-color:var(--navy); }
+
+    /* ── Font effect picker ── */
+    .fx-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:.45rem; margin-top:.35rem; }
+    .fx-btn { background:var(--bg2); border:1.5px solid var(--border); border-radius:8px;
+              padding:.45rem .3rem; cursor:pointer; font-family:inherit; text-align:center;
+              display:flex; flex-direction:column; align-items:center; gap:.2rem;
+              transition:border-color .14s,background .14s; }
+    .fx-btn span { font-size:1.1rem; color:var(--navy); line-height:1; }
+    .fx-btn small { font-size:.62rem; color:var(--text3); font-weight:500; }
+    .fx-btn:hover { border-color:var(--primary); background:var(--pri-l); }
+    .fx-btn.active { border-color:var(--primary); background:var(--pri-l); }
+    .fx-btn.active small { color:var(--primary); }
+
+    /* ── Demo animations (in picker) ── */
+    @keyframes adm-shimmer { 0%{background-position:0%} 100%{background-position:300%} }
+    @keyframes adm-typing  { 0%,100%{width:0;border-color:transparent} 10%,85%{border-color:var(--primary)} 15%,80%{width:100%} }
+    .logo-fx-anim-demo {
+      background:linear-gradient(90deg,#3ab3ca,#e74c8b,#8e44ad,#3ab3ca);
+      background-size:300%;
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+      animation:adm-shimmer 2s linear infinite; display:inline-block;
+    }
+    .logo-fx-typing-demo {
+      overflow:hidden; border-right:2px solid var(--primary); white-space:nowrap;
+      display:inline-block; animation:adm-typing 2.5s steps(2) infinite;
+    }
+
+    /* ── Background target radio ── */
+    .bg-target-lbl { display:flex; align-items:center; gap:.35rem; padding:.32rem .65rem;
+                     border:1.5px solid var(--border2); border-radius:20px; font-size:.79rem;
+                     cursor:pointer; transition:border-color .14s; }
+    .bg-target-lbl:has(input:checked) { border-color:var(--primary); background:var(--pri-l); color:var(--primary); font-weight:600; }
+    .bg-target-lbl input { accent-color:var(--primary); }
   </style>
 </head>
 <body>
@@ -201,14 +238,20 @@
             <input class="af-inp" id="as-author" placeholder="Tên tác giả"></div>
         </div>
 
-        <div class="af-g"><label>Ảnh bìa (URL hình ảnh)</label>
+        <div class="af-g"><label>Ảnh bìa</label>
           <div style="display:flex;gap:.6rem;align-items:flex-start">
             <div style="flex:1">
               <input class="af-inp" id="as-cover" type="url" placeholder="https://…/cover.jpg"
                      oninput="prevCover(this.value)">
-              <div class="af-hint" style="margin-top:.3rem">
-                📐 Kích thước khuyến nghị: <strong>300×400px</strong> (tỉ lệ 3:4) — tối thiểu 200×270px.<br>
-                🖼️ Định dạng: JPG / PNG / WebP. Chất lượng tốt nhất: ≥600px chiều rộng, dung lượng &lt;2MB.
+              <div style="display:flex;gap:.45rem;margin-top:.3rem;align-items:center;flex-wrap:wrap">
+                <label style="cursor:pointer;padding:.23rem .7rem;background:var(--bg2);border:1.5px solid var(--border2);border-radius:6px;font-size:.75rem;font-weight:600;white-space:nowrap">
+                  📂 Upload PNG/JPG/GIF
+                  <input type="file" accept="image/*" style="display:none" onchange="_uploadCoverFile(this,'as-cover','_as_cu')">
+                </label>
+                <span id="_as_cu" style="font-size:.71rem;color:var(--text3)"></span>
+              </div>
+              <div class="af-hint" style="margin-top:.25rem">
+                📐 Khuyến nghị: <strong>300×400px</strong> (3:4) · JPG/PNG/WebP · &lt;2MB
               </div>
             </div>
             <img id="as-prev" src="" alt="" style="width:48px;height:65px;object-fit:cover;
@@ -330,60 +373,187 @@
 
     <!-- ══ GIAO DIỆN ══ -->
     <div class="adm-panel" id="pnl-iface">
-      <div class="adm-card">
-        <div class="adm-card-title">🎨 Tuỳ chỉnh giao diện</div>
-        <div id="iface-alert" class="adm-alert"></div>
+      <div id="iface-alert" class="adm-alert" style="margin-bottom:.7rem"></div>
+      <div class="iface-layout">
 
-        <div class="iface-section">
-          <h3>🏷️ Thông tin trang web</h3>
-          <div class="g2">
-            <div class="af-g"><label>Tên website</label>
-              <input class="af-inp" id="if-sitename" value="Lưu Ly Hiền Nhi Các"></div>
-            <div class="af-g"><label>Slogan</label>
-              <input class="af-inp" id="if-slogan" value="Gác ngọc thanh vân, lưu vạn trang mộng"></div>
+        <!-- ── LEFT: controls ── -->
+        <div class="iface-controls">
+
+          <!-- Thông tin -->
+          <div class="adm-card">
+            <div class="adm-card-title">🏷️ Thông tin trang web</div>
+            <div class="g2">
+              <div class="af-g"><label>Tên website</label>
+                <input class="af-inp" id="if-sitename" value="Lưu Ly Hiền Nhi Các"
+                       oninput="renderIfacePreview()"></div>
+              <div class="af-g"><label>Slogan</label>
+                <input class="af-inp" id="if-slogan" value="Gác ngọc thanh vân, lưu vạn trang mộng"
+                       oninput="renderIfacePreview()"></div>
+            </div>
+            <div class="af-g"><label>Mô tả (SEO)</label>
+              <input class="af-inp" id="if-desc" value="Không gian đọc truyện online với các tác phẩm độc quyền từ các tác giả nội địa."></div>
           </div>
-          <div class="af-g"><label>Mô tả (SEO description)</label>
-            <input class="af-inp" id="if-desc" value="Không gian đọc truyện online với các tác phẩm độc quyền từ các tác giả nội địa."></div>
+
+          <!-- Màu chủ đạo -->
+          <div class="adm-card">
+            <div class="adm-card-title">🌈 Màu chủ đạo</div>
+            <div class="color-swatches" id="color-swatches">
+              <div class="swatch sel" style="background:#3ab3ca" data-color="#3ab3ca" onclick="pickColor(this)" title="Xanh mặc định"></div>
+              <div class="swatch" style="background:#e74c8b" data-color="#e74c8b" onclick="pickColor(this)" title="Hồng"></div>
+              <div class="swatch" style="background:#8e44ad" data-color="#8e44ad" onclick="pickColor(this)" title="Tím"></div>
+              <div class="swatch" style="background:#27ae60" data-color="#27ae60" onclick="pickColor(this)" title="Xanh lá"></div>
+              <div class="swatch" style="background:#e67e22" data-color="#e67e22" onclick="pickColor(this)" title="Cam"></div>
+              <div class="swatch" style="background:#c0392b" data-color="#c0392b" onclick="pickColor(this)" title="Đỏ"></div>
+              <div class="swatch" style="background:#2c3e50" data-color="#2c3e50" onclick="pickColor(this)" title="Đen xanh"></div>
+            </div>
+            <div style="margin-top:.65rem;display:flex;align-items:center;gap:.5rem">
+              <label style="font-size:.78rem;color:var(--text2)">Màu tuỳ chỉnh:</label>
+              <input type="color" id="if-color" value="#3ab3ca"
+                     style="width:34px;height:34px;border:none;border-radius:6px;cursor:pointer;padding:2px"
+                     oninput="previewColor(this.value)">
+              <span id="if-color-hex" style="font-size:.8rem;color:var(--text3)">#3ab3ca</span>
+            </div>
+          </div>
+
+          <!-- Font & kiểu chữ -->
+          <div class="adm-card">
+            <div class="adm-card-title">🔤 Font & Kiểu chữ</div>
+
+            <div class="af-g"><label>Font chữ tên web (logo)</label>
+              <select class="af-inp" id="if-font" onchange="renderIfacePreview()">
+                <option value="'Be Vietnam Pro',sans-serif">Be Vietnam Pro (mặc định)</option>
+                <option value="'Playfair Display',serif">Playfair Display – Cổ điển</option>
+                <option value="'Merriweather',serif">Merriweather – Văn học</option>
+                <option value="'Lora',serif">Lora – Nhẹ nhàng</option>
+                <option value="'Cinzel',serif">Cinzel – Trang trọng</option>
+                <option value="'Raleway',sans-serif">Raleway – Hiện đại</option>
+                <option value="'Dancing Script',cursive">Dancing Script – Thảo</option>
+                <option value="'Pacifico',cursive">Pacifico – Vui tươi</option>
+                <option value="Georgia,serif">Georgia – Cổ điển hệ thống</option>
+                <option value="'Inter',sans-serif">Inter – Tối giản</option>
+              </select>
+            </div>
+
+            <div class="af-g"><label>Cỡ chữ logo <span id="if-logosize-val" style="color:var(--primary);font-weight:700">1.15</span>em</label>
+              <input type="range" id="if-logosize" min="80" max="200" value="115"
+                     style="width:100%;accent-color:var(--primary)"
+                     oninput="document.getElementById('if-logosize-val').textContent=(this.value/100).toFixed(2);renderIfacePreview()">
+            </div>
+
+            <div class="af-g"><label>Hiệu ứng chữ logo</label>
+              <div class="fx-grid" id="fx-grid">
+                <button class="fx-btn active" data-fx="normal"    onclick="pickFx(this)"><span style="font-weight:400">Aa</span><small>Bình thường</small></button>
+                <button class="fx-btn" data-fx="bold"     onclick="pickFx(this)"><span style="font-weight:900">Aa</span><small>In đậm</small></button>
+                <button class="fx-btn" data-fx="italic"   onclick="pickFx(this)"><span style="font-style:italic">Aa</span><small>In nghiêng</small></button>
+                <button class="fx-btn" data-fx="bold-i"   onclick="pickFx(this)"><span style="font-weight:900;font-style:italic">Aa</span><small>Đậm nghiêng</small></button>
+                <button class="fx-btn" data-fx="3d"       onclick="pickFx(this)"><span style="text-shadow:2px 2px 0 rgba(0,0,0,.25),4px 4px 0 rgba(0,0,0,.1)">Aa</span><small>Nổi 3D</small></button>
+                <button class="fx-btn" data-fx="gradient" onclick="pickFx(this)"><span style="background:linear-gradient(135deg,#3ab3ca,#e74c8b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Aa</span><small>Gradient</small></button>
+                <button class="fx-btn" data-fx="anim"     onclick="pickFx(this)"><span class="logo-fx-anim-demo">Aa</span><small>Lấp lánh</small></button>
+                <button class="fx-btn" data-fx="typing"   onclick="pickFx(this)"><span class="logo-fx-typing-demo">Aa</span><small>Đánh máy</small></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Theme nền -->
+          <div class="adm-card">
+            <div class="adm-card-title">🖼️ Ảnh nền / Theme động</div>
+
+            <div class="af-g"><label>URL ảnh hoặc GIF (để trống = không dùng)</label>
+              <div style="display:flex;gap:.45rem;align-items:flex-start">
+                <input class="af-inp" id="if-bgimage" type="url" placeholder="https://…/background.gif"
+                       oninput="renderIfacePreview()" style="flex:1">
+                <label style="cursor:pointer;padding:.5rem .75rem;background:var(--bg2);border:1.5px solid var(--border2);border-radius:8px;font-size:.78rem;font-weight:600;white-space:nowrap;flex-shrink:0">
+                  📂 Upload GIF/Ảnh
+                  <input type="file" accept="image/*,image/gif" style="display:none"
+                         onchange="_uploadCoverFile(this,'if-bgimage','_bg_cu')">
+                </label>
+              </div>
+              <span id="_bg_cu" style="font-size:.71rem;color:var(--text3);margin-top:.2rem;display:block"></span>
+            </div>
+
+            <div class="af-g"><label>Áp dụng lên</label>
+              <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+                <label class="bg-target-lbl"><input type="radio" name="bg-target" id="bgt-hero"   value="hero"   checked onchange="renderIfacePreview()"> 🦸 Hero Banner</label>
+                <label class="bg-target-lbl"><input type="radio" name="bg-target" id="bgt-header" value="header"       onchange="renderIfacePreview()"> 🗂️ Header</label>
+                <label class="bg-target-lbl"><input type="radio" name="bg-target" id="bgt-body"   value="body"         onchange="renderIfacePreview()"> 🌐 Toàn trang</label>
+              </div>
+            </div>
+
+            <div class="af-g"><label>Độ tối nền <span id="if-bgdim-val" style="color:var(--primary);font-weight:700">30</span>%</label>
+              <input type="range" id="if-bgdim" min="0" max="80" value="30"
+                     style="width:100%;accent-color:var(--primary)"
+                     oninput="document.getElementById('if-bgdim-val').textContent=this.value;renderIfacePreview()">
+            </div>
+          </div>
+
+          <!-- Truyện đề cử -->
+          <div class="adm-card">
+            <div class="adm-card-title">📌 Truyện đề cử (Hero Banner)</div>
+            <div class="af-g">
+              <select class="af-inp" id="if-hero">
+                <option value="">— Tự động (truyện đầu tiên) —</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Buttons -->
+          <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.3rem">
+            <button class="btn-auth btn-auth-primary" onclick="saveIfaceSettings()"
+                    style="flex:1;max-width:220px">💾 Lưu & Áp dụng</button>
+            <button onclick="resetIface()"
+                    style="padding:.5rem 1rem;border:1.5px solid var(--border2);border-radius:8px;
+                           background:#fff;cursor:pointer;font-family:inherit;font-size:.85rem">↩ Đặt lại mặc định</button>
+          </div>
         </div>
 
-        <div class="iface-section">
-          <h3>🌈 Màu chủ đạo</h3>
-          <div class="af-hint" style="margin-bottom:.5rem">Chọn màu sắc chủ đạo cho toàn bộ website.</div>
-          <div class="color-swatches" id="color-swatches">
-            <div class="swatch sel" style="background:#3ab3ca" data-color="#3ab3ca" onclick="pickColor(this)" title="Xanh mặc định"></div>
-            <div class="swatch" style="background:#e74c8b" data-color="#e74c8b" onclick="pickColor(this)" title="Hồng"></div>
-            <div class="swatch" style="background:#8e44ad" data-color="#8e44ad" onclick="pickColor(this)" title="Tím"></div>
-            <div class="swatch" style="background:#27ae60" data-color="#27ae60" onclick="pickColor(this)" title="Xanh lá"></div>
-            <div class="swatch" style="background:#e67e22" data-color="#e67e22" onclick="pickColor(this)" title="Cam"></div>
-            <div class="swatch" style="background:#c0392b" data-color="#c0392b" onclick="pickColor(this)" title="Đỏ"></div>
-            <div class="swatch" style="background:#2c3e50" data-color="#2c3e50" onclick="pickColor(this)" title="Đen xanh"></div>
-          </div>
-          <div style="margin-top:.65rem;display:flex;align-items:center;gap:.5rem">
-            <label style="font-size:.78rem;color:var(--text2)">Màu tuỳ chỉnh:</label>
-            <input type="color" id="if-color" value="#3ab3ca"
-                   style="width:36px;height:36px;border:none;border-radius:6px;cursor:pointer;padding:2px"
-                   oninput="previewColor(this.value)">
-            <span id="if-color-hex" style="font-size:.8rem;color:var(--text3)">#3ab3ca</span>
+        <!-- ── RIGHT: live preview ── -->
+        <div class="iface-preview-wrap">
+          <div class="adm-card" style="position:sticky;top:72px">
+            <div class="adm-card-title">👁️ Xem trước trực tiếp</div>
+            <div id="iface-preview" style="border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;font-size:12px;line-height:1.4">
+
+              <!-- mini header -->
+              <div id="pv-header" style="background:#fff;border-bottom:1.5px solid #e8edf5;padding:7px 10px;display:flex;align-items:center;gap:6px">
+                <div style="flex:1;min-width:0">
+                  <div id="pv-logo" style="font-weight:700;color:#3ab3ca;font-size:1em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Lưu Ly Hiền Nhi Các</div>
+                  <div id="pv-slogan" style="font-size:.72em;color:#9fb8cc;margin-top:1px">Gác ngọc thanh vân, lưu vạn trang mộng</div>
+                </div>
+                <div id="pv-btn" style="background:#3ab3ca;color:#fff;border-radius:20px;padding:2px 8px;font-size:.72em;font-weight:700;white-space:nowrap">👑 Admin</div>
+              </div>
+
+              <!-- mini hero -->
+              <div id="pv-hero" style="background:linear-gradient(135deg,#e4f6fa 0%,#d8f0f5 100%);padding:10px 12px;min-height:72px;position:relative;overflow:hidden">
+                <div id="pv-hero-bg" style="position:absolute;inset:0;background-size:cover;background-position:center;opacity:0.35;pointer-events:none"></div>
+                <div style="position:relative;z-index:1">
+                  <div style="font-size:.68em;color:#3ab3ca;font-weight:700;margin-bottom:2px">⭐ TRUYỆN ĐỀ CỬ</div>
+                  <div style="font-size:.85em;font-weight:800;color:#1a2535">Tiêu đề truyện mẫu</div>
+                  <div style="font-size:.68em;color:#4a6080;margin-top:1px">Tác giả: Nguyễn Thi</div>
+                  <div style="margin-top:5px;display:flex;gap:4px">
+                    <div id="pv-readbtn" style="background:#3ab3ca;color:#fff;border-radius:12px;padding:2px 9px;font-size:.65em;font-weight:700">▶ Đọc ngay</div>
+                    <div style="border:1.5px solid rgba(255,255,255,.8);color:#1a2535;border-radius:12px;padding:2px 8px;font-size:.65em">📖 Chi tiết</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- mini cards -->
+              <div style="padding:8px;background:#f5f8fc;display:grid;grid-template-columns:1fr 1fr;gap:5px">
+                <div style="background:#fff;border-radius:5px;padding:6px;border:1px solid #e8edf5">
+                  <div style="font-size:.72em;font-weight:700;color:#1a2535;margin-bottom:2px">Kiếm Thần Vô Song</div>
+                  <div style="font-size:.62em;color:#9fb8cc">Tiên Hiệp · 42 chương</div>
+                </div>
+                <div style="background:#fff;border-radius:5px;padding:6px;border:1px solid #e8edf5">
+                  <div style="font-size:.72em;font-weight:700;color:#1a2535;margin-bottom:2px">Nữ Hoàng Băng Tuyết</div>
+                  <div style="font-size:.62em;color:#9fb8cc">Ngôn Tình · 18 chương</div>
+                </div>
+              </div>
+            </div>
+            <div style="font-size:.72rem;color:var(--text3);margin-top:.5rem;text-align:center">
+              Cập nhật tự động khi bạn thay đổi cài đặt bên trái
+            </div>
           </div>
         </div>
 
-        <div class="iface-section">
-          <h3>📌 Truyện đề cử (Hero Banner)</h3>
-          <div class="af-g"><label>Chọn truyện hiển thị trên banner trang chủ</label>
-            <select class="af-inp" id="if-hero">
-              <option value="">— Tự động (truyện đầu tiên) —</option>
-            </select>
-          </div>
-        </div>
-
-        <div style="display:flex;gap:.6rem;flex-wrap:wrap">
-          <button class="btn-auth btn-auth-primary" onclick="saveIfaceSettings()"
-                  style="flex:1;max-width:200px">💾 Lưu cài đặt</button>
-          <button onclick="resetIface()"
-                  style="padding:.5rem 1rem;border:1.5px solid var(--border2);border-radius:8px;
-                         background:#fff;cursor:pointer;font-family:inherit;font-size:.85rem">↩ Đặt lại mặc định</button>
-        </div>
-      </div>
+      </div><!-- /iface-layout -->
     </div>
 
   </div><!-- /adm-root -->
@@ -688,7 +858,15 @@ function loadIfaceSettings() {
     if (s.desc)     document.getElementById('if-desc').value     = s.desc;
     if (s.color)    { previewColor(s.color); document.getElementById('if-color').value = s.color; }
     if (s.hero)     document.getElementById('if-hero').value     = s.hero;
+    // New fields
+    if (s.fontFamily){ const el=document.getElementById('if-font'); if(el) el.value=s.fontFamily; }
+    if (s.logoSize)  { const el=document.getElementById('if-logosize'); if(el){ el.value=Math.round(s.logoSize*100); document.getElementById('if-logosize-val').textContent=s.logoSize.toFixed(2); } }
+    if (s.logoEffect){ pickFxByValue(s.logoEffect); }
+    if (s.bgImage)   { const el=document.getElementById('if-bgimage'); if(el) el.value=s.bgImage; }
+    if (s.bgTarget)  { const el=document.querySelector(`input[name="bg-target"][value="${s.bgTarget}"]`); if(el) el.checked=true; }
+    if (s.bgDim !== undefined){ const el=document.getElementById('if-bgdim'); if(el){ el.value=s.bgDim; document.getElementById('if-bgdim-val').textContent=s.bgDim; } }
   } catch {}
+  renderIfacePreview();
 }
 
 function populateHeroSelect() {
@@ -708,6 +886,7 @@ function previewColor(hex) {
   document.querySelectorAll('#color-swatches .swatch').forEach(s => {
     s.classList.toggle('sel', s.dataset.color === hex);
   });
+  renderIfacePreview();
 }
 
 function pickColor(el) {
@@ -716,28 +895,133 @@ function pickColor(el) {
   document.getElementById('if-color').value = hex;
 }
 
+function pickFx(el) {
+  document.querySelectorAll('.fx-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderIfacePreview();
+}
+function pickFxByValue(val) {
+  document.querySelectorAll('.fx-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.fx === val);
+  });
+}
+
+// ── Live preview renderer ───────────────────────────────────
+function renderIfacePreview() {
+  const color    = document.getElementById('if-color')?.value || '#3ab3ca';
+  const sitename = document.getElementById('if-sitename')?.value || 'Lưu Ly Hiền Nhi Các';
+  const slogan   = document.getElementById('if-slogan')?.value   || '';
+  const font     = document.getElementById('if-font')?.value     || "'Be Vietnam Pro',sans-serif";
+  const sizeEm   = ((parseInt(document.getElementById('if-logosize')?.value)||115)/100).toFixed(2);
+  const fx       = document.querySelector('.fx-btn.active')?.dataset.fx || 'normal';
+  const bgImage  = document.getElementById('if-bgimage')?.value  || '';
+  const bgDim    = parseInt(document.getElementById('if-bgdim')?.value||30);
+
+  // Logo el
+  const pvLogo   = document.getElementById('pv-logo');
+  const pvSlogan = document.getElementById('pv-slogan');
+  const pvBtn    = document.getElementById('pv-readbtn');
+  const pvHeader = document.getElementById('pv-header');
+  const pvHeroBg = document.getElementById('pv-hero-bg');
+
+  if (!pvLogo) return;
+
+  pvLogo.textContent   = sitename;
+  pvSlogan.textContent = slogan;
+  pvLogo.style.fontFamily  = font;
+  pvLogo.style.fontSize    = sizeEm + 'em';
+  pvLogo.style.color       = color;
+
+  // Apply effect
+  pvLogo.style.fontWeight         = '';
+  pvLogo.style.fontStyle          = '';
+  pvLogo.style.textShadow         = '';
+  pvLogo.style.background         = '';
+  pvLogo.style.webkitBackgroundClip = '';
+  pvLogo.style.webkitTextFillColor  = '';
+  pvLogo.style.backgroundClip      = '';
+  pvLogo.style.animation            = '';
+  pvLogo.style.overflow             = '';
+  pvLogo.style.borderRight          = '';
+  pvLogo.style.whiteSpace           = '';
+
+  if (fx === 'bold')     { pvLogo.style.fontWeight = '900'; }
+  else if (fx === 'italic')  { pvLogo.style.fontStyle  = 'italic'; }
+  else if (fx === 'bold-i')  { pvLogo.style.fontWeight = '900'; pvLogo.style.fontStyle = 'italic'; }
+  else if (fx === '3d')      { pvLogo.style.textShadow = `2px 2px 0 rgba(0,0,0,.22),4px 4px 0 rgba(0,0,0,.1)`; }
+  else if (fx === 'gradient') {
+    pvLogo.style.background = `linear-gradient(135deg,${color} 0%,#e74c8b 50%,${color} 100%)`;
+    pvLogo.style.webkitBackgroundClip = 'text'; pvLogo.style.webkitTextFillColor = 'transparent'; pvLogo.style.backgroundClip = 'text';
+  }
+  else if (fx === 'anim') {
+    pvLogo.style.background = `linear-gradient(90deg,${color},#e74c8b,#8e44ad,${color})`;
+    pvLogo.style.backgroundSize = '300%';
+    pvLogo.style.webkitBackgroundClip = 'text'; pvLogo.style.webkitTextFillColor = 'transparent'; pvLogo.style.backgroundClip = 'text';
+    pvLogo.style.animation = 'adm-shimmer 2s linear infinite';
+  }
+  else if (fx === 'typing') {
+    pvLogo.style.overflow = 'hidden'; pvLogo.style.borderRight = `2px solid ${color}`;
+    pvLogo.style.whiteSpace = 'nowrap'; pvLogo.style.display = 'inline-block';
+    pvLogo.style.animation = 'adm-typing 2.5s steps(20) infinite';
+  }
+
+  // Button colors
+  if (pvBtn) pvBtn.style.background = color;
+
+  // Background image
+  if (pvHeroBg) {
+    if (bgImage) {
+      pvHeroBg.style.backgroundImage = `url('${bgImage}')`;
+      pvHeroBg.style.opacity = ((100-bgDim)/100).toFixed(2);
+    } else {
+      pvHeroBg.style.backgroundImage = '';
+    }
+  }
+  // Header bg for "header" target
+  if (pvHeader) {
+    const bgTarget = document.querySelector('input[name="bg-target"]:checked')?.value || 'hero';
+    pvHeader.style.backgroundImage = (bgImage && bgTarget === 'header') ? `url('${bgImage}')` : '';
+    pvHeader.style.backgroundSize  = 'cover';
+  }
+}
+
 function saveIfaceSettings() {
   const s = {
-    sitename: v('if-sitename'),
-    slogan:   v('if-slogan'),
-    desc:     v('if-desc'),
-    color:    document.getElementById('if-color').value,
-    hero:     v('if-hero'),
+    sitename:   v('if-sitename'),
+    slogan:     v('if-slogan'),
+    desc:       v('if-desc'),
+    color:      document.getElementById('if-color').value,
+    hero:       v('if-hero'),
+    fontFamily: v('if-font'),
+    logoSize:   (parseInt(document.getElementById('if-logosize')?.value||115)/100),
+    logoEffect: document.querySelector('.fx-btn.active')?.dataset.fx || 'normal',
+    bgImage:    v('if-bgimage'),
+    bgTarget:   document.querySelector('input[name="bg-target"]:checked')?.value || 'hero',
+    bgDim:      parseInt(document.getElementById('if-bgdim')?.value||30),
   };
   localStorage.setItem(IFACE_KEY, JSON.stringify(s));
-  showAlert('iface-alert', '✅ Đã lưu cài đặt giao diện! Áp dụng khi tải lại trang.', true);
+  showAlert('iface-alert', '✅ Đã lưu! Giao diện sẽ áp dụng khi tải lại trang.', true);
   setTimeout(() => hideAlert('iface-alert'), 3500);
 }
 
 function resetIface() {
-  if (!confirm('Đặt lại về mặc định?')) return;
+  if (!confirm('Đặt lại toàn bộ về mặc định?')) return;
   localStorage.removeItem(IFACE_KEY);
   previewColor('#3ab3ca');
-  document.getElementById('if-color').value = '#3ab3ca';
-  document.getElementById('if-sitename').value = 'Lưu Ly Hiền Nhi Các';
-  document.getElementById('if-slogan').value   = 'Gác ngọc thanh vân, lưu vạn trang mộng';
-  document.getElementById('if-desc').value     = 'Không gian đọc truyện online với các tác phẩm độc quyền từ các tác giả nội địa.';
-  document.getElementById('if-hero').value     = '';
+  document.getElementById('if-color').value     = '#3ab3ca';
+  document.getElementById('if-sitename').value  = 'Lưu Ly Hiền Nhi Các';
+  document.getElementById('if-slogan').value    = 'Gác ngọc thanh vân, lưu vạn trang mộng';
+  document.getElementById('if-desc').value      = 'Không gian đọc truyện online với các tác phẩm độc quyền từ các tác giả nội địa.';
+  document.getElementById('if-hero').value      = '';
+  document.getElementById('if-font').value      = "'Be Vietnam Pro',sans-serif";
+  document.getElementById('if-logosize').value  = 115;
+  document.getElementById('if-logosize-val').textContent = '1.15';
+  document.getElementById('if-bgimage').value   = '';
+  document.getElementById('if-bgdim').value     = 30;
+  document.getElementById('if-bgdim-val').textContent = '30';
+  document.querySelector('input[name="bg-target"][value="hero"]').checked = true;
+  pickFxByValue('normal');
+  renderIfacePreview();
   showAlert('iface-alert', '✅ Đã đặt lại mặc định.', true);
   setTimeout(() => hideAlert('iface-alert'), 2500);
 }

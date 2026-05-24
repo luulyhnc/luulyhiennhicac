@@ -616,6 +616,12 @@ body.reader-green  { background:#d8ecd2; }
 }
 .countdown-circle span { animation:none; }
 @keyframes cspin { to { transform:rotate(360deg); } }
+@keyframes logo-shimmer { 0%{background-position:0%} 100%{background-position:300%} }
+@keyframes logo-typing  {
+  0%,100% { width:0; border-color:transparent; }
+  10%,85% { border-color:var(--primary); }
+  15%,80% { width:100%; }
+}
 .intst-btns { display:flex; align-items:center; justify-content:center; gap:.65rem; }
 .btn-skip {
   background:transparent; color:var(--text2); border:1.5px solid var(--border);

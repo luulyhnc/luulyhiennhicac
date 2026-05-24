@@ -23,6 +23,101 @@ const INTERSTITIAL_SECONDS = 5;
 const CHAPTERS_PER_PAGE    = 50;
 
 // ══════════════════════════════════════════════
+//  APPLY INTERFACE SETTINGS (from admin panel)
+// ══════════════════════════════════════════════
+(function applyIfaceSettings() {
+  try {
+    const s = JSON.parse(localStorage.getItem('_llhnc_iface') || '{}');
+
+    // Primary color
+    if (s.color) {
+      document.documentElement.style.setProperty('--primary', s.color);
+      document.documentElement.style.setProperty('--pri-d', s.color);
+    }
+
+    // Font family — load from Google Fonts dynamically
+    if (s.fontFamily) {
+      const gfName = s.fontFamily.replace(/['"]/g,'').split(',')[0].trim();
+      const safeId = '_gf_' + gfName.replace(/\s+/g,'_');
+      if (gfName && !['Inter','Georgia','Be Vietnam Pro'].includes(gfName) && !document.getElementById(safeId)) {
+        const lk = document.createElement('link');
+        lk.id   = safeId; lk.rel = 'stylesheet';
+        lk.href = 'https://fonts.googleapis.com/css2?family='
+          + encodeURIComponent(gfName).replace(/%20/g,'+')
+          + ':wght@400;700;900&display=swap';
+        document.head.appendChild(lk);
+      }
+      document.documentElement.style.setProperty('--font-logo', s.fontFamily);
+    }
+
+    // Logo size + effect — applied after DOM ready
+    const applyLogo = () => {
+      document.querySelectorAll('.logo-main').forEach(el => {
+        if (s.fontFamily) el.style.fontFamily = s.fontFamily;
+        if (s.logoSize)   el.style.fontSize   = s.logoSize + 'em';
+
+        // Clear previous effects
+        el.style.fontWeight = ''; el.style.fontStyle = '';
+        el.style.textShadow = ''; el.style.background = '';
+        el.style.webkitBackgroundClip = ''; el.style.webkitTextFillColor = '';
+        el.style.backgroundClip = ''; el.style.animation = '';
+        el.style.overflow = ''; el.style.borderRight = ''; el.style.whiteSpace = '';
+
+        const color = s.color || '#3ab3ca';
+        const fx    = s.logoEffect || 'normal';
+        if (fx === 'bold')     { el.style.fontWeight = '900'; }
+        else if (fx === 'italic')  { el.style.fontStyle = 'italic'; }
+        else if (fx === 'bold-i')  { el.style.fontWeight = '900'; el.style.fontStyle = 'italic'; }
+        else if (fx === '3d')      { el.style.textShadow = `2px 2px 0 rgba(0,0,0,.22),4px 4px 0 rgba(0,0,0,.1)`; }
+        else if (fx === 'gradient') {
+          el.style.background = `linear-gradient(135deg,${color} 0%,#e74c8b 50%,${color} 100%)`;
+          el.style.webkitBackgroundClip = 'text'; el.style.webkitTextFillColor = 'transparent';
+          el.style.backgroundClip = 'text';
+        }
+        else if (fx === 'anim') {
+          el.style.background = `linear-gradient(90deg,${color},#e74c8b,#8e44ad,${color})`;
+          el.style.backgroundSize = '300%';
+          el.style.webkitBackgroundClip = 'text'; el.style.webkitTextFillColor = 'transparent';
+          el.style.backgroundClip = 'text'; el.style.animation = 'logo-shimmer 3s linear infinite';
+        }
+        else if (fx === 'typing') {
+          el.style.overflow = 'hidden'; el.style.borderRight = `2px solid ${color}`;
+          el.style.whiteSpace = 'nowrap'; el.style.display = 'inline-block';
+          el.style.animation = 'logo-typing 3.5s steps(20) infinite';
+        }
+      });
+
+      // Background image
+      if (s.bgImage) {
+        const dim    = (s.bgDim !== undefined ? s.bgDim : 30);
+        const overlay = `rgba(0,0,0,${(dim/100).toFixed(2)})`;
+        const bg     = `${overlay}, url('${s.bgImage}') center/cover no-repeat`;
+        const target = s.bgTarget || 'hero';
+        if (target === 'body') {
+          document.body.style.backgroundImage = `url('${s.bgImage}')`;
+          document.body.style.backgroundSize = 'cover';
+          document.body.style.backgroundAttachment = 'fixed';
+        } else if (target === 'header') {
+          document.querySelectorAll('header').forEach(h => {
+            h.style.backgroundImage = `url('${s.bgImage}')`; h.style.backgroundSize = 'cover';
+          });
+        } else {
+          const hero = document.querySelector('.hero-banner');
+          if (hero) { hero.style.background = bg; }
+        }
+      }
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', applyLogo);
+    } else {
+      applyLogo();
+    }
+
+  } catch(e) { /* silently fail */ }
+})();
+
+// ══════════════════════════════════════════════
 //  DATA
 // ══════════════════════════════════════════════
 let _storiesCache = null;
