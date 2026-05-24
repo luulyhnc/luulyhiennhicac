@@ -118,6 +118,167 @@ const CHAPTERS_PER_PAGE    = 50;
 })();
 
 // ══════════════════════════════════════════════
+//  COPY PROTECTION & TRACKING
+// ══════════════════════════════════════════════
+(function initCopyProtection() {
+  const _CL_KEY      = '_copy_logs';   // localStorage key for copy log
+  const _CL_WH_KEY   = '_copy_webhook'; // webhook URL key
+  const MAX_LOGS     = 1000;
+  const SNIPPET_LEN  = 200;
+
+  // ── Helper: is user logged in? ──────────────────────────────
+  function _isLoggedIn() {
+    if (typeof AUTH   !== 'undefined' && AUTH.isOwner)    return true;
+    if (typeof MEMBER !== 'undefined' && MEMBER.isLoggedIn) return true;
+    return false;
+  }
+
+  // ── Helper: current user info ──────────────────────────────
+  function _getUser() {
+    if (typeof AUTH   !== 'undefined' && AUTH.isOwner)    return { id:'admin', name:'Admin' };
+    if (typeof MEMBER !== 'undefined' && MEMBER.currentUser) {
+      const u = MEMBER.currentUser;
+      return { id: u.id||u.username||'?', name: u.displayName||u.username||'Thành viên' };
+    }
+    return null;
+  }
+
+  // ── Log a copy event ───────────────────────────────────────
+  function _logCopy(snippet) {
+    try {
+      const user    = _getUser();
+      const ctx     = window._currentReaderCtx || {};
+      const story   = ctx.story   || window._currentStory || {};
+      const chapter = ctx.chapter || {};
+      const entry = {
+        ts:         Date.now(),
+        userId:     user?.id   || 'unknown',
+        userName:   user?.name || 'Khách',
+        storyId:    story.id    || '',
+        storyTitle: story.title || document.title || '',
+        chapId:     chapter.id    || '',
+        chapTitle:  chapter.title || '',
+        snippet:    snippet.slice(0, SNIPPET_LEN),
+        url:        location.href
+      };
+
+      // Save to localStorage
+      const logs = JSON.parse(localStorage.getItem(_CL_KEY) || '[]');
+      logs.unshift(entry);
+      localStorage.setItem(_CL_KEY, JSON.stringify(logs.slice(0, MAX_LOGS)));
+
+      // Send to webhook if configured
+      const wh = localStorage.getItem(_CL_WH_KEY);
+      if (wh) {
+        fetch(wh, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(entry)
+        }).catch(() => {});
+      }
+    } catch(_) {}
+  }
+
+  // ── Block copy modal for guests ────────────────────────────
+  function _showCopyBlock() {
+    if (document.getElementById('_cpb_modal')) return;
+    document.body.insertAdjacentHTML('beforeend', `
+      <div id="_cpb_modal" onclick="if(event.target===this)this.remove()"
+        style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:center;justify-content:center;font-family:inherit">
+        <div style="background:#fff;border-radius:14px;padding:1.8rem 1.6rem;max-width:340px;width:90%;text-align:center;box-shadow:0 16px 50px rgba(0,0,0,.25)">
+          <div style="font-size:2.2rem;margin-bottom:.5rem">🔒</div>
+          <div style="font-size:1rem;font-weight:700;color:#1a2535;margin-bottom:.4rem">Vui lòng đăng nhập</div>
+          <p style="font-size:.84rem;color:#5a7a9a;line-height:1.55;margin-bottom:1.1rem">
+            Chỉ thành viên đã đăng nhập mới có thể sao chép nội dung truyện.<br>
+            Đăng ký hoàn toàn <b>miễn phí</b>!
+          </p>
+          <div style="display:flex;gap:.6rem;justify-content:center">
+            <a href="login.html" style="padding:.5rem 1.1rem;background:#3ab3ca;color:#fff;border-radius:8px;text-decoration:none;font-size:.87rem;font-weight:600">Đăng nhập</a>
+            <a href="register.html" style="padding:.5rem 1.1rem;background:#f0f4f8;color:#3ab3ca;border:1.5px solid #3ab3ca;border-radius:8px;text-decoration:none;font-size:.87rem;font-weight:600">Đăng ký</a>
+            <button onclick="document.getElementById('_cpb_modal').remove()"
+              style="padding:.5rem .9rem;background:#f0f4f8;border:1.5px solid #dde;border-radius:8px;cursor:pointer;font-size:.87rem;font-family:inherit">Đóng</button>
+          </div>
+        </div>
+      </div>`);
+  }
+
+  // ── CSS: disable selection for guests, allow for members ──
+  function _applySelectCSS() {
+    const id = '_copy_prot_style';
+    if (document.getElementById(id)) return;
+    const style = document.createElement('style');
+    style.id = id;
+    style.textContent = `
+      .chapter-body, .story-desc, .desc-box {
+        -webkit-user-select: none;
+        user-select: none;
+      }
+      body.is-member .chapter-body,
+      body.is-member .story-desc,
+      body.is-member .desc-box,
+      body.is-owner  .chapter-body,
+      body.is-owner  .story-desc,
+      body.is-owner  .desc-box {
+        -webkit-user-select: text;
+        user-select: text;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  // ── Apply body class for member state ─────────────────────
+  function _applyBodyClass() {
+    if (typeof AUTH   !== 'undefined' && AUTH.isOwner)      document.body.classList.add('is-owner');
+    if (typeof MEMBER !== 'undefined' && MEMBER.isLoggedIn) document.body.classList.add('is-member');
+  }
+
+  // ── Intercept copy / right-click ──────────────────────────
+  document.addEventListener('copy', function(e) {
+    if (!_isLoggedIn()) {
+      e.preventDefault();
+      e.stopPropagation();
+      _showCopyBlock();
+      return;
+    }
+    const sel = window.getSelection()?.toString()?.trim() || '';
+    if (sel.length > 5) _logCopy(sel);
+  }, true);
+
+  document.addEventListener('contextmenu', function(e) {
+    // Only block right-click on chapter content for guests
+    if (_isLoggedIn()) return;
+    const target = e.target.closest('.chapter-body');
+    if (!target) return;
+    e.preventDefault();
+    _showCopyBlock();
+  });
+
+  // Keyboard shortcut block for guests
+  document.addEventListener('keydown', function(e) {
+    if (_isLoggedIn()) return;
+    const onContent = e.target.closest('.chapter-body');
+    if (!onContent) return;
+    if ((e.ctrlKey || e.metaKey) && ['c','a','x'].includes(e.key.toLowerCase())) {
+      e.preventDefault();
+      _showCopyBlock();
+    }
+  });
+
+  // ── Init on DOM ready ─────────────────────────────────────
+  const _init = () => { _applySelectCSS(); _applyBodyClass(); };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', _init);
+  else _init();
+
+  // Export log helpers for admin use
+  window._copyLogs = {
+    getAll: ()       => { try { return JSON.parse(localStorage.getItem(_CL_KEY) || '[]'); } catch { return []; } },
+    clear:  ()       => { localStorage.removeItem(_CL_KEY); },
+    setWebhook: url  => { if(url) localStorage.setItem(_CL_WH_KEY, url); else localStorage.removeItem(_CL_WH_KEY); },
+    getWebhook: ()   => localStorage.getItem(_CL_WH_KEY) || '',
+  };
+})();
+
+// ══════════════════════════════════════════════
 //  DATA
 // ══════════════════════════════════════════════
 let _storiesCache = null;

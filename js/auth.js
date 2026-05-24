@@ -10,6 +10,7 @@ const GH_REPO     = 'luulyhnc/luulyhiennhicac';
 const DATA_FILE   = 'data/stories.json';
 const _SK         = '_llhnc_s';   // session key
 const _PK         = '_llhnc_p';   // PAT key
+const _RK         = '_llhnc_r';   // remember key (email + remember flag)
 
 // ── AUTH ───────────────────────────────────────────────────────
 const AUTH = {
@@ -114,14 +115,22 @@ function _injectModal() {
     </div>
     <div style="margin-bottom:1rem">
       <div style="font-size:.78rem;font-weight:500;color:#4a6080;margin-bottom:.28rem">GitHub Personal Access Token</div>
-      <input id="_lp" type="password" placeholder="ghp_..."
-        onkeydown="if(event.key==='Enter')_doLogin()"
-        style="width:100%;padding:.5rem .72rem;border:1.5px solid #c5dce9;border-radius:8px;font-size:.87rem;font-family:inherit;outline:none;box-sizing:border-box">
+      <div style="position:relative">
+        <input id="_lp" type="password" placeholder="ghp_..."
+          onkeydown="if(event.key==='Enter')_doLogin()"
+          style="width:100%;padding:.5rem 2.2rem .5rem .72rem;border:1.5px solid #c5dce9;border-radius:8px;font-size:.87rem;font-family:inherit;outline:none;box-sizing:border-box">
+        <button type="button" onclick="_togglePat()"
+          style="position:absolute;right:.45rem;top:50%;transform:translateY(-50%);border:none;background:none;cursor:pointer;font-size:.85rem;color:#9fb8cc;padding:0" title="Hiện/Ẩn">👁</button>
+      </div>
       <div style="font-size:.72rem;color:#9fb8cc;margin-top:.3rem">
         Tạo tại <a href="https://github.com/settings/tokens/new?scopes=repo&description=LLHNC-Admin"
           target="_blank" style="color:#3ab3ca">GitHub Settings → Tokens</a> (scope: <b>repo</b>)
       </div>
     </div>
+    <label style="display:flex;align-items:center;gap:.45rem;font-size:.8rem;color:#4a6080;margin-bottom:.85rem;cursor:pointer;user-select:none">
+      <input type="checkbox" id="_lrem" style="width:15px;height:15px;accent-color:#3ab3ca;cursor:pointer">
+      Ghi nhớ đăng nhập trên thiết bị này
+    </label>
     <div id="_lerr" style="display:none;background:#fdecea;color:#e74c3c;padding:.45rem .7rem;border-radius:7px;font-size:.8rem;margin-bottom:.7rem"></div>
     <button id="_lbtn" onclick="_doLogin()"
       style="width:100%;padding:.58rem;background:#3ab3ca;color:#fff;border:none;border-radius:8px;font-size:.92rem;font-weight:600;cursor:pointer;font-family:inherit">
@@ -131,15 +140,46 @@ function _injectModal() {
 </div>`);
 }
 
+function _togglePat() {
+  const inp = document.getElementById('_lp');
+  if (!inp) return;
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+function _prefillLoginModal() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(_RK) || '{}');
+    if (saved.email) {
+      const le = document.getElementById('_le');
+      if (le) le.value = saved.email;
+    }
+    if (saved.pat) {
+      const lp = document.getElementById('_lp');
+      if (lp) lp.value = saved.pat;
+    }
+    if (saved.remember) {
+      const cb = document.getElementById('_lrem');
+      if (cb) cb.checked = true;
+    }
+  } catch(_) {}
+}
+
 async function _doLogin() {
-  const email = document.getElementById('_le').value.trim();
-  const pat   = document.getElementById('_lp').value.trim();
-  const err   = document.getElementById('_lerr');
-  const btn   = document.getElementById('_lbtn');
+  const email  = document.getElementById('_le').value.trim();
+  const pat    = document.getElementById('_lp').value.trim();
+  const rem    = document.getElementById('_lrem')?.checked || false;
+  const err    = document.getElementById('_lerr');
+  const btn    = document.getElementById('_lbtn');
   err.style.display = 'none';
   btn.textContent = '⏳ Đang xác thực...'; btn.disabled = true;
   try {
     await AUTH.login(email, pat);
+    // Save credentials if "remember me" checked
+    if (rem) {
+      localStorage.setItem(_RK, JSON.stringify({ email, pat, remember: true }));
+    } else {
+      localStorage.removeItem(_RK);
+    }
     btn.textContent = '✅ Xác thực xong!';
     setTimeout(() => location.reload(), 600);
   } catch(e) {
@@ -1018,5 +1058,6 @@ window._uploadCoverFile = _uploadCoverFile;
 // ── Boot ───────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   _injectModal();
+  _prefillLoginModal(); // auto-fill saved credentials if "remember" was checked
   _initHeader();
 });

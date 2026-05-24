@@ -205,6 +205,10 @@
         <span id="pend-dot" style="display:none;background:#e74c3c;color:#fff;border-radius:10px;padding:.04rem .38rem;font-size:.67rem;margin-left:.25rem">0</span>
       </button>
       <button class="adm-tab"        onclick="showTab('iface')"   id="tbtn-iface">🎨 Giao diện</button>
+      <button class="adm-tab"        onclick="showTab('copylogs')" id="tbtn-copylogs">
+        📋 Copy Logs
+        <span id="copy-dot" style="display:none;background:#e67e22;color:#fff;border-radius:10px;padding:.04rem .38rem;font-size:.67rem;margin-left:.25rem">0</span>
+      </button>
     </div>
 
     <!-- ══ DASHBOARD ══ -->
@@ -682,6 +686,50 @@
       </div><!-- /iface-layout -->
     </div>
 
+    <!-- ══ COPY LOGS ══ -->
+    <div class="adm-panel" id="pnl-copylogs">
+
+      <!-- Webhook settings -->
+      <div class="adm-card" style="margin-bottom:.8rem">
+        <div class="adm-card-title">⚙️ Cài đặt nhận thông báo</div>
+        <div class="g2">
+          <div class="af-g">
+            <label>🔔 Webhook URL (Discord / n8n / Make.com)</label>
+            <input class="af-inp" id="cl-webhook" type="url" placeholder="https://discord.com/api/webhooks/… hoặc n8n webhook"
+                   value="">
+            <div class="af-hint">Mỗi lần có người copy nội dung, hệ thống gửi POST request tới URL này với thông tin chi tiết.</div>
+          </div>
+          <div class="af-g" style="display:flex;flex-direction:column;justify-content:flex-end">
+            <button class="btn-auth btn-auth-primary" onclick="saveCopyWebhook()" style="margin-bottom:.4rem">💾 Lưu Webhook</button>
+            <button onclick="testCopyWebhook()"
+              style="padding:.45rem;border:1.5px solid var(--border2);border-radius:8px;background:#fff;cursor:pointer;font-family:inherit;font-size:.84rem">🧪 Test Webhook</button>
+          </div>
+        </div>
+        <div id="cl-wh-alert" class="adm-alert"></div>
+      </div>
+
+      <!-- Log panel -->
+      <div class="adm-card">
+        <div class="adm-card-title">
+          📋 Lịch sử sao chép nội dung
+          <div style="margin-left:auto;display:flex;gap:.5rem;align-items:center">
+            <input id="cl-filter" type="text" placeholder="Lọc theo tên, truyện…"
+              oninput="renderCopyLogs()"
+              style="padding:.3rem .6rem;border:1.5px solid var(--border2);border-radius:7px;font-size:.78rem;font-family:inherit;width:180px">
+            <button onclick="exportCopyLogs()"
+              style="padding:.3rem .7rem;background:var(--bg2);border:1.5px solid var(--border2);border-radius:7px;cursor:pointer;font-size:.78rem;font-family:inherit">⬇ CSV</button>
+            <button onclick="clearCopyLogs()"
+              style="padding:.3rem .7rem;background:#fef2f2;border:1.5px solid #fecaca;border-radius:7px;cursor:pointer;font-size:.78rem;font-family:inherit;color:#dc2626">🗑 Xóa log</button>
+          </div>
+        </div>
+        <div id="cl-summary" style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:.8rem;font-size:.8rem;color:var(--text3)"></div>
+        <div id="cl-table" style="overflow-x:auto">
+          <div class="adm-empty"><div class="ico">📋</div>Nhấn tab này để tải log.</div>
+        </div>
+      </div>
+
+    </div><!-- /pnl-copylogs -->
+
   </div><!-- /adm-root -->
 </main>
 
@@ -733,8 +781,9 @@ async function initAdmin(jumpTab) {
 function showTab(t) {
   document.querySelectorAll('.adm-panel').forEach(p => p.classList.remove('on'));
   document.querySelectorAll('.adm-tab').forEach(b => b.classList.remove('active'));
-  document.getElementById('pnl-' + t).classList.add('on');
-  document.getElementById('tbtn-' + t).classList.add('active');
+  document.getElementById('pnl-' + t)?.classList.add('on');
+  document.getElementById('tbtn-' + t)?.classList.add('active');
+  if (t === 'copylogs') _initCopyLogsTab();
 }
 
 // ── Stories (GitHub) ───────────────────────────────────────
@@ -754,6 +803,11 @@ function renderDash() {
   setText('st-pd', pN);
   const dot = document.getElementById('pend-dot');
   if (dot) { dot.textContent = pN; dot.style.display = pN ? 'inline' : 'none'; }
+
+  // Copy logs badge
+  const clogs = window._copyLogs?.getAll() || [];
+  const cdot  = document.getElementById('copy-dot');
+  if (cdot) { cdot.textContent = clogs.length; cdot.style.display = clogs.length ? 'inline' : 'none'; }
 
   // Pending panel
   const pend = _M.filter(u => u.role === 'pending_author');
@@ -1204,6 +1258,156 @@ function tblAlert(pfx, msg, ok) {
 function doSearch() {
   const q = document.getElementById('search-input').value.trim();
   if (q) location.href = 'index.html?search=' + encodeURIComponent(q);
+}
+
+// ══════════════════════════════════════════════════════════════
+// ── Copy Logs Panel ───────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+
+function _initCopyLogsTab() {
+  // Prefill webhook
+  const wh = window._copyLogs?.getWebhook() || '';
+  const whEl = document.getElementById('cl-webhook');
+  if (whEl && wh) whEl.value = wh;
+  renderCopyLogs();
+}
+
+function renderCopyLogs() {
+  const logs    = window._copyLogs?.getAll() || [];
+  const filter  = (document.getElementById('cl-filter')?.value || '').toLowerCase();
+  const tbl     = document.getElementById('cl-table');
+  const summary = document.getElementById('cl-summary');
+  const dot     = document.getElementById('copy-dot');
+
+  // Update badge
+  if (dot) {
+    if (logs.length) { dot.textContent = logs.length; dot.style.display = 'inline'; }
+    else dot.style.display = 'none';
+  }
+
+  // Filter
+  const filtered = filter
+    ? logs.filter(l =>
+        (l.userName||'').toLowerCase().includes(filter) ||
+        (l.storyTitle||'').toLowerCase().includes(filter) ||
+        (l.snippet||'').toLowerCase().includes(filter))
+    : logs;
+
+  // Summary
+  if (summary) {
+    const users   = [...new Set(logs.map(l => l.userId))].length;
+    const stories = [...new Set(logs.map(l => l.storyTitle).filter(Boolean))].length;
+    const today   = logs.filter(l => l.ts > Date.now() - 864e5).length;
+    summary.innerHTML = `
+      <span>📊 Tổng: <b>${logs.length}</b></span>
+      <span>👤 Người dùng: <b>${users}</b></span>
+      <span>📚 Truyện: <b>${stories}</b></span>
+      <span>📅 Hôm nay: <b>${today}</b></span>
+    `;
+  }
+
+  if (!tbl) return;
+  if (!filtered.length) {
+    tbl.innerHTML = `<div class="adm-empty"><div class="ico">📭</div>${filter ? 'Không có kết quả.' : 'Chưa có lịch sử sao chép.'}</div>`;
+    return;
+  }
+
+  tbl.innerHTML = `
+    <table style="width:100%;border-collapse:collapse;font-size:.8rem">
+      <thead>
+        <tr style="background:var(--bg2);text-align:left">
+          <th style="padding:.5rem .7rem;border-bottom:2px solid var(--border)">Thời gian</th>
+          <th style="padding:.5rem .7rem;border-bottom:2px solid var(--border)">Người dùng</th>
+          <th style="padding:.5rem .7rem;border-bottom:2px solid var(--border)">Truyện / Chương</th>
+          <th style="padding:.5rem .7rem;border-bottom:2px solid var(--border)">Nội dung sao chép</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${filtered.map((l, i) => {
+          const dt  = new Date(l.ts);
+          const dtStr = dt.toLocaleDateString('vi-VN') + ' ' + dt.toLocaleTimeString('vi-VN', {hour:'2-digit',minute:'2-digit'});
+          const row = i % 2 === 0 ? '' : 'style="background:var(--bg2)"';
+          return `<tr ${row}>
+            <td style="padding:.45rem .7rem;color:var(--text3);white-space:nowrap">${dtStr}</td>
+            <td style="padding:.45rem .7rem">
+              <div style="font-weight:600;color:var(--text)">${esc(l.userName||'?')}</div>
+              <div style="font-size:.72rem;color:var(--text3)">${esc(l.userId||'')}</div>
+            </td>
+            <td style="padding:.45rem .7rem">
+              <div style="font-weight:600;color:var(--primary)">${esc(l.storyTitle||'—')}</div>
+              <div style="font-size:.72rem;color:var(--text3)">${esc(l.chapTitle||'')}</div>
+            </td>
+            <td style="padding:.45rem .7rem;max-width:320px">
+              <div style="background:var(--bg2);padding:.3rem .5rem;border-radius:5px;color:var(--text2);
+                           white-space:pre-wrap;word-break:break-word;font-size:.76rem;max-height:60px;overflow:hidden">
+                ${esc(l.snippet||'—')}
+              </div>
+            </td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
+}
+
+function saveCopyWebhook() {
+  const url = document.getElementById('cl-webhook')?.value?.trim() || '';
+  window._copyLogs?.setWebhook(url);
+  showAlertInline('cl-wh-alert', url ? '✅ Đã lưu Webhook URL.' : '✅ Đã xóa Webhook URL.', true);
+}
+
+async function testCopyWebhook() {
+  const url = document.getElementById('cl-webhook')?.value?.trim() || '';
+  if (!url) { showAlertInline('cl-wh-alert', '❌ Vui lòng nhập Webhook URL trước.', false); return; }
+  showAlertInline('cl-wh-alert', '⏳ Đang gửi test…', true);
+  try {
+    await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ts: Date.now(), userId: 'admin', userName: 'Admin Test',
+        storyTitle: 'Kiểm tra webhook', chapTitle: 'Chương 1',
+        snippet: 'Đây là test từ Admin Panel Lưu Ly Hiền Nhi Các.', url: location.href
+      })
+    });
+    showAlertInline('cl-wh-alert', '✅ Gửi test thành công! Kiểm tra endpoint nhận.', true);
+  } catch(e) {
+    showAlertInline('cl-wh-alert', '❌ Lỗi: ' + e.message, false);
+  }
+}
+
+function clearCopyLogs() {
+  if (!confirm('Xóa toàn bộ lịch sử copy? Không thể khôi phục.')) return;
+  window._copyLogs?.clear();
+  renderCopyLogs();
+}
+
+function exportCopyLogs() {
+  const logs = window._copyLogs?.getAll() || [];
+  if (!logs.length) { alert('Không có log để xuất.'); return; }
+  const header = ['Thời gian','Người dùng','User ID','Truyện','Chương','Nội dung sao chép','URL'];
+  const rows   = logs.map(l => [
+    new Date(l.ts).toLocaleString('vi-VN'),
+    l.userName||'', l.userId||'', l.storyTitle||'', l.chapTitle||'',
+    (l.snippet||'').replace(/\n/g,' '), l.url||''
+  ]);
+  const csv = [header, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'copy-logs-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click(); URL.revokeObjectURL(a.href);
+}
+
+function showAlertInline(id, msg, ok) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = ok ? 'adm-alert adm-alert-ok' : 'adm-alert';
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; }, 4000);
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
 // ══════════════════════════════════════════════════════════════
