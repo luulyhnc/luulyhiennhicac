@@ -106,6 +106,23 @@
     .genre-pill input:checked + label { background:var(--primary); color:#fff; border-color:var(--primary); }
     .genre-pill label:hover           { border-color:var(--primary); color:var(--primary); }
     .genre-pill input:checked + label:hover { opacity:.82; color:#fff; }
+    /* ── Add custom genre row ── */
+    .genre-add-row { display:flex; gap:.4rem; margin-top:.42rem; align-items:center; }
+    .genre-add-inp {
+      flex:1; min-width:0; padding:.28rem .6rem;
+      border:1.5px solid var(--border2); border-radius:7px;
+      font-size:.77rem; font-family:inherit; outline:none;
+      color:var(--text1); background:#fff; transition:border-color .14s;
+    }
+    .genre-add-inp:focus { border-color:var(--primary); }
+    .genre-add-inp::placeholder { color:var(--text3); }
+    .genre-add-row button {
+      padding:.28rem .72rem; background:var(--pri-l); color:var(--primary);
+      border:1.5px solid var(--primary); border-radius:7px;
+      cursor:pointer; font-size:.77rem; font-weight:700; font-family:inherit;
+      white-space:nowrap; transition:background .13s;
+    }
+    .genre-add-row button:hover { background:var(--primary); color:#fff; }
 
     /* ── Filter row ── */
     .flt-row { display:flex; gap:.55rem; flex-wrap:wrap; margin-bottom:.9rem; align-items:center; }
@@ -327,6 +344,11 @@
             <span class="genre-pill"><input type="checkbox" id="asg6" name="as-genre" value="Lịch Sử"><label for="asg6">Lịch Sử</label></span>
             <span class="genre-pill"><input type="checkbox" id="asg7" name="as-genre" value="Khác"><label for="asg7">Khác</label></span>
           </div>
+          <div class="genre-add-row">
+            <input id="as-genre-inp" class="genre-add-inp" placeholder="Thể loại khác…"
+                   onkeydown="if(event.key==='Enter'){event.preventDefault();_addCustomGenre('as-genre','as-genre-inp');}">
+            <button type="button" onclick="_addCustomGenre('as-genre','as-genre-inp')">+ Thêm</button>
+          </div>
         </div>
 
         <div class="af-g"><label>Tags (phân cách bởi dấu phẩy)</label>
@@ -374,6 +396,11 @@
                   <span class="genre-pill"><input type="checkbox" id="asrg5" name="as-ser-genre" value="Kiếm Hiệp"><label for="asrg5">Kiếm Hiệp</label></span>
                   <span class="genre-pill"><input type="checkbox" id="asrg6" name="as-ser-genre" value="Lịch Sử"><label for="asrg6">Lịch Sử</label></span>
                   <span class="genre-pill"><input type="checkbox" id="asrg7" name="as-ser-genre" value="Khác"><label for="asrg7">Khác</label></span>
+                </div>
+                <div class="genre-add-row">
+                  <input id="as-ser-genre-inp" class="genre-add-inp" placeholder="Thể loại khác…"
+                         onkeydown="if(event.key==='Enter'){event.preventDefault();_addCustomGenre('as-ser-genre','as-ser-genre-inp');}">
+                  <button type="button" onclick="_addCustomGenre('as-ser-genre','as-ser-genre-inp')">+ Thêm</button>
                 </div>
               </div>
               <div class="af-g" style="margin-bottom:.5rem"><label>Trạng thái</label>
@@ -486,6 +513,11 @@
               <span class="genre-pill"><input type="checkbox" id="srg5" name="ser-genre" value="Kiếm Hiệp" onchange="renderSeriesPreview()"><label for="srg5">Kiếm Hiệp</label></span>
               <span class="genre-pill"><input type="checkbox" id="srg6" name="ser-genre" value="Lịch Sử" onchange="renderSeriesPreview()"><label for="srg6">Lịch Sử</label></span>
               <span class="genre-pill"><input type="checkbox" id="srg7" name="ser-genre" value="Khác" onchange="renderSeriesPreview()"><label for="srg7">Khác</label></span>
+            </div>
+            <div class="genre-add-row">
+              <input id="ser-genre-inp" class="genre-add-inp" placeholder="Thể loại khác…"
+                     onkeydown="if(event.key==='Enter'){event.preventDefault();_addCustomGenre('ser-genre','ser-genre-inp',renderSeriesPreview);}">
+              <button type="button" onclick="_addCustomGenre('ser-genre','ser-genre-inp',renderSeriesPreview)">+ Thêm</button>
             </div>
           </div>
           <div class="g3">
@@ -2681,7 +2713,10 @@ function doEditSeries(id) {
   genreWrap.className = 'genre-pills'; genreWrap.id = 'sed_genre';
   const genres = ['Tiên Hiệp','Huyền Huyễn','Ngôn Tình','Đô Thị','Nữ Cường','Kiếm Hiệp','Lịch Sử','Khác'];
   const cur = Array.isArray(s.genre) ? s.genre : (s.genre ? [s.genre] : []);
-  genres.forEach(function(g, i) {
+  // Also include any custom genres already on this series
+  const allGenres = genres.slice();
+  cur.forEach(function(g){ if (!allGenres.includes(g)) allGenres.push(g); });
+  allGenres.forEach(function(g, i) {
     const span = document.createElement('span'); span.className = 'genre-pill';
     const cb = document.createElement('input');
     cb.type = 'checkbox'; cb.id = 'seg_e' + i; cb.name = 'se_genre_e'; cb.value = g;
@@ -2691,6 +2726,18 @@ function doEditSeries(id) {
     span.appendChild(cb); span.appendChild(lbl);
     genreWrap.appendChild(span);
   });
+
+  // "Add custom genre" row
+  const genreAddRow = document.createElement('div'); genreAddRow.className = 'genre-add-row';
+  const genreInp = document.createElement('input'); genreInp.className = 'genre-add-inp';
+  genreInp.id = 'sed_genre_inp'; genreInp.placeholder = 'Thể loại khác…';
+  genreInp.addEventListener('keydown', function(e){
+    if (e.key === 'Enter') { e.preventDefault(); _addCustomGenre('sed_genre','sed_genre_inp'); }
+  });
+  const genreAddBtn = document.createElement('button'); genreAddBtn.type = 'button';
+  genreAddBtn.textContent = '+ Thêm';
+  genreAddBtn.addEventListener('click', function(){ _addCustomGenre('sed_genre','sed_genre_inp'); });
+  genreAddRow.appendChild(genreInp); genreAddRow.appendChild(genreAddBtn);
 
   // Total + Status row
   const g3 = el('div', 'margin-bottom:.8rem'); g3.className = 'g3';
@@ -2720,11 +2767,16 @@ function doEditSeries(id) {
   saveBtn.addEventListener('click', function(){ _saveSeriesEdits(id); });
   btnRow.appendChild(cancelBtn); btnRow.appendChild(saveBtn);
 
+  // Wrap genre pills + add-row together
+  const genreContainer = document.createElement('div');
+  genreContainer.appendChild(genreWrap);
+  genreContainer.appendChild(genreAddRow);
+
   // ── Assemble ──────────────────────────────────────────────
   [hdr, msg, g2,
    fldWrap('Ảnh bìa', coverInp),
    fldWrap('Giới thiệu', descTA),
-   fldWrap('Thể loại', genreWrap),
+   fldWrap('Thể loại', genreContainer),
    g3, btnRow
   ].forEach(function(c){ box.appendChild(c); });
 
@@ -2774,6 +2826,41 @@ function tblAlert(pfx, msg, ok) {
   el.className = 'adm-alert ' + (ok ? 'adm-ok' : 'adm-err');
   el.textContent = msg;
   setTimeout(() => { el.className='adm-alert'; el.textContent=''; }, 4500);
+}
+
+// ── Add custom genre pill ─────────────────────────────────────
+function _addCustomGenre(groupId, inputId, onChangeCb) {
+  const inp = document.getElementById(inputId);
+  const grp = document.getElementById(groupId);
+  if (!inp || !grp) return;
+  const val = inp.value.trim();
+  if (!val) { inp.focus(); return; }
+
+  // Deduplicate (case-insensitive) — just check existing pill
+  const existing = Array.from(grp.querySelectorAll('input[type=checkbox]'));
+  const dupe = existing.find(function(x){ return x.value.toLowerCase() === val.toLowerCase(); });
+  if (dupe) {
+    dupe.checked = true;
+    dupe.dispatchEvent(new Event('change'));
+    inp.value = ''; inp.focus(); return;
+  }
+
+  // Create new pill
+  const uid = groupId + '_c' + Date.now();
+  const span = document.createElement('span'); span.className = 'genre-pill';
+  const cb   = document.createElement('input');
+  cb.type = 'checkbox'; cb.id = uid;
+  cb.name = (grp.querySelector('input') || {}).name || groupId;
+  cb.value = val; cb.checked = true;
+  if (onChangeCb) cb.addEventListener('change', onChangeCb);
+  const lbl = document.createElement('label');
+  lbl.htmlFor = uid; lbl.textContent = val;
+  span.appendChild(cb); span.appendChild(lbl);
+  grp.appendChild(span);
+
+  inp.value = ''; inp.focus();
+  if (typeof _debounceAsPreview === 'function' && _asPrevActive) _debounceAsPreview();
+  if (typeof renderSeriesPreview === 'function' && groupId.startsWith('ser')) renderSeriesPreview();
 }
 
 // ── Multi-genre helpers ──────────────────────────────────────────
