@@ -356,21 +356,29 @@ const CHAPTERS_PER_PAGE    = 50;
 //  DATA
 // ══════════════════════════════════════════════
 let _storiesCache = null;
+let _seriesCacheT = 0;   // timestamp when cache was filled
 let _seriesCache  = null;
+const _CACHE_TTL  = 90 * 1000; // 90 seconds — balance freshness vs. bandwidth
 
-async function fetchStories() {
-  if (_storiesCache) return _storiesCache;
-  const res = await fetch("data/stories.json");
+async function fetchStories(forceRefresh) {
+  // Always bypass browser/CDN cache via unique timestamp parameter.
+  // A new page load always fetches fresh; _storiesCache only deduplicates
+  // repeated calls *within the same page load* (e.g. multiple components).
+  if (_storiesCache && !forceRefresh) return _storiesCache;
+  const res = await fetch("data/stories.json?_=" + Date.now(), { cache: 'no-store' });
+  if (!res.ok) throw new Error("Không thể tải dữ liệu truyện (" + res.status + ")");
   _storiesCache = await res.json();
   return _storiesCache;
 }
 
-async function fetchSeries() {
-  if (_seriesCache) return _seriesCache;
+async function fetchSeries(forceRefresh) {
+  const now = Date.now();
+  if (_seriesCache && !forceRefresh && (now - _seriesCacheT) < _CACHE_TTL) return _seriesCache;
   try {
-    const res = await fetch("data/series.json");
-    _seriesCache = await res.json();
-  } catch { _seriesCache = []; }
+    const res = await fetch("data/series.json?_=" + now, { cache: 'no-store' });
+    _seriesCache  = await res.json();
+    _seriesCacheT = now;
+  } catch { _seriesCache = _seriesCache || []; }
   return _seriesCache;
 }
 
