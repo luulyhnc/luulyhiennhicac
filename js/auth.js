@@ -140,27 +140,94 @@ function _initHeader() {
     if (AUTH.isOwner) {
       btn.textContent = '👑 Admin ▾';
       btn.style.cssText += ';background:#27ae60!important;border-color:#27ae60!important';
-      btn.onclick = e => {
+      btn.onclick = function(e) {
         e.stopPropagation();
         const old = document.getElementById('_omenu');
         if (old) { old.remove(); return; }
-        const rc  = btn.getBoundingClientRect();
-        const m   = document.createElement('div');
+
+        const rc = btn.getBoundingClientRect();
+        const m  = document.createElement('div');
         m.id = '_omenu';
-        m.style.cssText = `position:fixed;top:${rc.bottom+4}px;right:${window.innerWidth-rc.right}px;background:#fff;border-radius:10px;box-shadow:0 4px 24px rgba(0,0,0,.18);z-index:9998;min-width:210px;overflow:hidden;font-family:'Inter',sans-serif`;
-        m.innerHTML = `
-          <a href="admin.html" class="_omenu_item">⚙️ Admin Panel</a>
-          <a href="admin.html#addstory" onclick="sessionStorage.setItem('_adm_tab','addstory')" class="_omenu_item">➕ Đăng truyện</a>
-          <a href="admin.html#members"  onclick="sessionStorage.setItem('_adm_tab','members')"  class="_omenu_item">👥 Quản lý thành viên</a>
-          <button onclick="document.getElementById('_omenu')?.remove();_openAiModeration()" class="_omenu_item" style="background:none;border:none;cursor:pointer;width:100%;text-align:left;font-family:'Inter',sans-serif">🤖 AI Kiểm duyệt nội dung</button>
-          ${typeof downloadNewsletterExcel==='function'?'<button onclick="downloadNewsletterExcel()" class="_omenu_item" style="background:none;border:none;cursor:pointer;width:100%;text-align:left;font-family:\'Inter\',sans-serif">📥 Tải email đăng ký (.csv)</button>':''}
-          <div style="height:1px;background:#eef3f7"></div>
-          <button onclick="AUTH.logout()" class="_omenu_item" style="color:#e74c3c;background:none;border:none;cursor:pointer;width:100%;text-align:left;font-family:'Inter',sans-serif">🚪 Đăng xuất</button>`;
-        m.querySelectorAll('._omenu_item').forEach(el => {
-          el.style.cssText = 'display:block;padding:.7rem 1rem;font-size:.86rem;color:#1a2535;text-decoration:none';
-        });
+        m.style.cssText = [
+          'position:fixed',
+          'top:'+(rc.bottom+5)+'px',
+          'right:'+(window.innerWidth-rc.right)+'px',
+          'background:#fff',
+          'border-radius:10px',
+          'box-shadow:0 6px 28px rgba(0,0,0,.18)',
+          'z-index:10000',
+          'min-width:220px',
+          'overflow:hidden',
+          "font-family:'Inter',sans-serif",
+          'border:1.5px solid #e0ecf5',
+        ].join(';');
+
+        // Helper: create a menu row
+        function _row(html, color, onClick) {
+          const el = document.createElement(onClick ? 'button' : 'a');
+          el.innerHTML = html;
+          el.style.cssText = [
+            'display:block','width:100%','padding:.68rem 1.1rem',
+            'font-size:.86rem','text-align:left','text-decoration:none',
+            'background:none','border:none','cursor:pointer',
+            "font-family:'Inter',sans-serif",
+            'color:'+(color||'#1a2535'),
+            'transition:background .13s',
+          ].join(';');
+          el.onmouseenter = function() { this.style.background='#f0f7fc'; };
+          el.onmouseleave = function() { this.style.background='none'; };
+          if (onClick) el.onclick = function() { m.remove(); onClick(); };
+          return el;
+        }
+        function _sep() {
+          const d = document.createElement('div');
+          d.style.cssText = 'height:1px;background:#eef3f7;margin:.2rem 0';
+          return d;
+        }
+
+        // ── Menu items ──
+        const aPanel = _row('⚙️ &nbsp;Admin Panel');
+        aPanel.href = 'admin.html';
+        aPanel.onclick = function() { m.remove(); };
+
+        const aStory = _row('➕ &nbsp;Đăng truyện');
+        aStory.href = 'admin.html';
+        aStory.onclick = function() { sessionStorage.setItem('_adm_tab','addstory'); m.remove(); };
+
+        const aMember = _row('👥 &nbsp;Quản lý thành viên');
+        aMember.href = 'admin.html';
+        aMember.onclick = function() { sessionStorage.setItem('_adm_tab','members'); m.remove(); };
+
+        const bAI = _row('🤖 &nbsp;AI Kiểm duyệt', null,
+          function() { if (typeof _openAiModeration==='function') _openAiModeration(); });
+
+        m.appendChild(aPanel);
+        m.appendChild(aStory);
+        m.appendChild(aMember);
+        m.appendChild(_sep());
+        m.appendChild(bAI);
+
+        if (typeof downloadNewsletterExcel === 'function') {
+          m.appendChild(_row('📥 &nbsp;Tải email đăng ký (.csv)', null,
+            function() { downloadNewsletterExcel(); }));
+        }
+
+        m.appendChild(_sep());
+        m.appendChild(_row('🚪 &nbsp;Đăng xuất', '#e74c3c',
+          function() { AUTH.logout(); }));
+
         document.body.appendChild(m);
-        setTimeout(() => document.addEventListener('click', () => m.remove(), { once:true }), 10);
+
+        // Close on outside click
+        setTimeout(function() {
+          function _outside(ev) {
+            if (!m.contains(ev.target) && ev.target !== btn) {
+              m.remove();
+              document.removeEventListener('click', _outside);
+            }
+          }
+          document.addEventListener('click', _outside);
+        }, 0);
       };
 
       // Nút Đăng xuất riêng — luôn hiển thị ngay cạnh Admin
