@@ -279,6 +279,79 @@ const CHAPTERS_PER_PAGE    = 50;
 })();
 
 // ══════════════════════════════════════════════
+//  SCREENSHOT PROTECTION
+// ══════════════════════════════════════════════
+(function initScreenshotProtection() {
+  // Block print / Save-as-PDF
+  const noPrint = document.createElement('style');
+  noPrint.id = '_noscr_style';
+  noPrint.textContent = '@media print{html,body{display:none!important;visibility:hidden!important}}';
+  document.head.appendChild(noPrint);
+
+  // Toast notification
+  function _ssToast(msg) {
+    if (document.getElementById('_ss_toast')) return;
+    const el = document.createElement('div');
+    el.id = '_ss_toast';
+    el.style.cssText = [
+      'position:fixed','top:1.1rem','left:50%','transform:translateX(-50%)',
+      'background:#1a2535','color:#fff','padding:.6rem 1.5rem',
+      'border-radius:10px','font-size:.82rem','z-index:999999',
+      'box-shadow:0 4px 24px rgba(0,0,0,.45)','font-family:Inter,sans-serif',
+      'pointer-events:none','transition:opacity .5s','white-space:nowrap'
+    ].join(';');
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 500); }, 2800);
+  }
+
+  // Block PrintScreen key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'PrintScreen') {
+      e.preventDefault();
+      navigator.clipboard?.writeText?.('');
+      _ssToast('📵 Nội dung được bảo vệ – Không cho phép chụp màn hình.');
+    }
+    // Block Ctrl+P (print)
+    if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+      e.preventDefault();
+      _ssToast('📵 Không cho phép in / xuất PDF trang này.');
+    }
+  }, true);
+
+  // Low-opacity watermark on chapter content (deters screen-sharing abuse)
+  function _stamp() {
+    document.querySelectorAll('.chapter-body:not([data-wm="1"])').forEach(body => {
+      body.dataset.wm = '1';
+      if (getComputedStyle(body).position === 'static') body.style.position = 'relative';
+      let user = 'Lưu Ly Hiền Nhi Các';
+      if (typeof AUTH   !== 'undefined' && AUTH.isOwner)      user = 'Admin';
+      else if (typeof MEMBER !== 'undefined' && MEMBER.isLoggedIn) {
+        const u = MEMBER.user; user = u?.username || u?.email || 'Thành viên';
+      }
+      const txt = (user + '  ·  luulyhnc.github.io   ').repeat(20);
+      const wm  = document.createElement('div');
+      wm.setAttribute('aria-hidden', 'true');
+      wm.style.cssText = [
+        'position:absolute','inset:0','pointer-events:none','z-index:0',
+        'overflow:hidden','opacity:.045','user-select:none',
+        'word-break:break-all','line-height:3.4','font-size:.75rem',
+        'font-weight:700','color:#000',
+        'transform:rotate(-22deg) scale(1.5)','transform-origin:center',
+        'padding:2rem','white-space:normal'
+      ].join(';');
+      wm.textContent = txt;
+      body.prepend(wm);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(_stamp, 900);
+    new MutationObserver(_stamp).observe(document.body, { childList: true, subtree: true });
+  });
+})();
+
+// ══════════════════════════════════════════════
 //  DATA
 // ══════════════════════════════════════════════
 let _storiesCache = null;
@@ -523,6 +596,29 @@ async function loadStoryPage() {
         </table>
 
         <div class="desc-box">${story.description}</div>
+
+        ${story.audioUrl ? `
+        <div style="margin:.9rem 0;padding:.75rem;background:var(--bg2);border:1.5px solid var(--border);border-radius:10px">
+          <div style="font-size:.75rem;font-weight:700;color:var(--text3);margin-bottom:.45rem;text-transform:uppercase;letter-spacing:.04em">🎧 Nghe truyện</div>
+          <audio controls style="width:100%;outline:none;border-radius:6px" preload="none">
+            <source src="${story.audioUrl}">
+            Trình duyệt không hỗ trợ audio.
+          </audio>
+        </div>` : ''}
+
+        ${story.videoUrl ? `
+        <div style="margin:.9rem 0;padding:.75rem;background:var(--bg2);border:1.5px solid var(--border);border-radius:10px">
+          <div style="font-size:.75rem;font-weight:700;color:var(--text3);margin-bottom:.45rem;text-transform:uppercase;letter-spacing:.04em">🎬 Xem video</div>
+          ${/youtu\.?be/.test(story.videoUrl)
+            ? `<div style="position:relative;padding-bottom:56.25%;border-radius:8px;overflow:hidden">
+                 <iframe src="https://www.youtube.com/embed/${story.videoUrl.match(/(?:v=|youtu\.be\/)([^&?/]+)/)?.[1]||''}"
+                   style="position:absolute;inset:0;width:100%;height:100%;border:none" allowfullscreen loading="lazy"></iframe>
+               </div>`
+            : `<video controls style="width:100%;border-radius:8px;max-height:340px" preload="none">
+                 <source src="${story.videoUrl}">
+                 Trình duyệt không hỗ trợ video.
+               </video>`}
+        </div>` : ''}
 
         <div class="action-btns">
           ${firstCh  ? `<a href="${readerUrl(story.id, firstCh.id)}"  class="btn btn-accent">▶ Đọc từ đầu</a>` : ""}

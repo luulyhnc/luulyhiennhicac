@@ -486,52 +486,228 @@ async function _saveStoryEdits(storyId) {
 // ── Chapter editor (from story.html chapter list) ──────────────
 async function openChapterEditor(storyId, chapterId) {
   if (document.getElementById('_ce_modal')) return;
+  const _tabActive   = 'padding:.38rem .9rem;border:none;border-bottom:2.5px solid #3ab3ca;background:transparent;cursor:pointer;font-size:.83rem;font-weight:700;color:#3ab3ca;font-family:inherit';
+  const _tabInactive = 'padding:.38rem .9rem;border:none;border-bottom:2.5px solid transparent;background:transparent;cursor:pointer;font-size:.83rem;color:#9fb8cc;font-family:inherit;transition:color .15s';
   document.body.insertAdjacentHTML('beforeend', `
 <div id="_ce_modal" onclick="if(event.target===this)this.remove()"
-  style="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9998;display:flex;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto;font-family:'Inter',sans-serif">
-  <div style="background:#fff;border-radius:14px;padding:1.5rem;width:100%;max-width:720px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-      <b>✏️ Sửa chương</b>
+  style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9998;display:flex;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto;font-family:'Inter',sans-serif">
+  <div style="background:#fff;border-radius:14px;padding:1.5rem;width:100%;max-width:800px;box-shadow:0 20px 60px rgba(0,0,0,.25)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.1rem">
+      <b style="font-size:1rem;color:#1a2535">✏️ Sửa chương</b>
       <button onclick="document.getElementById('_ce_modal').remove()"
-        style="border:none;background:#f0f4f8;width:30px;height:30px;border-radius:50%;cursor:pointer">✕</button>
+        style="border:none;background:#f0f4f8;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:.9rem">✕</button>
     </div>
     <div id="_ce_loading" style="text-align:center;padding:2rem;color:#9fb8cc">⏳ Đang tải nội dung...</div>
     <div id="_ce_form" style="display:none">
       ${_fld('Tên chương','ced_t','')}
+
+      <!-- Affiliate URL -->
       <div style="margin-bottom:.85rem">
-        <div style="font-size:.78rem;font-weight:500;color:#4a6080;margin-bottom:.28rem">
+        <div style="font-size:.78rem;font-weight:600;color:#4a6080;margin-bottom:.28rem">
           🔗 Link tiếp thị liên kết
-          <span style="font-weight:400;color:#9fb8cc;font-size:.72rem"> — hiển thị trong màn hình chờ khi chuyển chương</span>
+          <span style="font-weight:400;color:#9fb8cc;font-size:.72rem"> — hiển thị trong màn hình chờ giữa chương</span>
         </div>
-        <input id="ced_aff" type="url" placeholder="https://shopee.vn/… hoặc để trống nếu không có"
+        <input id="ced_aff" type="url" placeholder="https://shopee.vn/… hoặc để trống"
           style="width:100%;padding:.5rem .72rem;border:1.5px solid #c5dce9;border-radius:8px;font-size:.87rem;font-family:inherit;outline:none;box-sizing:border-box">
-        <div style="font-size:.72rem;color:#9fb8cc;margin-top:.2rem">Link sẽ xuất hiện dạng banner quảng cáo trong màn hình đếm ngược giữa các chương.</div>
       </div>
+
+      <!-- Chapter image -->
       <div style="margin-bottom:.85rem">
-        <div style="font-size:.78rem;font-weight:500;color:#4a6080;margin-bottom:.28rem">Nội dung</div>
-        <textarea id="ced_c" rows="20"
-          style="width:100%;padding:.75rem;border:1.5px solid #c5dce9;border-radius:8px;font-size:.88rem;font-family:'Merriweather',Georgia,serif;line-height:1.8;resize:vertical;box-sizing:border-box;outline:none"></textarea>
-        <div style="font-size:.72rem;color:#9fb8cc;margin-top:.2rem">Dùng <code style="background:#f0f4f8;padding:.1rem .3rem;border-radius:3px">*chữ nghiêng*</code> hoặc <code style="background:#f0f4f8;padding:.1rem .3rem;border-radius:3px">**chữ đậm**</code> để định dạng.</div>
+        <div style="font-size:.78rem;font-weight:600;color:#4a6080;margin-bottom:.28rem">
+          🖼️ Ảnh minh họa chương
+          <span style="font-weight:400;color:#9fb8cc;font-size:.72rem"> — không bắt buộc, hiển thị đầu chương</span>
+        </div>
+        <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+          <input id="ced_img" type="url" placeholder="https://… hoặc để trống"
+            style="flex:1;min-width:180px;padding:.5rem .72rem;border:1.5px solid #c5dce9;border-radius:8px;font-size:.85rem;font-family:inherit;outline:none;box-sizing:border-box"
+            oninput="_ceImgPreview()">
+          <label style="cursor:pointer;padding:.38rem .75rem;background:#f0f4f8;border:1.5px solid #c5dce9;border-radius:7px;font-size:.77rem;font-weight:600;white-space:nowrap">
+            📂 Upload
+            <input type="file" accept="image/*" style="display:none" onchange="_ceImgUpload(this)">
+          </label>
+          <span id="_ced_img_st" style="font-size:.72rem;color:#9fb8cc"></span>
+        </div>
+        <div id="_ced_img_prev_wrap" style="display:none;margin-top:.35rem">
+          <img id="_ced_img_thumb" src="" alt="" style="max-height:72px;border-radius:6px;border:1.5px solid #c5dce9">
+        </div>
       </div>
-      <div id="_ce_msg" style="display:none;padding:.45rem .7rem;border-radius:7px;font-size:.8rem;margin-bottom:.7rem"></div>
-      <div style="display:flex;gap:.5rem;justify-content:flex-end">
+
+      <!-- Tab bar -->
+      <div style="border-bottom:2px solid #eef3f7;margin-bottom:.85rem;display:flex;gap:0">
+        <button id="_ced_tb_edit" onclick="_ceTabs('edit')" style="${_tabActive}">✏️ Chỉnh sửa</button>
+        <button id="_ced_tb_word" onclick="_ceTabs('word')" style="${_tabInactive}">📄 Upload Word</button>
+        <button id="_ced_tb_prev" onclick="_ceTabs('prev')" style="${_tabInactive}">👁 Xem trước</button>
+      </div>
+
+      <!-- Pane: Edit -->
+      <div id="_ced_pane_edit">
+        <textarea id="ced_c" rows="20"
+          style="width:100%;padding:.75rem;border:1.5px solid #c5dce9;border-radius:8px;font-size:.88rem;font-family:'Merriweather',Georgia,serif;line-height:1.85;resize:vertical;box-sizing:border-box;outline:none"></textarea>
+        <div style="font-size:.72rem;color:#9fb8cc;margin-top:.2rem">Dùng <code style="background:#f0f4f8;padding:.1rem .3rem;border-radius:3px">*nghiêng*</code> · <code style="background:#f0f4f8;padding:.1rem .3rem;border-radius:3px">**đậm**</code></div>
+      </div>
+
+      <!-- Pane: Word upload -->
+      <div id="_ced_pane_word" style="display:none">
+        <div style="border:2px dashed #c5dce9;border-radius:10px;padding:1.5rem;text-align:center;background:#fafcff">
+          <div style="font-size:2rem;margin-bottom:.4rem">📄</div>
+          <div style="font-size:.84rem;color:#4a6080;margin-bottom:.75rem">Chọn file <b>.docx</b> để thay thế toàn bộ nội dung chương này</div>
+          <label style="cursor:pointer;padding:.45rem 1.3rem;background:#3ab3ca;color:#fff;border-radius:8px;font-size:.84rem;font-weight:600;display:inline-block">
+            📂 Chọn file .docx
+            <input type="file" accept=".docx,.doc" style="display:none" id="_ced_word_inp" onchange="_ceLoadWord(this)">
+          </label>
+          <div id="_ced_word_st" style="font-size:.76rem;color:#9fb8cc;margin-top:.55rem"></div>
+        </div>
+        <div id="_ced_word_prev_wrap" style="display:none;margin-top:.85rem">
+          <div style="font-size:.79rem;font-weight:600;color:#4a6080;margin-bottom:.35rem">📋 Nội dung trích xuất — xem trước trước khi áp dụng:</div>
+          <div id="_ced_word_prev" style="max-height:280px;overflow-y:auto;padding:.75rem;border:1.5px solid #c5dce9;border-radius:8px;font-size:.83rem;font-family:'Merriweather',Georgia,serif;line-height:1.75;background:#fafcff;white-space:pre-wrap"></div>
+          <div style="margin-top:.6rem;display:flex;gap:.5rem;flex-wrap:wrap">
+            <button onclick="_ceApplyWord()"
+              style="padding:.44rem 1.1rem;background:#3ab3ca;color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:.83rem;font-weight:600;font-family:inherit">
+              ✅ Áp dụng thay thế nội dung cũ
+            </button>
+            <button onclick="_ceWordCancel()"
+              style="padding:.44rem .9rem;background:#fff;border:1.5px solid #c5dce9;border-radius:7px;cursor:pointer;font-size:.83rem;font-family:inherit">
+              Hủy
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pane: Preview -->
+      <div id="_ced_pane_prev" style="display:none">
+        <div id="_ced_prev_body" style="min-height:200px;padding:1.1rem 1.3rem;border:1.5px solid #c5dce9;border-radius:8px;background:#fafcff;font-family:'Merriweather',Georgia,serif;font-size:.9rem;line-height:1.9;max-height:520px;overflow-y:auto"></div>
+      </div>
+
+      <div id="_ce_msg" style="display:none;padding:.45rem .7rem;border-radius:7px;font-size:.8rem;margin-top:.75rem"></div>
+      <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.9rem;padding-top:.75rem;border-top:1.5px solid #eef3f7">
         <button onclick="document.getElementById('_ce_modal').remove()"
           style="padding:.5rem 1rem;border:1.5px solid #c5dce9;border-radius:7px;cursor:pointer;background:#fff;font-family:inherit">Hủy</button>
         <button onclick="_saveCh('${storyId}',${chapterId})"
-          style="padding:.5rem 1.1rem;background:#3ab3ca;color:#fff;border:none;border-radius:7px;cursor:pointer;font-family:inherit;font-weight:600">💾 Lưu & Deploy</button>
+          style="padding:.5rem 1.2rem;background:#3ab3ca;color:#fff;border:none;border-radius:7px;cursor:pointer;font-family:inherit;font-weight:600">💾 Lưu & Deploy</button>
       </div>
     </div>
   </div>
 </div>`);
+
+  // ── Tab switching ──
+  const _tabA = 'padding:.38rem .9rem;border:none;border-bottom:2.5px solid #3ab3ca;background:transparent;cursor:pointer;font-size:.83rem;font-weight:700;color:#3ab3ca;font-family:inherit';
+  const _tabI = 'padding:.38rem .9rem;border:none;border-bottom:2.5px solid transparent;background:transparent;cursor:pointer;font-size:.83rem;color:#9fb8cc;font-family:inherit';
+  window._ceTabs = function(tab) {
+    ['edit','word','prev'].forEach(t => {
+      const pane = document.getElementById('_ced_pane_' + t);
+      const btn  = document.getElementById('_ced_tb_' + t);
+      if (pane) pane.style.display = t === tab ? '' : 'none';
+      if (btn)  btn.style.cssText  = t === tab ? _tabA : _tabI;
+    });
+    if (tab === 'prev') {
+      const raw  = document.getElementById('ced_c')?.value || '';
+      const body = document.getElementById('_ced_prev_body');
+      const imgUrl = (document.getElementById('ced_img')?.value || '').trim();
+      if (body) {
+        const imgHtml = imgUrl ? `<img src="${imgUrl.replace(/"/g,'&quot;')}" alt="" style="width:100%;max-height:260px;object-fit:cover;border-radius:8px;margin-bottom:1rem" onerror="this.style.display='none'">` : '';
+        body.innerHTML = imgHtml + raw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+          .split(/\n\n+/)
+          .map(p => `<p style="margin:0 0 1em">${p
+            .replace(/\*\*(.*?)\*\*/g,'<b>$1</b>')
+            .replace(/\*(.*?)\*/g,'<i>$1</i>')
+            .replace(/\n/g,'<br>')
+          }</p>`).join('');
+      }
+    }
+  };
+
+  // ── Image preview & upload ──
+  window._ceImgPreview = function() {
+    const url  = (document.getElementById('ced_img')?.value || '').trim();
+    const wrap = document.getElementById('_ced_img_prev_wrap');
+    const thumb = document.getElementById('_ced_img_thumb');
+    if (!wrap || !thumb) return;
+    if (url) { thumb.src = url; wrap.style.display = ''; }
+    else      wrap.style.display = 'none';
+  };
+  window._ceImgUpload = async function(input) {
+    const file = input.files?.[0];
+    const st   = document.getElementById('_ced_img_st');
+    if (!file) return;
+    if (st) st.textContent = '⏳ Đang upload…';
+    const reader = new FileReader();
+    reader.onload = async e => {
+      try {
+        const b64  = e.target.result.split(',')[1];
+        const ext  = (file.name.split('.').pop() || 'jpg').toLowerCase();
+        const fname = 'images/chapters/' + Date.now() + '.' + ext;
+        await AUTH.ghPutRaw(fname, b64, 'Upload: chapter image ' + file.name);
+        const url = 'https://raw.githubusercontent.com/' + GH_REPO + '/main/' + fname;
+        const inp = document.getElementById('ced_img');
+        if (inp) { inp.value = url; _ceImgPreview(); }
+        if (st) st.textContent = '✅ Upload xong!';
+      } catch(err) { if (st) st.textContent = '❌ ' + err.message; }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // ── Word upload ──
+  window._ceWordText = '';
+  window._ceLoadWord = async function(input) {
+    const file = input.files?.[0];
+    const st   = document.getElementById('_ced_word_st');
+    if (!file) return;
+    if (st) st.textContent = '⏳ Đang đọc file…';
+    // Load mammoth.js dynamically if not already loaded
+    if (typeof mammoth === 'undefined') {
+      await new Promise((res, rej) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js';
+        s.onload = res; s.onerror = () => rej(new Error('Không tải được mammoth.js'));
+        document.head.appendChild(s);
+      });
+    }
+    try {
+      const buf    = await file.arrayBuffer();
+      const result = await mammoth.extractRawText({ arrayBuffer: buf });
+      window._ceWordText = result.value;
+      const prev = document.getElementById('_ced_word_prev');
+      const wrap = document.getElementById('_ced_word_prev_wrap');
+      if (prev) prev.textContent = window._ceWordText.slice(0, 4000) + (window._ceWordText.length > 4000 ? '\n…(còn nhiều hơn)' : '');
+      if (wrap) wrap.style.display = '';
+      if (st)   st.textContent = `✅ Trích xuất xong · ${window._ceWordText.length.toLocaleString()} ký tự`;
+    } catch(e) {
+      if (st) st.textContent = '❌ Lỗi: ' + e.message;
+    }
+  };
+  window._ceApplyWord = function() {
+    const ta = document.getElementById('ced_c');
+    if (!ta || !window._ceWordText) return;
+    if (!confirm('⚠️ Áp dụng sẽ THAY THẾ toàn bộ nội dung hiện tại bằng nội dung từ file Word.\nBạn có chắc chắn?')) return;
+    ta.value = window._ceWordText;
+    window._ceTabs('edit');
+    const st = document.getElementById('_ced_word_st');
+    if (st) st.textContent = '✅ Đã áp dụng — kiểm tra ở tab Chỉnh sửa.';
+    const wrap = document.getElementById('_ced_word_prev_wrap');
+    if (wrap) wrap.style.display = 'none';
+  };
+  window._ceWordCancel = function() {
+    const inp  = document.getElementById('_ced_word_inp');
+    const wrap = document.getElementById('_ced_word_prev_wrap');
+    const st   = document.getElementById('_ced_word_st');
+    if (inp)  inp.value = '';
+    if (wrap) wrap.style.display = 'none';
+    if (st)   st.textContent = '';
+    window._ceWordText = '';
+  };
+
+  // ── Load chapter data ──
   try {
     const { stories } = await AUTH.loadStories();
-    const ch = stories.find(s=>s.id===storyId)?.chapters.find(c=>c.id===chapterId);
+    const ch = stories.find(s => s.id === storyId)?.chapters.find(c => c.id === chapterId);
     if (!ch) throw new Error('Không tìm thấy chương!');
     document.getElementById('ced_t').value   = ch.title;
     document.getElementById('ced_aff').value = ch.affiliateUrl || '';
+    document.getElementById('ced_img').value = ch.chapImage    || '';
     document.getElementById('ced_c').value   = ch.content;
+    if (ch.chapImage) window._ceImgPreview();
     document.getElementById('_ce_loading').style.display = 'none';
-    document.getElementById('_ce_form').style.display = 'block';
+    document.getElementById('_ce_form').style.display    = 'block';
   } catch(e) {
     document.getElementById('_ce_loading').textContent = '❌ ' + e.message;
   }
@@ -549,8 +725,9 @@ async function _saveCh(storyId, chapterId) {
     ch.title   = document.getElementById('ced_t').value.trim();
     ch.content = document.getElementById('ced_c').value;
     const aff  = (document.getElementById('ced_aff')?.value || '').trim();
-    if (aff) ch.affiliateUrl = aff;
-    else delete ch.affiliateUrl;
+    if (aff) ch.affiliateUrl = aff; else delete ch.affiliateUrl;
+    const img  = (document.getElementById('ced_img')?.value  || '').trim();
+    if (img) ch.chapImage = img; else delete ch.chapImage;
     _s('⏳ Đang lưu lên GitHub...', true);
     await AUTH.saveStories(stories, sha, `Online: sửa ${ch.title}`);
     _s('✅ Đã lưu! Web cập nhật trong ~1 phút.', true);

@@ -272,7 +272,14 @@
         </div>
 
         <div class="af-g"><label>Giới thiệu</label>
-          <textarea class="af-inp" id="as-desc" rows="4" placeholder="Mô tả ngắn…"></textarea>
+          <textarea class="af-inp" id="as-desc" rows="4" placeholder="Mô tả ngắn…"
+                    oninput="_debounceAiGenre('as')"></textarea>
+        </div>
+        <div class="g2">
+          <div class="af-g"><label>🎧 Audio truyện <span style="font-weight:400;font-size:.75rem;color:var(--text3)">(không bắt buộc — mp3, SoundCloud…)</span></label>
+            <input class="af-inp" id="as-audio" type="url" placeholder="https://…/audio.mp3"></div>
+          <div class="af-g"><label>🎬 Video truyện <span style="font-weight:400;font-size:.75rem;color:var(--text3)">(không bắt buộc — YouTube, mp4…)</span></label>
+            <input class="af-inp" id="as-video" type="url" placeholder="https://youtube.com/…"></div>
         </div>
 
         <div class="g3">
@@ -284,7 +291,7 @@
             <select class="af-inp" id="as-source">
               <option>Sáng tác</option><option>Dịch</option><option>ST</option>
             </select></div>
-          <div class="af-g"><label>Thể loại chính</label>
+          <div class="af-g"><label>Thể loại chính <span id="as-ai-genre-st" style="font-size:.69rem;color:var(--text3);font-weight:400;margin-left:.3rem"></span></label>
             <select class="af-inp" id="as-genre">
               <option>Tiên Hiệp</option><option>Huyền Huyễn</option><option>Ngôn Tình</option>
               <option>Đô Thị</option><option>Nữ Cường</option><option>Kiếm Hiệp</option>
@@ -425,9 +432,9 @@
           </div>
           <div class="af-g"><label>Giới thiệu series</label>
             <textarea class="af-inp" id="ser-desc" rows="3" placeholder="Mô tả ngắn về series…"
-                      oninput="renderSeriesPreview()"></textarea></div>
+                      oninput="renderSeriesPreview();_debounceAiGenre('ser')"></textarea></div>
           <div class="g3">
-            <div class="af-g"><label>Thể loại</label>
+            <div class="af-g"><label>Thể loại <span id="ser-ai-genre-st" style="font-size:.69rem;color:var(--text3);font-weight:400;margin-left:.3rem"></span></label>
               <select class="af-inp" id="ser-genre" onchange="renderSeriesPreview()">
                 <option>Tiên Hiệp</option><option>Huyền Huyễn</option><option>Ngôn Tình</option>
                 <option>Đô Thị</option><option>Nữ Cường</option><option>Kiếm Hiệp</option>
@@ -1045,6 +1052,7 @@ function clearAddForm() {
   });
   const serOrd = document.getElementById('as-series-order'); if (serOrd) serOrd.value = '1';
   document.getElementById('as-prev').style.display = 'none';
+  ['as-audio','as-video'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   // Reset chapters
   _asChapters = [];
   _renderChapterList();
@@ -1060,12 +1068,14 @@ async function doAddStory() {
   if (!title)  return showAlert('as-alert', 'Vui lòng nhập tên truyện.', false);
   if (!author) return showAlert('as-alert', 'Vui lòng nhập tên tác giả.', false);
 
-  const cover  = v('as-cover').trim();
-  const desc   = v('as-desc').trim();
-  const status = v('as-status');
-  const source = v('as-source');
-  const genre  = v('as-genre');
-  const tags   = v('as-tags').split(',').map(t=>t.trim()).filter(Boolean);
+  const cover    = v('as-cover').trim();
+  const desc     = v('as-desc').trim();
+  const status   = v('as-status');
+  const source   = v('as-source');
+  const genre    = v('as-genre');
+  const tags     = v('as-tags').split(',').map(t=>t.trim()).filter(Boolean);
+  const audioUrl = (document.getElementById('as-audio')?.value || '').trim();
+  const videoUrl = (document.getElementById('as-video')?.value || '').trim();
   // Collect chapters from dynamic list
   const chInputs = document.querySelectorAll('.as-ch-item');
   const chT      = chInputs.length ? chInputs[0].querySelector('.as-ch-title')?.value?.trim() : '';
@@ -1103,7 +1113,9 @@ async function doAddStory() {
     const chapters = allChapters.length ? allChapters : [];
     const entry = { id:sid, title, author, cover, description:desc,
                     status, source, genre, genres:[genre,...tags], tags,
-                    hidden:false, chapters };
+                    hidden:false, chapters,
+                    ...(audioUrl ? { audioUrl } : {}),
+                    ...(videoUrl ? { videoUrl } : {}) };
     if (seriesId) {
       const ser = _SER.find(s => s.id === seriesId);
       entry.seriesId    = seriesId;
@@ -2030,7 +2042,7 @@ async function doAddSeries() {
       genre:v('ser-genre'), status:v('ser-status') });
     await _saveSeries('Thêm series: ' + title);
     ['ser-title','ser-author','ser-cover','ser-desc'].forEach(id => { const el=document.getElementById(id); if(el)el.value=''; });
-    document.getElementById('ser-prev').style.display = 'none';
+    const _sp = document.getElementById('ser-prev'); if (_sp) _sp.style.display = 'none';
     showAlert('ser-alert', `✅ Đã tạo series "${title}"!`, true);
     renderSeriesList(); populateSeriesSelect();
     setTimeout(() => hideAlert('ser-alert'), 3000);
@@ -2058,6 +2070,71 @@ function tblAlert(pfx, msg, ok) {
   el.className = 'adm-alert ' + (ok ? 'adm-ok' : 'adm-err');
   el.textContent = msg;
   setTimeout(() => { el.className='adm-alert'; el.textContent=''; }, 4500);
+}
+
+// ── AI genre suggestion ─────────────────────────────────────
+const _aiGenreTimer = {};
+function _debounceAiGenre(prefix) {
+  clearTimeout(_aiGenreTimer[prefix]);
+  _aiGenreTimer[prefix] = setTimeout(() => _aiSuggestGenre(prefix), 1400);
+}
+
+async function _aiSuggestGenre(prefix) {
+  const descEl   = document.getElementById(prefix + '-desc');
+  const titleEl  = document.getElementById(prefix + '-title');
+  const genreEl  = document.getElementById(prefix + '-genre');
+  const statusEl = document.getElementById(prefix + '-ai-genre-st');
+  const tagsEl   = document.getElementById(prefix + '-tags');
+
+  const desc  = (descEl?.value  || '').trim();
+  const title = (titleEl?.value || '').trim();
+  if (desc.length < 25 && title.length < 3) return;
+
+  const apiKey = localStorage.getItem('_llhnc_gk') || '';
+  if (!apiKey) return; // AI key not configured — silently skip
+
+  if (statusEl) statusEl.textContent = '🤖…';
+
+  try {
+    const model = await _getWorkingGeminiModel(apiKey);
+    const prompt = `Phân tích thông tin truyện dưới đây và đề xuất thể loại phù hợp nhất từ danh sách cho sẵn.
+Tiêu đề: "${title}"
+Mô tả: "${desc}"
+
+Danh sách thể loại hợp lệ: Tiên Hiệp, Huyền Huyễn, Ngôn Tình, Đô Thị, Nữ Cường, Kiếm Hiệp, Lịch Sử, Khác
+
+Chỉ trả về JSON hợp lệ (không markdown, không giải thích):
+{"genre":"Ngôn Tình","tags":["Hiện đại","HE","Boss"],"confidence":"high"}`;
+
+    const data = await _geminiRequest(apiKey, model, prompt);
+    const text  = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+    const m     = text.match(/\{[\s\S]*?\}/);
+    if (!m) { if (statusEl) statusEl.textContent = ''; return; }
+    const r = JSON.parse(m[0]);
+    if (!r?.genre) { if (statusEl) statusEl.textContent = ''; return; }
+
+    // Auto-set genre select
+    if (genreEl) {
+      const opts = Array.from(genreEl.options).map(o => o.value);
+      if (opts.includes(r.genre)) {
+        genreEl.value = r.genre;
+        if (prefix === 'ser') renderSeriesPreview(); // update preview
+      }
+    }
+    // Auto-fill tags if field is empty
+    if (tagsEl && r.tags?.length && !tagsEl.value.trim()) {
+      tagsEl.value = r.tags.join(', ');
+    }
+    // Show status badge
+    if (statusEl) {
+      const icon = r.confidence === 'high' ? '✅' : r.confidence === 'medium' ? '🟡' : '⚪';
+      statusEl.innerHTML = `${icon} AI: <b>${esc(r.genre)}</b>`
+        + (r.tags?.length ? ` <span style="font-weight:400">${esc(r.tags.slice(0,3).join(', '))}</span>` : '');
+      statusEl.style.color = r.confidence === 'high' ? '#27ae60' : '#e67e22';
+    }
+  } catch(e) {
+    if (statusEl) statusEl.textContent = '';
+  }
 }
 </script>
 </body>
