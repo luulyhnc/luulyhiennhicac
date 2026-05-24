@@ -22,18 +22,31 @@ const AUTH = {
   get pat() { return localStorage.getItem(_PK) || ''; },
 
   async login(email, pat) {
-    if (email.trim().toLowerCase() !== OWNER_EMAIL.toLowerCase())
-      throw new Error('Email không có quyền truy cập.');
+    // Step 1: verify PAT is valid and belongs to the repo owner
+    // (We do NOT hard-check email here — GitHub API is the authority)
+    const repoOwner = GH_REPO.split('/')[0]; // 'luulyhnc'
+    const userRes = await fetch('https://api.github.com/user', {
+      headers: { Authorization:`token ${pat}`, Accept:'application/vnd.github.v3+json' }
+    });
+    if (!userRes.ok) {
+      const e = await userRes.json().catch(()=>({}));
+      throw new Error(e.message || `PAT không hợp lệ hoặc đã hết hạn (${userRes.status}). Hãy tạo PAT mới trên GitHub Settings.`);
+    }
+    const ghUser = await userRes.json();
+    if (ghUser.login.toLowerCase() !== repoOwner.toLowerCase())
+      throw new Error(`PAT không thuộc về tài khoản quản trị (${repoOwner}). Vui lòng dùng PAT của đúng tài khoản.`);
+
+    // Step 2: verify write access to repo
     const r = await fetch(`https://api.github.com/repos/${GH_REPO}`, {
       headers: { Authorization:`token ${pat}`, Accept:'application/vnd.github.v3+json' }
     });
     if (!r.ok) {
       const e = await r.json().catch(()=>({}));
-      throw new Error(e.message || `Xác thực thất bại (${r.status}). Kiểm tra lại PAT.`);
+      throw new Error(e.message || `Không thể truy cập repo (${r.status}). Kiểm tra lại PAT.`);
     }
     const repo = await r.json();
     if (!repo.permissions?.push)
-      throw new Error('PAT không có quyền ghi vào repo. Cần scope: repo → contents.');
+      throw new Error('PAT không có quyền ghi vào repo. Cần scope: Contents → Read and write.');
     localStorage.setItem(_PK, pat);
     localStorage.setItem(_SK, JSON.stringify({ ok:true, exp: Date.now() + 30*864e5 }));
   },

@@ -57,7 +57,7 @@
           <label for="login-pw">Mật khẩu <span id="login-pw-hint" style="font-size:.72rem;color:var(--gold);font-weight:600;display:none">— nhận dạng Admin PAT</span></label>
           <div class="auth-pw-wrap">
             <input class="auth-input" type="password" id="login-pw" placeholder="Nhập mật khẩu"
-                   oninput="document.getElementById('login-pw-hint').style.display=this.value.startsWith('ghp_')?'inline':'none'"
+                   oninput="document.getElementById('login-pw-hint').style.display=(this.value.startsWith('ghp_')||this.value.startsWith('github_pat_'))?'inline':'none'"
                    onkeydown="if(event.key==='Enter')doMemberLogin()">
             <button type="button" class="auth-pw-toggle" id="login-pw-toggle"
                     onclick="toggleAuthPw('login-pw','login-pw-toggle')" title="Hiện/Ẩn mật khẩu">👁</button>
@@ -141,23 +141,35 @@
     if (!identifier) { showLoginAlert('Vui lòng nhập tên đăng nhập hoặc email.'); return; }
     if (!password)   { showLoginAlert('Vui lòng nhập mật khẩu.'); return; }
 
-    // ── Detect Admin (Owner) credentials ──────────────────
-    // If the identifier matches the owner email AND the password
-    // looks like a GitHub PAT (ghp_…), route to AUTH.login() instead.
-    const OWNER = (typeof OWNER_EMAIL !== 'undefined') ? OWNER_EMAIL : 'lethuhien211094@gmail.com';
-    if (identifier.toLowerCase() === OWNER.toLowerCase() && password.startsWith('ghp_')) {
+    // ── Detect Admin credentials (GitHub PAT format) ──────
+    // If the password looks like a GitHub PAT (ghp_… or github_pat_…),
+    // always attempt AUTH.login() first — do NOT require exact email match
+    // here (AUTH.login() itself enforces OWNER_EMAIL check).
+    // • If AUTH.login() succeeds → admin session, done.
+    // • If AUTH.login() fails AND identifier == OWNER_EMAIL → show PAT error.
+    // • If AUTH.login() fails AND identifier != OWNER_EMAIL → silently fall
+    //   through to member login (user typed a ghp_-like password by accident).
+    const _isPAT = password.startsWith('ghp_') || password.startsWith('github_pat_');
+    const _ownerEmail = (typeof OWNER_EMAIL !== 'undefined') ? OWNER_EMAIL : 'lethuhien211094@gmail.com';
+    if (_isPAT) {
       btn.disabled = true;
       btn.textContent = '⏳ Đang xác thực Admin…';
       try {
         await AUTH.login(identifier, password);
         showLoginAlert('✅ Đăng nhập Admin thành công! Đang tải lại…', 'success');
         setTimeout(() => location.href = 'index.html', 700);
+        return;
       } catch (e) {
-        showLoginAlert('❌ ' + (e.message || 'Xác thực thất bại. Kiểm tra lại PAT.'));
-        btn.disabled = false;
-        btn.textContent = 'Đăng nhập';
+        if (identifier.toLowerCase() === _ownerEmail.toLowerCase()) {
+          // Correct admin email but bad/expired PAT → show clear error
+          showLoginAlert('❌ PAT không hợp lệ hoặc đã hết hạn. Vui lòng tạo PAT mới trên GitHub Settings.');
+          btn.disabled = false;
+          btn.textContent = 'Đăng nhập';
+          return;
+        }
+        // Not admin email → continue to member login flow below
+        btn.textContent = 'Đang đăng nhập…';
       }
-      return;
     }
 
     btn.disabled = true;
