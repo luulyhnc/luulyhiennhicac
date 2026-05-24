@@ -642,11 +642,16 @@ async function _testAiKey() {
   // Clear cache so we re-probe all models with this key
   localStorage.removeItem('_llhnc_gm');
   localStorage.removeItem('_llhnc_gk2');
-  if (st) st.textContent = '⏳ Đang thử các model Gemini…';
+  if (st) st.textContent = '⏳ Đang kiểm tra key và liệt kê models…';
   try {
+    // Show all available models
+    let modelList = [];
+    try { modelList = await _listGeminiModels(apiKey); } catch(_){}
     const model = await _getWorkingGeminiModel(apiKey);
     localStorage.setItem('_llhnc_gk', apiKey);
-    if (st) st.textContent = `✅ Key hợp lệ! Model đang dùng: ${model}`;
+    const listStr = modelList.slice(0,5).join(', ') + (modelList.length>5 ? ` (+${modelList.length-5} khác)`:'');
+    if (st) st.innerHTML = `✅ Key hợp lệ! Đang dùng: <b>${_ea(model)}</b>`
+      + (listStr ? `<br><span style="font-size:.74rem;color:#7fb0ca">Models có sẵn: ${_ea(listStr)}</span>` : '');
   } catch(e) {
     if (st) st.innerHTML = `❌ ${_ea(e.message)} &nbsp;·&nbsp; <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:#3ab3ca">Lấy key mới tại đây</a>`;
   }
@@ -715,8 +720,8 @@ async function _runAiCheckAll() {
   st.textContent = `✅ Đã kiểm tra xong ${stories.length} truyện.`;
 }
 
-// Try models in priority order; cache the first that works
-const _GEMINI_MODELS = [
+// Fallback model list (used only if API listing fails)
+const _GEMINI_MODELS_FB = [
   'gemini-2.5-flash-preview-05-20',
   'gemini-2.5-flash',
   'gemini-2.5-pro',
@@ -725,7 +730,6 @@ const _GEMINI_MODELS = [
   'gemini-1.5-flash-latest',
   'gemini-1.5-flash',
   'gemini-1.5-flash-8b',
-  'gemini-1.5-pro',
 ];
 
 async function _geminiRequest(apiKey, model, prompt) {
@@ -741,34 +745,59 @@ async function _geminiRequest(apiKey, model, prompt) {
   return resp.json();
 }
 
-async function _getWorkingGeminiModel(apiKey) {
-  // Return cached model if key matches
-  const cached    = localStorage.getItem('_llhnc_gm');
-  const cachedKey = localStorage.getItem('_llhnc_gk2'); // key fingerprint
-  const keyFp     = apiKey.slice(-8);
-  if (cached && cachedKey === keyFp) return cached;
-
-  // Try each model in order, collect errors for diagnostics
-  const errors = [];
-  for (const model of _GEMINI_MODELS) {
-    try {
-      await _geminiRequest(apiKey, model, 'Hi');
-      localStorage.setItem('_llhnc_gm',  model);
-      localStorage.setItem('_llhnc_gk2', keyFp);
-      return model;
-    } catch(e) {
-      const msg = e.message || '';
-      errors.push(`${model}: ${msg}`);
-      // Key invalid → no point trying other models
-      if (msg.includes('API key not valid') || msg.includes('API_KEY_INVALID') ||
-          msg.includes('invalid') && msg.toLowerCase().includes('key')) {
-        throw new Error('API key không hợp lệ. Vui lòng lấy key mới tại aistudio.google.com/app/apikey');
-      }
-    }
+// Fetch all models available to this API key via the list endpoint
+async function _listGeminiModels(apiKey) {
+  const resp = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}&pageSize=50`,
+    { headers:{'Content-Type':'application/json'} }
+  );
+  if (!resp.ok) {
+    const e = await resp.json().catch(()=>({}));
+    throw new Error(e.error?.message || `HTTP ${resp.status}`);
   }
-  // None worked — show diagnostic details
-  const detail = errors.slice(0,3).join(' | ');
-  throw new Error(`Không tìm được model nào hoạt động. Chi tiết: ${detail}`);
+  const data = await resp.json();
+  // Filter to models that support generateContent, prefer flash/lite
+  const models = (data.models || [])
+    .filter(m => (m.supportedGenerationMethods||[]).includes('generateContent'))
+    .map(m => m.name.replace('models/', ''))
+    .sort((a,b) => {
+      // Prefer flash over pro, smaller over larger for cost
+      const score = s => s.includes('flash')?0:s.includes('lite')?1:2;
+      return score(a) - score(b);
+    });
+  return models;
+}
+
+async function _getWorkingGeminiModel(apiKey) {
+  const keyFp = apiKey.slice(-8);
+  // Return cached if same key
+  if (localStorage.getItem('_llhnc_gk2') === keyFp) {
+    const cached = localStorage.getItem('_llhnc_gm');
+    if (cached) return cached;
+  }
+
+  const _isKeyError = msg =>
+    msg.includes('API key not valid') || msg.includes('API_KEY_INVALID') ||
+    (msg.toLowerCase().includes('invalid') && msg.toLowerCase().includes('key'));
+
+  // Step 1: try to list available models from the API itself
+  let modelList = [];
+  try {
+    modelList = await _listGeminiModels(apiKey);
+  } catch(e) {
+    if (_isKeyError(e.message||''))
+      throw new Error('API key không hợp lệ. Vui lòng lấy key mới tại aistudio.google.com/app/apikey');
+    // Network error or other — fall back to hardcoded list
+    modelList = _GEMINI_MODELS_FB;
+  }
+
+  if (!modelList.length) modelList = _GEMINI_MODELS_FB;
+
+  // Step 2: use first model from the list (already sorted, no need to probe)
+  const model = modelList[0];
+  localStorage.setItem('_llhnc_gm',  model);
+  localStorage.setItem('_llhnc_gk2', keyFp);
+  return model;
 }
 
 async function _aiCheckStory(story, apiKey) {
