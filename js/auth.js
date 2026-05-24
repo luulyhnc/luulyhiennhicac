@@ -702,6 +702,9 @@ function _sel(lbl, id, opts, cur) {
 }
 function _ea(s) { return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+// Expose globally so other scripts (member.js) can check AUTH.isOwner
+window.AUTH = AUTH;
+
 // ── Boot ───────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   _injectModal();
