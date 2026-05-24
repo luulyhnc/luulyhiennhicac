@@ -138,8 +138,11 @@ async function _doLogin() {
 function _initHeader() {
   document.querySelectorAll('.btn-login').forEach(btn => {
     if (AUTH.isOwner) {
+      btn.removeAttribute('onclick');           // strip any hardcoded onclick="alert(…)"
       btn.textContent = '👑 Admin ▾';
-      btn.style.cssText += ';background:#27ae60!important;border-color:#27ae60!important';
+      btn.style.background    = '#27ae60';
+      btn.style.borderColor   = '#27ae60';
+      btn.style.color         = '#fff';
       btn.onclick = function(e) {
         e.stopPropagation();
         const old = document.getElementById('_omenu');
@@ -259,8 +262,8 @@ function _initHeader() {
       }
     } else {
       // Non-owner: go to member login page
-      // (Admin PAT modal still accessible via "Quản trị viên?" link on login.html)
-      btn.onclick = () => { location.href = 'login.html'; };
+      btn.removeAttribute('onclick');
+      btn.onclick = function() { location.href = 'login.html'; };
     }
   });
 }
