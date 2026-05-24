@@ -2343,52 +2343,68 @@ function doEditSeries(id) {
   const s = _SER.find(x => x.id === id);
   if (!s) return;
   if (document.getElementById('_sedit_modal')) return;
+
+  // Build modal skeleton (NO data interpolation here to avoid any encoding issues)
+  document.body.insertAdjacentHTML('beforeend',
+    '<div id="_sedit_modal" onclick="if(event.target===this)this.remove()"' +
+    ' style="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9998;display:flex;align-items:center;justify-content:center;font-family:inherit;overflow-y:auto;padding:1rem">' +
+    '<div style="background:#fff;border-radius:14px;padding:1.5rem;width:90%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.1rem">' +
+    '<b style="font-size:1rem">✏️ Sửa Series</b>' +
+    '<button onclick="document.getElementById(\'_sedit_modal\').remove()" style="border:none;background:var(--bg2);width:30px;height:30px;border-radius:50%;cursor:pointer">✕</button>' +
+    '</div>' +
+    '<div id="_sedit_msg" style="display:none;padding:.45rem .7rem;border-radius:7px;font-size:.8rem;margin-bottom:.7rem"></div>' +
+    '<div class="g2" style="margin-bottom:.65rem">' +
+    '<div class="af-g" style="margin-bottom:0"><label>Tên series *</label><input class="af-inp" id="sed_title"></div>' +
+    '<div class="af-g" style="margin-bottom:0"><label>Tác giả</label><input class="af-inp" id="sed_author"></div>' +
+    '</div>' +
+    '<div class="af-g"><label>Ảnh bìa</label><input class="af-inp" id="sed_cover" type="url" placeholder="https://…/cover.jpg"></div>' +
+    '<div class="af-g"><label>Giới thiệu</label><textarea class="af-inp" id="sed_desc" rows="3" style="resize:vertical"></textarea></div>' +
+    '<div class="af-g"><label>Thể loại</label><div class="genre-pills" id="sed_genre"></div></div>' +
+    '<div class="g3" style="margin-bottom:.8rem">' +
+    '<div class="af-g" style="margin-bottom:0"><label>Tổng số tập <span style="font-weight:400;font-size:.72rem;color:var(--text3)">(dự kiến)</span></label>' +
+    '<input class="af-inp" id="sed_total" type="number" min="1"></div>' +
+    '<div class="af-g" style="margin-bottom:0"><label>Trạng thái</label>' +
+    '<select class="af-inp" id="sed_status"><option>Đang ra</option><option>Hoàn thành</option><option>Tạm dừng</option></select></div>' +
+    '<div></div></div>' +
+    '<div style="display:flex;gap:.5rem;justify-content:flex-end">' +
+    '<button onclick="document.getElementById(\'_sedit_modal\').remove()" style="padding:.5rem 1rem;border:1.5px solid var(--border2);border-radius:7px;cursor:pointer;background:#fff;font-family:inherit">Hủy</button>' +
+    '<button id="_sedit_save_btn" style="padding:.5rem 1.1rem;background:var(--primary);color:#fff;border:none;border-radius:7px;cursor:pointer;font-family:inherit;font-weight:600">💾 Lưu & Deploy</button>' +
+    '</div></div></div>'
+  );
+
+  // ── Populate form values via DOM API (never via string interpolation) ──
+  document.getElementById('sed_title').value  = s.title  || '';
+  document.getElementById('sed_author').value = s.author || '';
+  document.getElementById('sed_cover').value  = s.cover  || '';
+  document.getElementById('sed_desc').value   = s.description || '';
+  document.getElementById('sed_total').value  = s.totalVolumes || '';
+
+  // Status dropdown
+  const stEl = document.getElementById('sed_status');
+  Array.from(stEl.options).forEach(o => { o.selected = (o.value === s.status); });
+
+  // Genre checkboxes
   const genres = ['Tiên Hiệp','Huyền Huyễn','Ngôn Tình','Đô Thị','Nữ Cường','Kiếm Hiệp','Lịch Sử','Khác'];
   const cur    = Array.isArray(s.genre) ? s.genre : (s.genre ? [s.genre] : []);
-  const genreHtml = genres.map((g, i) =>
-    `<span class="genre-pill"><input type="checkbox" id="seg_e${i}" name="se_genre_e" value="${esc(g)}"${cur.includes(g)?' checked':''}><label for="seg_e${i}">${esc(g)}</label></span>`
-  ).join('');
-  document.body.insertAdjacentHTML('beforeend', `
-<div id="_sedit_modal" onclick="if(event.target===this)this.remove()"
-  style="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9998;display:flex;align-items:center;justify-content:center;font-family:inherit;overflow-y:auto;padding:1rem">
-  <div style="background:#fff;border-radius:14px;padding:1.5rem;width:90%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.1rem">
-      <b style="font-size:1rem">✏️ Sửa Series</b>
-      <button onclick="document.getElementById('_sedit_modal').remove()"
-        style="border:none;background:var(--bg2);width:30px;height:30px;border-radius:50%;cursor:pointer">✕</button>
-    </div>
-    <div id="_sedit_msg" style="display:none;padding:.45rem .7rem;border-radius:7px;font-size:.8rem;margin-bottom:.7rem"></div>
-    <div class="g2" style="margin-bottom:.65rem">
-      <div class="af-g" style="margin-bottom:0"><label>Tên series *</label>
-        <input class="af-inp" id="sed_title" value="${esc(s.title)}"></div>
-      <div class="af-g" style="margin-bottom:0"><label>Tác giả</label>
-        <input class="af-inp" id="sed_author" value="${esc(s.author||'')}"></div>
-    </div>
-    <div class="af-g"><label>Ảnh bìa</label>
-      <input class="af-inp" id="sed_cover" type="url" value="${esc(s.cover||'')}" placeholder="https://…/cover.jpg"></div>
-    <div class="af-g"><label>Giới thiệu</label>
-      <textarea class="af-inp" id="sed_desc" rows="3" style="resize:vertical">${esc(s.description||'')}</textarea></div>
-    <div class="af-g"><label>Thể loại</label>
-      <div class="genre-pills" id="sed_genre">${genreHtml}</div></div>
-    <div class="g3" style="margin-bottom:.8rem">
-      <div class="af-g" style="margin-bottom:0"><label>Tổng số tập <span style="font-weight:400;font-size:.72rem;color:var(--text3)">(dự kiến)</span></label>
-        <input class="af-inp" id="sed_total" type="number" min="1" value="${s.totalVolumes||''}"></div>
-      <div class="af-g" style="margin-bottom:0"><label>Trạng thái</label>
-        <select class="af-inp" id="sed_status">
-          <option${s.status==='Đang ra'?' selected':''}>Đang ra</option>
-          <option${s.status==='Hoàn thành'?' selected':''}>Hoàn thành</option>
-          <option${s.status==='Tạm dừng'?' selected':''}>Tạm dừng</option>
-        </select></div>
-      <div></div>
-    </div>
-    <div style="display:flex;gap:.5rem;justify-content:flex-end">
-      <button onclick="document.getElementById('_sedit_modal').remove()"
-        style="padding:.5rem 1rem;border:1.5px solid var(--border2);border-radius:7px;cursor:pointer;background:#fff;font-family:inherit">Hủy</button>
-      <button onclick="_saveSeriesEdits('${esc(id)}')"
-        style="padding:.5rem 1.1rem;background:var(--primary);color:#fff;border:none;border-radius:7px;cursor:pointer;font-family:inherit;font-weight:600">💾 Lưu & Deploy</button>
-    </div>
-  </div>
-</div>`);
+  const genreEl = document.getElementById('sed_genre');
+  genreEl.innerHTML = '';
+  genres.forEach((g, i) => {
+    const span = document.createElement('span');
+    span.className = 'genre-pill';
+    const cb  = document.createElement('input');
+    cb.type = 'checkbox'; cb.id = 'seg_e' + i;
+    cb.name = 'se_genre_e'; cb.value = g;
+    cb.checked = cur.includes(g);
+    const lbl = document.createElement('label');
+    lbl.htmlFor = 'seg_e' + i;
+    lbl.textContent = g;
+    span.appendChild(cb); span.appendChild(lbl);
+    genreEl.appendChild(span);
+  });
+
+  // Save button — store id via closure (no string interpolation in onclick)
+  document.getElementById('_sedit_save_btn').onclick = function() { _saveSeriesEdits(id); };
 }
 
 async function _saveSeriesEdits(id) {
