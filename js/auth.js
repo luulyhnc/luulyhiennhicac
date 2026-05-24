@@ -639,12 +639,14 @@ async function _testAiKey() {
     if (st) st.innerHTML = '❌ Key không đúng định dạng. Gemini API key phải bắt đầu bằng <b>AIza</b>.';
     return;
   }
-  if (st) st.textContent = '⏳ Đang kiểm tra key…';
+  // Clear cache so we re-probe all models with this key
+  localStorage.removeItem('_llhnc_gm');
+  localStorage.removeItem('_llhnc_gk2');
+  if (st) st.textContent = '⏳ Đang thử các model Gemini…';
   try {
     const model = await _getWorkingGeminiModel(apiKey);
     localStorage.setItem('_llhnc_gk', apiKey);
-    localStorage.setItem('_llhnc_gm', model);
-    if (st) st.textContent = `✅ Key hợp lệ! Đang dùng model: ${model}`;
+    if (st) st.textContent = `✅ Key hợp lệ! Model đang dùng: ${model}`;
   } catch(e) {
     if (st) st.innerHTML = `❌ ${_ea(e.message)} &nbsp;·&nbsp; <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:#3ab3ca">Lấy key mới tại đây</a>`;
   }
@@ -715,8 +717,12 @@ async function _runAiCheckAll() {
 
 // Try models in priority order; cache the first that works
 const _GEMINI_MODELS = [
+  'gemini-2.5-flash-preview-05-20',
+  'gemini-2.5-flash',
+  'gemini-2.5-pro',
   'gemini-2.0-flash',
   'gemini-2.0-flash-lite',
+  'gemini-1.5-flash-latest',
   'gemini-1.5-flash',
   'gemini-1.5-flash-8b',
   'gemini-1.5-pro',
@@ -726,7 +732,7 @@ async function _geminiRequest(apiKey, model, prompt) {
   const resp = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
     { method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ contents:[{parts:[{text:prompt}]}], generationConfig:{temperature:0.1,maxOutputTokens:256} }) }
+      body: JSON.stringify({ contents:[{parts:[{text:prompt}]}], generationConfig:{temperature:0.1,maxOutputTokens:64} }) }
   );
   if (!resp.ok) {
     const e = await resp.json().catch(()=>({}));
@@ -736,30 +742,33 @@ async function _geminiRequest(apiKey, model, prompt) {
 }
 
 async function _getWorkingGeminiModel(apiKey) {
-  // Return cached model if already known
-  const cached = localStorage.getItem('_llhnc_gm');
-  if (cached) {
-    // Quick verify cached model still works
-    try {
-      await _geminiRequest(apiKey, cached, 'ping');
-      return cached;
-    } catch { localStorage.removeItem('_llhnc_gm'); }
-  }
-  // Try each model in order
+  // Return cached model if key matches
+  const cached    = localStorage.getItem('_llhnc_gm');
+  const cachedKey = localStorage.getItem('_llhnc_gk2'); // key fingerprint
+  const keyFp     = apiKey.slice(-8);
+  if (cached && cachedKey === keyFp) return cached;
+
+  // Try each model in order, collect errors for diagnostics
+  const errors = [];
   for (const model of _GEMINI_MODELS) {
     try {
-      await _geminiRequest(apiKey, model, 'Trả về chữ OK');
-      localStorage.setItem('_llhnc_gm', model);
+      await _geminiRequest(apiKey, model, 'Hi');
+      localStorage.setItem('_llhnc_gm',  model);
+      localStorage.setItem('_llhnc_gk2', keyFp);
       return model;
     } catch(e) {
-      // "API key not valid" → no point trying other models
-      if (e.message && (e.message.includes('API key not valid') || e.message.includes('API_KEY_INVALID'))) {
-        throw new Error('API key không hợp lệ. Vui lòng kiểm tra lại key tại aistudio.google.com/app/apikey');
+      const msg = e.message || '';
+      errors.push(`${model}: ${msg}`);
+      // Key invalid → no point trying other models
+      if (msg.includes('API key not valid') || msg.includes('API_KEY_INVALID') ||
+          msg.includes('invalid') && msg.toLowerCase().includes('key')) {
+        throw new Error('API key không hợp lệ. Vui lòng lấy key mới tại aistudio.google.com/app/apikey');
       }
-      // Otherwise try next model
     }
   }
-  throw new Error('Không tìm được model Gemini nào hoạt động. Vui lòng kiểm tra API key.');
+  // None worked — show diagnostic details
+  const detail = errors.slice(0,3).join(' | ');
+  throw new Error(`Không tìm được model nào hoạt động. Chi tiết: ${detail}`);
 }
 
 async function _aiCheckStory(story, apiKey) {
