@@ -149,7 +149,9 @@ function _initHeader() {
         m.id = '_omenu';
         m.style.cssText = `position:fixed;top:${rc.bottom+4}px;right:${window.innerWidth-rc.right}px;background:#fff;border-radius:10px;box-shadow:0 4px 24px rgba(0,0,0,.18);z-index:9998;min-width:210px;overflow:hidden;font-family:'Inter',sans-serif`;
         m.innerHTML = `
-          <a href="http://localhost:3344" target="_blank" class="_omenu_item">⚙️ Admin Panel (local)</a>
+          <a href="admin.html" class="_omenu_item">⚙️ Admin Panel</a>
+          <a href="admin.html#addstory" onclick="sessionStorage.setItem('_adm_tab','addstory')" class="_omenu_item">➕ Đăng truyện</a>
+          <a href="admin.html#members"  onclick="sessionStorage.setItem('_adm_tab','members')"  class="_omenu_item">👥 Quản lý thành viên</a>
           <button onclick="document.getElementById('_omenu')?.remove();_openAiModeration()" class="_omenu_item" style="background:none;border:none;cursor:pointer;width:100%;text-align:left;font-family:'Inter',sans-serif">🤖 AI Kiểm duyệt nội dung</button>
           ${typeof downloadNewsletterExcel==='function'?'<button onclick="downloadNewsletterExcel()" class="_omenu_item" style="background:none;border:none;cursor:pointer;width:100%;text-align:left;font-family:\'Inter\',sans-serif">📥 Tải email đăng ký (.csv)</button>':''}
           <div style="height:1px;background:#eef3f7"></div>
