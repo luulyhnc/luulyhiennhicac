@@ -773,7 +773,7 @@ async function loadStoryPage() {
           <tr><td>Nguồn</td><td>${story.source || "Tác giả tự viết"}</td></tr>
         </table>
 
-        <div class="desc-box">${story.description}</div>
+        <div class="desc-box">${renderDesc(story.description)}</div>
 
         ${story.audioUrl ? `
         <div style="margin:.9rem 0;padding:.75rem;background:var(--bg2);border:1.5px solid var(--border);border-radius:10px">
@@ -1069,21 +1069,55 @@ function escHtml(s) {
   return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 }
 
-// Render chapter content with basic Markdown-lite:
-// **text** → <strong>, *text* / _text_ → <em>
-// Newlines preserved via CSS white-space:pre-wrap on .reader-body
+// Render story description with newline → <br> support
+function renderDesc(raw) {
+  if (!raw) return '';
+  return raw
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/\n\n+/g, '</p><p>')
+    .replace(/\n/g, '<br>');
+}
+
+// Render chapter content → proper <p> paragraph blocks
+// Supports: **bold**, *italic* / _italic_
+// Paragraph logic:
+//   • double newline (\n\n) → paragraph break
+//   • single newline inside a paragraph → <br>
+//   • if no double newlines at all → every non-empty line = own paragraph
 function renderChapterContent(raw) {
-  // 1. Escape HTML entities (XSS-safe)
-  let s = raw
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-  // 2. Bold: **text** (process before single *)
-  s = s.replace(/\*\*([^*\r\n]+)\*\*/g, "<strong>$1</strong>");
-  // 3. Italic: *text* or _text_ (single line only, no nesting)
-  s = s.replace(/\*([^*\r\n]+)\*/g, "<em>$1</em>");
-  s = s.replace(/_([^_\r\n]+)_/g, "<em>$1</em>");
-  return s;
+  if (!raw) return '';
+
+  // 1. Normalise line endings
+  let s = raw.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+  // 2. Collapse 4+ consecutive blank lines to 2
+  s = s.replace(/\n{4,}/g, '\n\n\n');
+
+  // 3. Escape HTML (must happen before we add tags)
+  s = s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+  // 4. Markdown-lite (single-line only)
+  s = s.replace(/\*\*([^*\r\n]+)\*\*/g, '<strong>$1</strong>');
+  s = s.replace(/\*([^*\r\n]+)\*/g,     '<em>$1</em>');
+  s = s.replace(/_([^_\r\n]+)_/g,       '<em>$1</em>');
+
+  // 5. Split into paragraphs
+  //    Prefer double-newline as paragraph separator.
+  //    Fallback: single newline (each line → its own paragraph).
+  const useDouble = s.includes('\n\n');
+  const chunks = useDouble
+    ? s.split(/\n\n+/)
+    : s.split('\n');
+
+  // 6. Wrap each non-empty chunk in <p>; single \n inside chunk → <br>
+  return chunks
+    .map(c => c.trim())
+    .filter(c => c.length > 0)
+    .map(c => '<p>' + c.replace(/\n/g, '<br>') + '</p>')
+    .join('');
 }
 
 function fmtNum(n) {

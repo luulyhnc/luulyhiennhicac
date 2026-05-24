@@ -610,6 +610,8 @@ header {
   background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius);
   padding:.9rem 1rem; font-size:.87rem; color:var(--text2); line-height:1.8; margin:.8rem 0;
 }
+.desc-box p { margin:0 0 .85em 0; }
+.desc-box p:last-child { margin-bottom:0; }
 .action-btns { display:flex; gap:.7rem; flex-wrap:wrap; margin-top:.9rem; }
 
 /* Chapter list */
@@ -692,10 +694,17 @@ header {
   background:#fff; border-radius:var(--radius); padding:2.2rem 2.8rem;
   border:1.5px solid var(--border); box-shadow:var(--shadow-s);
   font-size:var(--reader-fs,17px); line-height:var(--reader-lh,1.8);
-  color:var(--text); white-space:pre-wrap;
+  color:var(--text);
   font-family:var(--reader-font,'Merriweather',Georgia,serif);
   transition:background .3s, color .3s, font-size .15s, line-height .15s;
 }
+/* Paragraph spacing in reader */
+.reader-body p {
+  margin:0 0 1.25em 0;
+  text-indent:1.8em;
+}
+.reader-body p:first-child { text-indent:0; }
+.reader-body p:last-child  { margin-bottom:0; }
 body.reader-light .reader-body { background:#f5f0e8; color:#2c2018; border-color:#d8cfc4; }
 body.reader-sepia  .reader-body { background:#f0e6d0; color:#3d2b1f; border-color:#d4c5a9; }
 body.reader-dark   .reader-body { background:#1e2430; color:#c8d0dc; border-color:#2e3a4a; }
