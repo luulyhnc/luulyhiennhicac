@@ -482,9 +482,19 @@ async function openChapterEditor(storyId, chapterId) {
     <div id="_ce_form" style="display:none">
       ${_fld('Tên chương','ced_t','')}
       <div style="margin-bottom:.85rem">
+        <div style="font-size:.78rem;font-weight:500;color:#4a6080;margin-bottom:.28rem">
+          🔗 Link tiếp thị liên kết
+          <span style="font-weight:400;color:#9fb8cc;font-size:.72rem"> — hiển thị trong màn hình chờ khi chuyển chương</span>
+        </div>
+        <input id="ced_aff" type="url" placeholder="https://shopee.vn/… hoặc để trống nếu không có"
+          style="width:100%;padding:.5rem .72rem;border:1.5px solid #c5dce9;border-radius:8px;font-size:.87rem;font-family:inherit;outline:none;box-sizing:border-box">
+        <div style="font-size:.72rem;color:#9fb8cc;margin-top:.2rem">Link sẽ xuất hiện dạng banner quảng cáo trong màn hình đếm ngược giữa các chương.</div>
+      </div>
+      <div style="margin-bottom:.85rem">
         <div style="font-size:.78rem;font-weight:500;color:#4a6080;margin-bottom:.28rem">Nội dung</div>
         <textarea id="ced_c" rows="20"
           style="width:100%;padding:.75rem;border:1.5px solid #c5dce9;border-radius:8px;font-size:.88rem;font-family:'Merriweather',Georgia,serif;line-height:1.8;resize:vertical;box-sizing:border-box;outline:none"></textarea>
+        <div style="font-size:.72rem;color:#9fb8cc;margin-top:.2rem">Dùng <code style="background:#f0f4f8;padding:.1rem .3rem;border-radius:3px">*chữ nghiêng*</code> hoặc <code style="background:#f0f4f8;padding:.1rem .3rem;border-radius:3px">**chữ đậm**</code> để định dạng.</div>
       </div>
       <div id="_ce_msg" style="display:none;padding:.45rem .7rem;border-radius:7px;font-size:.8rem;margin-bottom:.7rem"></div>
       <div style="display:flex;gap:.5rem;justify-content:flex-end">
@@ -500,8 +510,9 @@ async function openChapterEditor(storyId, chapterId) {
     const { stories } = await AUTH.loadStories();
     const ch = stories.find(s=>s.id===storyId)?.chapters.find(c=>c.id===chapterId);
     if (!ch) throw new Error('Không tìm thấy chương!');
-    document.getElementById('ced_t').value = ch.title;
-    document.getElementById('ced_c').value = ch.content;
+    document.getElementById('ced_t').value   = ch.title;
+    document.getElementById('ced_aff').value = ch.affiliateUrl || '';
+    document.getElementById('ced_c').value   = ch.content;
     document.getElementById('_ce_loading').style.display = 'none';
     document.getElementById('_ce_form').style.display = 'block';
   } catch(e) {
@@ -520,6 +531,9 @@ async function _saveCh(storyId, chapterId) {
     if (!ch) { _s('Không tìm thấy chương!', false); return; }
     ch.title   = document.getElementById('ced_t').value.trim();
     ch.content = document.getElementById('ced_c').value;
+    const aff  = (document.getElementById('ced_aff')?.value || '').trim();
+    if (aff) ch.affiliateUrl = aff;
+    else delete ch.affiliateUrl;
     _s('⏳ Đang lưu lên GitHub...', true);
     await AUTH.saveStories(stories, sha, `Online: sửa ${ch.title}`);
     _s('✅ Đã lưu! Web cập nhật trong ~1 phút.', true);
