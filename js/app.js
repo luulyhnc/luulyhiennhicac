@@ -445,7 +445,7 @@ async function loadHomePage() {
     return;
   }
 
-  listEl.innerHTML = stories.map(s => storyCardH(s)).join("");
+  listEl.innerHTML = `<div class="story-grid">${stories.map(s => storyCardV(s)).join("")}</div>`;
 }
 
 function renderHero(s, all) {
@@ -482,35 +482,98 @@ function renderHero(s, all) {
   }
 }
 
+// _rankData caches the full sorted list for tab switching
+window._rankData = [];
+
 function renderSidebar(stories) {
-  const hotList   = document.getElementById("hot-list");
+  const rankList  = document.getElementById("rank-list");
   const trendTags = document.getElementById("trend-tags");
 
-  if (hotList) {
-    const sorted = [...stories].sort((a, b) => (b.views || 0) - (a.views || 0));
-    hotList.innerHTML = sorted.map((s, i) => `
-      <a class="hot-item" href="${storyUrl(s.id)}">
-        <span class="hot-rank ${i===0?'r1':i===1?'r2':i===2?'r3':''}">${i+1}</span>
-        ${s.cover
-          ? `<img src="${s.cover}" alt="${s.title}" class="hot-cover">`
-          : `<div class="hot-cover-ph">📚</div>`}
-        <div class="hot-info">
-          <div class="hot-title">${s.title}</div>
-          <div class="hot-meta">⭐${s.rating||4.5} · 👁 ${fmtNum(s.views||0)}</div>
-        </div>
-      </a>`).join("");
+  if (rankList) {
+    // Sort by chapters desc (proxy for activity since we have no real view stats)
+    window._rankData = [...stories].sort((a, b) =>
+      ((b.chapters?.length || 0) + (b.views || 0) * 0.001) -
+      ((a.chapters?.length || 0) + (a.views || 0) * 0.001)
+    );
+    _renderRankList(rankList, window._rankData);
   }
 
   if (trendTags) {
-    const genres = [...new Set(stories.flatMap(s => s.genre))];
+    const genres = [...new Set(stories.flatMap(s => s.genre || []))];
     const list   = genres.length ? genres
-      : ["Tiên Hiệp","Huyền Huyễn","Ngôn Tình","Đô Thị","Nữ Cường","Kiếm Hiệp","Lịch Sử","Tu Tiên","Hành Động"];
+      : ["Tiên Hiệp","Huyền Huyễn","Ngôn Tình","Đô Thị","Nữ Cường","Kiếm Hiệp","Lịch Sử"];
     trendTags.innerHTML = list.map(g =>
       `<a class="trend-tag" href="index.html?genre=${encodeURIComponent(g)}">${g}</a>`
     ).join("");
   }
 }
 
+function _renderRankList(el, list) {
+  el.innerHTML = list.slice(0, 8).map((s, i) => `
+    <a class="rank-item" href="${storyUrl(s.id)}">
+      <span class="rank-num ${i===0?'r1':i===1?'r2':i===2?'r3':''}">${i+1}</span>
+      ${s.cover
+        ? `<img src="${s.cover}" alt="${s.title}" class="rank-cover" loading="lazy">`
+        : `<div class="rank-cover-ph">📚</div>`}
+      <div class="rank-info">
+        <div class="rank-title">${s.title}</div>
+        <div class="rank-meta">⭐ ${s.rating||4.5} · 📖 ${s.chapters?.length||0} ch</div>
+      </div>
+    </a>`).join("");
+}
+
+function switchRankTab(btn, period) {
+  document.querySelectorAll('.rank-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  const el = document.getElementById("rank-list");
+  if (!el || !window._rankData?.length) return;
+  // All periods show the same base ranking for now (no per-period stats stored)
+  // Could be extended with real data later
+  _renderRankList(el, window._rankData);
+}
+
+// ── Vertical grid card (homepage) ──────────────────────────────
+function storyCardV(s) {
+  const chapCount = s.chapters?.length || 0;
+  const isDone    = s.status === "Hoàn thành";
+  const isHot     = (s.views || 0) > 1000;
+
+  const coverHtml = s.cover
+    ? `<img src="${s.cover}" alt="${s.title}" class="card-v-cover" loading="lazy">`
+    : `<div class="card-v-ph">📚</div>`;
+
+  const newBadge  = chapCount > 0 ? `<span class="badge-vn">Mới</span>` : "";
+  const hotBadge  = isHot          ? `<span class="badge-vh">Hot</span>` : "";
+  const fullBadge = isDone         ? `<span class="badge-vf">Full</span>` : "";
+
+  const seriesBadge = s.seriesId
+    ? `<a href="series.html#${s.seriesId}" onclick="event.stopPropagation()"
+         style="display:inline-block;background:rgba(58,179,202,.18);color:#fff;border-radius:4px;padding:.08rem .38rem;font-size:.58rem;font-weight:700;text-decoration:none;border:1px solid rgba(255,255,255,.35)">
+         📚 Tập ${s.seriesOrder||"?"}</a>`
+    : "";
+
+  return `
+    <div class="card-v" onclick="location.href='${storyUrl(s.id)}'">
+      <div class="card-v-cover-wrap">
+        ${coverHtml}
+        <div class="card-v-badges">${newBadge}${hotBadge}</div>
+        ${fullBadge}
+        <div class="card-v-bar">
+          <span>📖 ${chapCount} ch ${seriesBadge}</span>
+          <span>⭐ ${s.rating || 4.5}</span>
+        </div>
+      </div>
+      <div class="card-v-body">
+        <div class="card-v-title">${s.title}</div>
+        <div class="card-v-author">${s.author}</div>
+        <div class="card-v-tags">
+          ${(s.genre || []).slice(0, 2).map(g => `<span class="tag">${g}</span>`).join("")}
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── Horizontal card (used on story/series pages) ────────────────
 function storyCardH(s) {
   const firstCh = s.chapters[0];
   const sc = s.status === "Hoàn thành" ? "bs-done" : "bs-ongoing";

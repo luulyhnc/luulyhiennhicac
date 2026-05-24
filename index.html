@@ -76,8 +76,14 @@
 
   <aside class="sidebar">
     <div class="sidebar-card">
-      <div class="sidebar-card-title">🔥 Truyện nổi bật</div>
-      <ul class="hot-list" id="hot-list"></ul>
+      <div class="sidebar-card-title">🏆 Bảng xếp hạng</div>
+      <div class="rank-tabs">
+        <button class="rank-tab active" onclick="switchRankTab(this,'day')">Ngày</button>
+        <button class="rank-tab" onclick="switchRankTab(this,'week')">Tuần</button>
+        <button class="rank-tab" onclick="switchRankTab(this,'month')">Tháng</button>
+        <button class="rank-tab" onclick="switchRankTab(this,'year')">Năm</button>
+      </div>
+      <div class="rank-list" id="rank-list"></div>
     </div>
     <div class="sidebar-card">
       <div class="sidebar-card-title">🔍 Thể loại phổ biến</div>
