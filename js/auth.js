@@ -600,16 +600,22 @@ function _openAiModeration() {
       <button onclick="document.getElementById('_ai_modal').remove()"
         style="border:none;background:#f0f4f8;width:30px;height:30px;border-radius:50%;cursor:pointer">✕</button>
     </div>
-    <div style="display:flex;gap:.5rem;margin-bottom:.85rem;flex-wrap:wrap">
-      <input id="_ai_key" type="password" placeholder="Gemini API Key (miễn phí tại aistudio.google.com)"
+    <div style="display:flex;gap:.5rem;margin-bottom:.5rem;flex-wrap:wrap">
+      <input id="_ai_key" type="password" placeholder="Gemini API Key — bắt đầu bằng AIza… (lấy miễn phí tại aistudio.google.com)"
         value="${_ea(savedKey)}"
         style="flex:1;min-width:200px;padding:.45rem .7rem;border:1.5px solid #c5dce9;border-radius:7px;font-size:.84rem;font-family:inherit;outline:none">
+      <button onclick="_testAiKey()"
+        style="padding:.45rem .9rem;background:#f0f4f8;border:1.5px solid #c5dce9;border-radius:7px;cursor:pointer;font-size:.83rem;font-family:inherit">🔍 Test</button>
       <button onclick="_saveAiKey()"
         style="padding:.45rem .9rem;background:#f0f4f8;border:1.5px solid #c5dce9;border-radius:7px;cursor:pointer;font-size:.83rem;font-family:inherit">💾 Lưu key</button>
       <button onclick="_runAiCheckAll()"
         style="padding:.45rem 1rem;background:#3ab3ca;color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:.85rem;font-weight:600;font-family:inherit">▶ Kiểm tra tất cả</button>
     </div>
-    <div id="_ai_status" style="font-size:.8rem;color:#9fb8cc;margin-bottom:.8rem">Nhập Gemini API Key rồi bấm "Kiểm tra tất cả".</div>
+    <div style="font-size:.75rem;color:#9fb8cc;margin-bottom:.7rem">
+      📌 Lấy API Key miễn phí: <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:#3ab3ca">aistudio.google.com/app/apikey</a>
+      &nbsp;·&nbsp; Key hợp lệ bắt đầu bằng <code style="background:#f0f4f8;padding:.05rem .3rem;border-radius:3px">AIza</code>
+    </div>
+    <div id="_ai_status" style="font-size:.8rem;color:#9fb8cc;margin-bottom:.8rem">Nhập Gemini API Key rồi bấm "Test" để xác nhận hoặc "Kiểm tra tất cả".</div>
     <div id="_ai_results"></div>
   </div>
 </div>`);
@@ -617,17 +623,43 @@ function _openAiModeration() {
 
 function _saveAiKey() {
   const key = (document.getElementById('_ai_key')?.value || '').trim();
+  const st  = document.getElementById('_ai_status');
+  if (!key) { if (st) st.textContent = '⚠️ Key trống — không lưu.'; return; }
+  if (!key.startsWith('AIza')) { if (st) st.innerHTML = '❌ Key không đúng định dạng. Gemini API key phải bắt đầu bằng <b>AIza</b>. Lấy key tại <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:#3ab3ca">aistudio.google.com</a>.'; return; }
   localStorage.setItem('_llhnc_gk', key);
-  const st = document.getElementById('_ai_status');
-  if (st) st.textContent = key ? '✅ Đã lưu API Key.' : '⚠️ Key trống.';
+  if (st) st.textContent = '✅ Đã lưu API Key.';
+}
+
+async function _testAiKey() {
+  const keyEl  = document.getElementById('_ai_key');
+  const apiKey = (keyEl?.value || '').trim() || localStorage.getItem('_llhnc_gk') || '';
+  const st     = document.getElementById('_ai_status');
+  if (!apiKey) { if (st) st.textContent = '❌ Vui lòng nhập API Key.'; return; }
+  if (!apiKey.startsWith('AIza')) {
+    if (st) st.innerHTML = '❌ Key không đúng định dạng. Gemini API key phải bắt đầu bằng <b>AIza</b>.';
+    return;
+  }
+  if (st) st.textContent = '⏳ Đang kiểm tra key…';
+  try {
+    const model = await _getWorkingGeminiModel(apiKey);
+    localStorage.setItem('_llhnc_gk', apiKey);
+    localStorage.setItem('_llhnc_gm', model);
+    if (st) st.textContent = `✅ Key hợp lệ! Đang dùng model: ${model}`;
+  } catch(e) {
+    if (st) st.innerHTML = `❌ ${_ea(e.message)} &nbsp;·&nbsp; <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:#3ab3ca">Lấy key mới tại đây</a>`;
+  }
 }
 
 async function _runAiCheckAll() {
-  const keyEl = document.getElementById('_ai_key');
+  const keyEl  = document.getElementById('_ai_key');
   const apiKey = (keyEl?.value || '').trim() || localStorage.getItem('_llhnc_gk') || '';
-  const st = document.getElementById('_ai_status');
+  const st     = document.getElementById('_ai_status');
   const results = document.getElementById('_ai_results');
   if (!apiKey) { if (st) st.textContent = '❌ Vui lòng nhập Gemini API Key.'; return; }
+  if (!apiKey.startsWith('AIza')) {
+    if (st) st.innerHTML = '❌ Key không đúng định dạng. Key phải bắt đầu bằng <b>AIza</b> — lấy miễn phí tại <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:#3ab3ca">aistudio.google.com</a>.';
+    return;
+  }
   localStorage.setItem('_llhnc_gk', apiKey);
   if (!st || !results) return;
 
@@ -681,7 +713,57 @@ async function _runAiCheckAll() {
   st.textContent = `✅ Đã kiểm tra xong ${stories.length} truyện.`;
 }
 
+// Try models in priority order; cache the first that works
+const _GEMINI_MODELS = [
+  'gemini-2.0-flash',
+  'gemini-2.0-flash-lite',
+  'gemini-1.5-flash',
+  'gemini-1.5-flash-8b',
+  'gemini-1.5-pro',
+];
+
+async function _geminiRequest(apiKey, model, prompt) {
+  const resp = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+    { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ contents:[{parts:[{text:prompt}]}], generationConfig:{temperature:0.1,maxOutputTokens:256} }) }
+  );
+  if (!resp.ok) {
+    const e = await resp.json().catch(()=>({}));
+    throw new Error(e.error?.message || `HTTP ${resp.status}`);
+  }
+  return resp.json();
+}
+
+async function _getWorkingGeminiModel(apiKey) {
+  // Return cached model if already known
+  const cached = localStorage.getItem('_llhnc_gm');
+  if (cached) {
+    // Quick verify cached model still works
+    try {
+      await _geminiRequest(apiKey, cached, 'ping');
+      return cached;
+    } catch { localStorage.removeItem('_llhnc_gm'); }
+  }
+  // Try each model in order
+  for (const model of _GEMINI_MODELS) {
+    try {
+      await _geminiRequest(apiKey, model, 'Trả về chữ OK');
+      localStorage.setItem('_llhnc_gm', model);
+      return model;
+    } catch(e) {
+      // "API key not valid" → no point trying other models
+      if (e.message && (e.message.includes('API key not valid') || e.message.includes('API_KEY_INVALID'))) {
+        throw new Error('API key không hợp lệ. Vui lòng kiểm tra lại key tại aistudio.google.com/app/apikey');
+      }
+      // Otherwise try next model
+    }
+  }
+  throw new Error('Không tìm được model Gemini nào hoạt động. Vui lòng kiểm tra API key.');
+}
+
 async function _aiCheckStory(story, apiKey) {
+  const model  = await _getWorkingGeminiModel(apiKey);
   const sample = story.chapters.slice(0,2).map(c=>(c.content||'').slice(0,600)).join('\n---\n');
   const prompt = `Bạn là hệ thống kiểm duyệt nội dung tự động cho website đọc truyện Việt Nam hợp pháp. Phân tích truyện sau:
 
@@ -695,15 +777,9 @@ Xác định các nội dung vi phạm: chính trị/kích động, bạo lực 
 Chỉ trả về JSON, không giải thích:
 {"safe":true,"score":0,"issues":[],"recommendation":"an toàn"}`;
 
-  const resp = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-    { method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ contents:[{parts:[{text:prompt}]}], generationConfig:{temperature:0.1,maxOutputTokens:200} }) }
-  );
-  if (!resp.ok) { const e=await resp.json().catch(()=>({})); throw new Error(e.error?.message||`HTTP ${resp.status}`); }
-  const data = await resp.json();
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
-  const m = text.match(/\{[\s\S]*?\}/);
+  const data = await _geminiRequest(apiKey, model, prompt);
+  const text  = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+  const m     = text.match(/\{[\s\S]*?\}/);
   try { return m ? JSON.parse(m[0]) : {safe:true,score:0,issues:[],recommendation:'an toàn'}; }
   catch { return {safe:true,score:0,issues:[],recommendation:'an toàn'}; }
 }
