@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Series – Lưu Ly Hiền Nhi Các</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+  <div class="hdr-top">
+    <a href="index.html" class="logo">
+      <span class="logo-main">Lưu Ly Hiền Nhi Các</span>
+      <span class="logo-slogan">Gác ngọc thanh vân, lưu vạn trang mộng</span>
+    </a>
+    <nav class="hdr-nav">
+      <a href="index.html">Trang Chủ</a>
+      <a href="index.html?genre=Tiên+Hiệp">Tiên Hiệp</a>
+      <a href="index.html?genre=Huyền+Huyễn">Huyền Huyễn</a>
+      <a href="index.html?genre=Ngôn+Tình">Ngôn Tình</a>
+      <a href="index.html?genre=Đô+Thị">Đô Thị</a>
+      <a href="index.html?genre=Nữ+Cường">Nữ Cường</a>
+      <a href="index.html?status=Hoàn+thành">Đã Hoàn Thành</a>
+      <a href="guide.html">✍️ Đăng Truyện</a>
+    </nav>
+    <div class="search-bar">
+      <input type="text" id="search-input" placeholder="Tìm kiếm truyện, tác giả..."
+             onkeydown="if(event.key==='Enter')doSearch()">
+      <button onclick="doSearch()">🔍</button>
+    </div>
+    <button class="btn-login">👤 Đăng nhập</button>
+  </div>
+</header>
+
+<main class="container" style="padding-top:1.5rem;padding-bottom:2.5rem">
+  <div class="breadcrumb" id="breadcrumb">
+    <a href="index.html">Trang chủ</a>
+    <span class="sep">›</span>
+    <span id="bc-series">Series</span>
+  </div>
+  <div id="series-page-root">
+    <div class="empty-state"><div class="icon">⏳</div><p>Đang tải...</p></div>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-main">
+    <div class="footer-brand">
+      <a href="index.html" class="logo" style="margin-bottom:.5rem;display:inline-flex">
+        <span class="logo-main">Lưu Ly Hiền Nhi Các</span>
+      </a>
+      <p class="footer-desc">Không gian đọc truyện online với các tác phẩm độc quyền từ các tác giả nội địa. Cập nhật liên tục mỗi ngày.</p>
+      <div class="footer-social">
+        <a href="#" title="Facebook">f</a>
+        <a href="#" title="Instagram">📷</a>
+        <a href="#" title="TikTok">🎵</a>
+        <a href="#" title="YouTube">▶</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Khám phá</h4>
+      <ul>
+        <li><a href="index.html">Trang chủ</a></li>
+        <li><a href="index.html?genre=Tiên+Hiệp">Tiên Hiệp</a></li>
+        <li><a href="index.html?genre=Ngôn+Tình">Ngôn Tình</a></li>
+        <li><a href="index.html?status=Hoàn+thành">Đã hoàn thành</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Cộng đồng</h4>
+      <ul>
+        <li><a href="#">Diễn đàn</a></li>
+        <li><a href="#">Group Facebook</a></li>
+        <li><a href="#">Hoạt động</a></li>
+        <li><a href="#">Đóng góp</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Hỗ trợ</h4>
+      <ul>
+        <li><a href="guide.html">Đăng truyện</a></li>
+        <li><a href="dieu-khoan-su-dung.html">Điều khoản sử dụng</a></li>
+        <li><a href="chinh-sach-bao-mat.html">Chính sách bảo mật</a></li>
+        <li><a href="#">Liên hệ</a></li>
+      </ul>
+    </div>
+    <div class="footer-col footer-newsletter">
+      <h4>Nhận thông báo truyện mới</h4>
+      <p>Đăng ký để nhận thông báo khi có chương mới!</p>
+      <div class="newsletter-form">
+        <input type="email" placeholder="Nhập email của bạn...">
+        <button>Đăng ký</button>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">© 2026 Lưu Ly Hiền Nhi Các – Gác ngọc thanh vân, lưu vạn trang mộng</div>
+</footer>
+
+<script src="js/auth.js"></script>
+<script src="js/app.js"></script>
+<script src="js/member.js"></script>
+<script>
+  // ── Series page helpers ──────────────────────────────────────────────────
+
+  function _escHtml(s) {
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function _statusClass(status) {
+    return (status === "Hoàn thành") ? "bs-done" : "bs-ongoing";
+  }
+
+  // ── Main loader ──────────────────────────────────────────────────────────
+
+  async function loadSeriesPage() {
+    const root     = document.getElementById("series-page-root");
+    const bcSeries = document.getElementById("bc-series");
+    if (!root) return;
+
+    const seriesId = location.hash.slice(1);
+
+    if (!seriesId) {
+      root.innerHTML = '<div class="empty-state"><div class="icon">❌</div><p>Không tìm thấy series. Vui lòng kiểm tra lại đường dẫn.</p></div>';
+      return;
+    }
+
+    // Show loading state while fetching
+    root.innerHTML = '<div class="empty-state"><div class="icon">⏳</div><p>Đang tải series...</p></div>';
+
+    // Fetch both data sources in parallel
+    let seriesList, stories;
+    try {
+      const [seriesRes, storiesRes] = await Promise.all([
+        fetch("data/series.json"),
+        fetch("data/stories.json")
+      ]);
+      seriesList = await seriesRes.json();
+      stories    = await storiesRes.json();
+    } catch (err) {
+      root.innerHTML = '<div class="empty-state"><div class="icon">❌</div><p>Không thể tải dữ liệu. Vui lòng thử lại.</p></div>';
+      return;
+    }
+
+    // Find the matching series
+    const series = seriesList.find(s => s.id === seriesId);
+
+    if (!series) {
+      root.innerHTML = '<div class="empty-state"><div class="icon">😢</div><p>Series không tồn tại hoặc đã bị xoá.</p></div>';
+      return;
+    }
+
+    // Update document title and breadcrumb
+    document.title = _escHtml(series.title) + " – Lưu Ly Hiền Nhi Các";
+    if (bcSeries) bcSeries.textContent = series.title;
+
+    // Filter and sort stories belonging to this series
+    const seriesStories = stories
+      .filter(s => s.seriesId === seriesId)
+      .sort((a, b) => (a.seriesOrder || 0) - (b.seriesOrder || 0));
+
+    // Determine the first story and its first chapter for the "Đọc từ Tập 1" button
+    const firstStory   = seriesStories[0] || null;
+    const firstChapter = firstStory && firstStory.chapters && firstStory.chapters[0]
+      ? firstStory.chapters[0]
+      : null;
+
+    const statusCls = _statusClass(series.status);
+
+    // ── Series header block ───────────────────────────────────────────────
+    const coverHtml = series.cover
+      ? `<img src="${_escHtml(series.cover)}" alt="${_escHtml(series.title)}" class="series-cover-img">`
+      : `<div class="series-cover-img cover-placeholder">📚</div>`;
+
+    const genreTagsHtml = Array.isArray(series.genre)
+      ? series.genre.map(g =>
+          `<a class="genre-tag" href="index.html?genre=${encodeURIComponent(g)}">${_escHtml(g)}</a>`
+        ).join("")
+      : "";
+
+    const readBtn = firstStory && firstChapter
+      ? `<a href="reader.html#${_escHtml(firstStory.id)}/${firstChapter.id}" class="btn btn-accent">▶ Đọc từ Tập 1</a>`
+      : `<button class="btn btn-accent" disabled style="opacity:.45">▶ Đọc từ Tập 1</button>`;
+
+    // ── Story cards ───────────────────────────────────────────────────────
+    const storyCardsHtml = seriesStories.length
+      ? seriesStories.map(s => _seriesStoryCard(s)).join("")
+      : `<div class="empty-state"><div class="icon">📭</div><p>Chưa có tập nào trong series này.</p></div>`;
+
+    root.innerHTML = `
+      <!-- Series detail block -->
+      <div class="story-layout">
+        <div class="story-cover-wrap series-cover-wrap">
+          ${coverHtml}
+        </div>
+
+        <div class="story-info">
+          <h1>${_escHtml(series.title)}</h1>
+
+          <div class="stat-row">
+            <div class="stat-item">
+              <div class="val">${seriesStories.length}</div>
+              <div class="key">Số tập</div>
+            </div>
+          </div>
+
+          <table class="story-meta-table">
+            <tr>
+              <td>Tác giả</td>
+              <td><a href="index.html?search=${encodeURIComponent(series.author)}">${_escHtml(series.author)}</a></td>
+            </tr>
+            <tr>
+              <td>Thể loại</td>
+              <td>${genreTagsHtml}</td>
+            </tr>
+            <tr>
+              <td>Trạng thái</td>
+              <td>
+                <span class="badge-status-sm ${statusCls}">${_escHtml(series.status)}</span>
+              </td>
+            </tr>
+          </table>
+
+          <div class="desc-box">${_escHtml(series.description)}</div>
+
+          <div class="action-btns">
+            ${readBtn}
+          </div>
+        </div>
+      </div>
+
+      <!-- Story list in series -->
+      <div class="chap-list-wrap">
+        <div class="chap-list-header">
+          <span class="title">📚 Danh Sách Tập (${seriesStories.length} tập)</span>
+        </div>
+        <div class="story-list" style="padding:.75rem">
+          ${storyCardsHtml}
+        </div>
+      </div>
+    `;
+  }
+
+  // ── Series story card ────────────────────────────────────────────────────
+
+  function _seriesStoryCard(s) {
+    const tapLabel  = s.seriesOrder != null ? `Tập ${s.seriesOrder}` : "Tập ?";
+    const chapCount = Array.isArray(s.chapters) ? s.chapters.length : 0;
+    const statusCls = _statusClass(s.status);
+
+    const coverHtml = s.cover
+      ? `<img src="${_escHtml(s.cover)}" alt="${_escHtml(s.title)}" class="card-h-cover" loading="lazy">`
+      : `<div class="card-h-ph">📖</div>`;
+
+    return `
+      <div class="card-h" onclick="location.href='story.html#${_escHtml(s.id)}'">
+        ${coverHtml}
+        <div class="card-h-info">
+          <div class="card-h-author" style="font-size:.72rem;font-weight:700;color:var(--primary);margin-bottom:.1rem">${_escHtml(tapLabel)}</div>
+          <div class="card-h-title">${_escHtml(s.title)}</div>
+          <div class="card-h-author">${_escHtml(s.author)}</div>
+          <div class="card-h-tags">
+            ${Array.isArray(s.genre)
+              ? s.genre.slice(0, 3).map(g => `<span class="tag">${_escHtml(g)}</span>`).join("")
+              : ""}
+            <span class="badge-status-sm ${statusCls}">${_escHtml(s.status)}</span>
+          </div>
+          <div class="card-h-stats">
+            <span>📖 ${chapCount} chương</span>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // ── Bootstrap ────────────────────────────────────────────────────────────
+  document.addEventListener("DOMContentLoaded", loadSeriesPage);
+  window.addEventListener("hashchange", loadSeriesPage);
+
+  function doSearch() {
+    const q = document.getElementById("search-input").value.trim();
+    if (q) location.href = "index.html?search=" + encodeURIComponent(q);
+  }
+</script>
+</body>
+</html>

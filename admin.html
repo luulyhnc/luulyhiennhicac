@@ -197,7 +197,8 @@
     <div class="adm-tabs">
       <button class="adm-tab active" onclick="showTab('dash')"    id="tbtn-dash">📊 Dashboard</button>
       <button class="adm-tab"        onclick="showTab('addstory')" id="tbtn-addstory">➕ Đăng truyện</button>
-      <button class="adm-tab"        onclick="showTab('stories')" id="tbtn-stories">📚 Quản lý truyện</button>
+      <button class="adm-tab"        onclick="showTab('series')"  id="tbtn-series">📚 Series</button>
+      <button class="adm-tab"        onclick="showTab('stories')" id="tbtn-stories">🗂️ Quản lý truyện</button>
       <button class="adm-tab"        onclick="showTab('members')" id="tbtn-members">
         👥 Thành viên
         <span id="pend-dot" style="display:none;background:#e74c3c;color:#fff;border-radius:10px;padding:.04rem .38rem;font-size:.67rem;margin-left:.25rem">0</span>
@@ -287,6 +288,23 @@
 
         <details style="margin-bottom:.9rem">
           <summary style="cursor:pointer;font-size:.82rem;font-weight:600;color:var(--primary);user-select:none">
+            📚 Thuộc Series (tuỳ chọn)
+          </summary>
+          <div style="margin-top:.65rem">
+            <div class="g2">
+              <div class="af-g"><label>Chọn series</label>
+                <select class="af-inp" id="as-series">
+                  <option value="">— Không thuộc series —</option>
+                </select></div>
+              <div class="af-g"><label>Số thứ tự (Tập)</label>
+                <input class="af-inp" id="as-series-order" type="number" min="1" value="1" placeholder="1">
+                <div class="af-hint">Tập 1, 2, 3… trong series</div></div>
+            </div>
+          </div>
+        </details>
+
+        <details style="margin-bottom:.9rem">
+          <summary style="cursor:pointer;font-size:.82rem;font-weight:600;color:var(--primary);user-select:none">
             ➕ Thêm chương đầu tiên (tuỳ chọn)
           </summary>
           <div style="margin-top:.65rem">
@@ -312,6 +330,65 @@
                   style="padding:.5rem 1rem;border:1.5px solid var(--border2);border-radius:8px;
                          background:#fff;cursor:pointer;font-family:inherit;font-size:.85rem">🗑 Xóa form</button>
         </div>
+      </div>
+    </div>
+
+    <!-- ══ SERIES ══ -->
+    <div class="adm-panel" id="pnl-series">
+
+      <!-- Create form -->
+      <div class="adm-card" style="margin-bottom:.8rem">
+        <div class="adm-card-title">➕ Tạo Series mới</div>
+        <div id="ser-alert" class="adm-alert"></div>
+        <div class="g2">
+          <div class="af-g"><label>Tên series *</label>
+            <input class="af-inp" id="ser-title" placeholder="VD: Tam Giới Kiếm Thần"></div>
+          <div class="af-g"><label>Tác giả</label>
+            <input class="af-inp" id="ser-author" placeholder="Tên tác giả"></div>
+        </div>
+        <div class="af-g"><label>Ảnh bìa series</label>
+          <div style="display:flex;gap:.5rem;align-items:flex-start">
+            <div style="flex:1">
+              <input class="af-inp" id="ser-cover" type="url" placeholder="https://…/cover.jpg"
+                     oninput="const p=document.getElementById('ser-prev');p.src=this.value;p.style.display=this.value?'block':'none'">
+              <label style="display:inline-flex;align-items:center;gap:.3rem;cursor:pointer;margin-top:.28rem;padding:.22rem .65rem;background:var(--bg2);border:1.5px solid var(--border2);border-radius:6px;font-size:.75rem;font-weight:600">
+                📂 Upload
+                <input type="file" accept="image/*" style="display:none" onchange="_uploadCoverFile(this,'ser-cover','_ser_cu')">
+              </label>
+              <span id="_ser_cu" style="font-size:.71rem;color:var(--text3);margin-left:.3rem"></span>
+            </div>
+            <img id="ser-prev" src="" alt="" style="width:44px;height:60px;object-fit:cover;border-radius:4px;border:1.5px solid var(--border);display:none;flex-shrink:0">
+          </div>
+        </div>
+        <div class="af-g"><label>Giới thiệu series</label>
+          <textarea class="af-inp" id="ser-desc" rows="3" placeholder="Mô tả ngắn về series…"></textarea></div>
+        <div class="g3">
+          <div class="af-g"><label>Thể loại</label>
+            <select class="af-inp" id="ser-genre">
+              <option>Tiên Hiệp</option><option>Huyền Huyễn</option><option>Ngôn Tình</option>
+              <option>Đô Thị</option><option>Nữ Cường</option><option>Kiếm Hiệp</option>
+              <option>Lịch Sử</option><option>Khác</option>
+            </select></div>
+          <div class="af-g"><label>Trạng thái</label>
+            <select class="af-inp" id="ser-status">
+              <option>Đang ra</option><option>Hoàn thành</option><option>Tạm dừng</option>
+            </select></div>
+          <div class="af-g" style="display:flex;align-items:flex-end">
+            <button class="btn-auth btn-auth-primary" id="ser-btn" onclick="doAddSeries()"
+                    style="width:100%">💾 Tạo Series</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Series list -->
+      <div class="adm-card">
+        <div class="adm-card-title">📋 Danh sách Series
+          <span style="margin-left:auto;font-size:.78rem;font-weight:400;color:var(--text3)" id="ser-count"></span>
+        </div>
+        <div id="ser-list">
+          <div class="adm-empty"><div class="ico">⏳</div>Đang tải…</div>
+        </div>
+        <div id="ser-list-alert" class="adm-alert" style="margin-top:.6rem"></div>
       </div>
     </div>
 
@@ -592,10 +669,12 @@ let _S = [], _SHA = null, _M = [];
 // ── Init ───────────────────────────────────────────────────
 async function initAdmin(jumpTab) {
   _M = typeof LocalAuth !== 'undefined' ? LocalAuth.getAllUsers() : [];
-  await _loadStories();
+  await Promise.all([_loadStories(), _loadSeries()]);
   renderDash();
   renderStoryTbl(_S);
   renderMemberTbl(_M);
+  renderSeriesList();
+  populateSeriesSelect();
   loadIfaceSettings();
   populateHeroSelect();
   if (jumpTab) showTab(jumpTab);
@@ -733,7 +812,7 @@ function prevCover(url) {
 }
 
 function clearAddForm() {
-  ['as-title','as-author','as-cover','as-desc','as-tags','as-ch-t','as-ch-aff','as-ch-c'].forEach(id => {
+  ['as-title','as-author','as-cover','as-desc','as-tags','as-series-order','as-ch-t','as-ch-aff','as-ch-c'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
   document.getElementById('as-prev').style.display = 'none';
@@ -752,9 +831,11 @@ async function doAddStory() {
   const source = v('as-source');
   const genre  = v('as-genre');
   const tags   = v('as-tags').split(',').map(t=>t.trim()).filter(Boolean);
-  const chT    = v('as-ch-t').trim();
-  const chC    = v('as-ch-c').trim();
-  const chAff  = v('as-ch-aff').trim();
+  const chT      = v('as-ch-t').trim();
+  const chC      = v('as-ch-c').trim();
+  const chAff    = v('as-ch-aff').trim();
+  const seriesId = v('as-series').trim();
+  const seriesOrder = parseInt(v('as-series-order')) || 1;
 
   const btn = document.getElementById('as-btn');
   btn.disabled = true; btn.textContent = '⏳ Đang lưu…';
@@ -772,9 +853,16 @@ async function doAddStory() {
     const ch1 = (chT && chC) ? { id:1, title:chT, content:chC } : null;
     if (ch1 && chAff) ch1.affiliateUrl = chAff;
     const chapters = ch1 ? [ch1] : [];
-    stories.push({ id:sid, title, author, cover, description:desc,
-                   status, source, genre, genres:[genre,...tags], tags,
-                   hidden:false, chapters });
+    const entry = { id:sid, title, author, cover, description:desc,
+                    status, source, genre, genres:[genre,...tags], tags,
+                    hidden:false, chapters };
+    if (seriesId) {
+      const ser = _SER.find(s => s.id === seriesId);
+      entry.seriesId    = seriesId;
+      entry.seriesTitle = ser?.title || seriesId;
+      entry.seriesOrder = seriesOrder;
+    }
+    stories.push(entry);
 
     showAlert('as-alert', '⏳ Đang lưu lên GitHub…', true);
     await AUTH.saveStories(stories, sha, `Thêm truyện: ${title}`);
@@ -1047,6 +1135,116 @@ function tblAlert(pfx, msg, ok) {
 function doSearch() {
   const q = document.getElementById('search-input').value.trim();
   if (q) location.href = 'index.html?search=' + encodeURIComponent(q);
+}
+
+// ── Series management ──────────────────────────────────────
+const SERIES_FILE = 'data/series.json';
+let _SER = [], _SER_SHA = null;
+
+async function _loadSeries() {
+  try {
+    const info   = await AUTH.ghGet(SERIES_FILE);
+    const binary = atob(info.content.replace(/\n/g,''));
+    const json   = decodeURIComponent(escape(binary));
+    _SER = JSON.parse(json); _SER_SHA = info.sha;
+  } catch { _SER = []; _SER_SHA = null; }
+}
+
+async function _saveSeries(msg) {
+  const res = await AUTH.ghPut(SERIES_FILE, JSON.stringify(_SER, null, 2), msg, _SER_SHA||undefined);
+  if (res?.content?.sha) _SER_SHA = res.content.sha;
+}
+
+function renderSeriesList() {
+  const ct  = document.getElementById('ser-count');
+  const el  = document.getElementById('ser-list');
+  if (ct) ct.textContent = _SER.length + ' series';
+  if (!el) return;
+  if (!_SER.length) {
+    el.innerHTML = '<div class="adm-empty"><div class="ico">📭</div>Chưa có series nào. Tạo series đầu tiên bên trên!</div>';
+    return;
+  }
+  el.innerHTML = `<div style="display:grid;gap:.65rem">
+    ${_SER.map(s => {
+      const storyCount = _S.filter(x => x.seriesId === s.id).length;
+      return `<div style="display:flex;align-items:center;gap:.75rem;padding:.75rem .9rem;background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--radius)">
+        ${s.cover
+          ? `<img src="${esc(s.cover)}" style="width:38px;height:52px;object-fit:cover;border-radius:4px;border:1px solid var(--border);flex-shrink:0" onerror="this.style.display='none'">`
+          : `<div style="width:38px;height:52px;background:var(--pri-l);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0">📚</div>`}
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:700;color:var(--navy);font-size:.92rem">${esc(s.title)}</div>
+          <div style="font-size:.77rem;color:var(--text2);margin-top:.1rem">${esc(s.author||'')}${s.author&&s.genre?' · ':''}${Array.isArray(s.genre)?s.genre[0]:esc(s.genre||'')}</div>
+          <div style="margin-top:.2rem;display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
+            <span class="rb ${s.status==='Hoàn thành'?'rb-ok':'rb-reader'}">${esc(s.status||'Đang ra')}</span>
+            <span style="font-size:.73rem;color:var(--text3)">📖 ${storyCount} tập</span>
+          </div>
+          ${s.description?`<div style="font-size:.75rem;color:var(--text3);margin-top:.2rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:360px">${esc(s.description)}</div>`:''}
+        </div>
+        <div style="display:flex;gap:.35rem;flex-shrink:0">
+          <a href="series.html#${esc(s.id)}" target="_blank" class="ab ab-edit" style="text-decoration:none">👁 Xem</a>
+          <button class="ab ab-del" onclick="doDelSeries('${esc(s.id)}','${esc(s.title)}')">🗑</button>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function populateSeriesSelect() {
+  ['as-series'].forEach(selId => {
+    const sel = document.getElementById(selId);
+    if (!sel) return;
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">— Không thuộc series —</option>'
+      + _SER.map(s => `<option value="${esc(s.id)}">${esc(s.title)}</option>`).join('');
+    if (cur) sel.value = cur;
+  });
+}
+
+async function doAddSeries() {
+  const title  = v('ser-title').trim();
+  if (!title) return showAlert('ser-alert', 'Vui lòng nhập tên series.', false);
+  const btn = document.getElementById('ser-btn');
+  btn.disabled = true; btn.textContent = '⏳ Đang lưu…';
+  showAlert('ser-alert', '⏳ Đang lưu lên GitHub…', true);
+  try {
+    await _loadSeries(); // refresh SHA
+    let baseId = title.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')
+      .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40) || 'series';
+    let sid = baseId, n = 2;
+    while (_SER.find(s => s.id === sid)) sid = baseId + '-' + (n++);
+    _SER.push({ id:sid, title, author:v('ser-author').trim(),
+      cover:v('ser-cover').trim(), description:v('ser-desc').trim(),
+      genre:v('ser-genre'), status:v('ser-status') });
+    await _saveSeries('Thêm series: ' + title);
+    ['ser-title','ser-author','ser-cover','ser-desc'].forEach(id => { const el=document.getElementById(id); if(el)el.value=''; });
+    document.getElementById('ser-prev').style.display = 'none';
+    showAlert('ser-alert', `✅ Đã tạo series "${title}"!`, true);
+    renderSeriesList(); populateSeriesSelect();
+    setTimeout(() => hideAlert('ser-alert'), 3000);
+  } catch(e) { showAlert('ser-alert', '❌ ' + e.message, false); }
+  finally { btn.disabled = false; btn.textContent = '💾 Tạo Series'; }
+}
+
+async function doDelSeries(id, title) {
+  if (!confirm(`Xóa series "${title}"?\n(Các tập truyện trong series sẽ không bị xóa, chỉ gỡ liên kết.)`)) return;
+  tblAlert('ser-list', '⏳ Đang xóa…', true);
+  try {
+    await _loadSeries();
+    _SER = _SER.filter(s => s.id !== id);
+    await _saveSeries('Xóa series: ' + title);
+    renderSeriesList(); populateSeriesSelect();
+    tblAlert('ser-list', `✅ Đã xóa series "${title}".`, true);
+  } catch(e) { tblAlert('ser-list', '❌ ' + e.message, false); }
+}
+
+function tblAlert(pfx, msg, ok) {
+  // override existing tblAlert to also handle ser-list
+  const id = pfx.includes('-') ? pfx + '-alert' : pfx + '-alert';
+  const el = document.getElementById(id) || document.getElementById(pfx.replace('-list','') + '-list-alert');
+  if (!el) return;
+  el.className = 'adm-alert ' + (ok ? 'adm-ok' : 'adm-err');
+  el.textContent = msg;
+  setTimeout(() => { el.className='adm-alert'; el.textContent=''; }, 4500);
 }
 </script>
 </body>

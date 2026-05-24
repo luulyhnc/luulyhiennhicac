@@ -121,12 +121,22 @@ const CHAPTERS_PER_PAGE    = 50;
 //  DATA
 // ══════════════════════════════════════════════
 let _storiesCache = null;
+let _seriesCache  = null;
 
 async function fetchStories() {
   if (_storiesCache) return _storiesCache;
   const res = await fetch("data/stories.json");
   _storiesCache = await res.json();
   return _storiesCache;
+}
+
+async function fetchSeries() {
+  if (_seriesCache) return _seriesCache;
+  try {
+    const res = await fetch("data/series.json");
+    _seriesCache = await res.json();
+  } catch { _seriesCache = []; }
+  return _seriesCache;
 }
 
 async function findStory(id) {
@@ -279,6 +289,7 @@ function storyCardH(s) {
           <span>👁 ${fmtNum(s.views||0)}</span>
           <span>📖 ${s.chapters.length} chương</span>
           ${firstCh ? `<span class="badge-new">Mới</span>` : ""}
+          ${s.seriesId ? `<a href="series.html#${s.seriesId}" onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:.2rem;background:var(--pri-l);color:var(--primary);border-radius:10px;padding:.08rem .45rem;font-size:.69rem;font-weight:700;text-decoration:none;border:1px solid var(--primary)">📚 Tập ${s.seriesOrder||'?'}</a>` : ""}
         </div>
       </div>
     </div>`;
@@ -365,6 +376,38 @@ async function loadStoryPage() {
   renderChapterList(story);
   window._currentStory = story;
   if (window.AUTH?.isOwner && typeof initStoryEditMode === 'function') initStoryEditMode(story);
+
+  // Show series box if story belongs to a series
+  if (story.seriesId) {
+    fetchSeries().then(allSeries => {
+      const ser = allSeries.find(s => s.id === story.seriesId);
+      if (!ser) return;
+      fetchStories().then(allStories => {
+        const siblings = allStories
+          .filter(s => s.seriesId === story.seriesId && !s.hidden)
+          .sort((a,b) => (a.seriesOrder||0) - (b.seriesOrder||0));
+        const box = document.createElement('div');
+        box.className = 'series-box';
+        box.innerHTML = `
+          <div class="series-box-hdr">
+            <span class="series-box-icon">📚</span>
+            <div>
+              <div class="series-box-title"><a href="series.html#${ser.id}">${ser.title}</a></div>
+              <div class="series-box-meta">${siblings.length} tập · ${ser.status||'Đang ra'}</div>
+            </div>
+          </div>
+          <div class="series-taps">
+            ${siblings.map(s => `
+              <a href="story.html#${s.id}" class="series-tap${s.id===story.id?' active':''}">
+                <span class="tap-num">Tập ${s.seriesOrder||'?'}</span>
+                <span class="tap-title">${s.title}</span>
+              </a>`).join('')}
+          </div>`;
+        const detailRoot = document.getElementById('story-detail-root');
+        if (detailRoot) detailRoot.insertAdjacentElement('afterend', box);
+      });
+    });
+  }
 }
 
 function renderChapterList(story) {
