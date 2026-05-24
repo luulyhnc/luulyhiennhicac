@@ -19,7 +19,7 @@ const MEMBER = {
 
 function _initMemberHeader() {
   // If owner login (auth.js) is active, let auth.js handle the button
-  if (window.AUTH && window.AUTH.isOwner) return;
+  if (typeof AUTH !== 'undefined' && AUTH.isOwner) return;
 
   const btn = document.querySelector('.btn-login');
   if (!btn) return;
