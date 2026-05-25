@@ -917,9 +917,8 @@ async function loadReaderPage() {
   if (!root) return;
 
   const [storyId, chapterStr] = getHash().split("/");
-  const chapterId = parseInt(chapterStr, 10);
 
-  if (!storyId || isNaN(chapterId)) {
+  if (!storyId || !chapterStr) {
     root.innerHTML = errHtml("Địa chỉ không hợp lệ.");
     return;
   }
@@ -927,7 +926,8 @@ async function loadReaderPage() {
   const story = await findStory(storyId);
   if (!story) { root.innerHTML = errHtml("Không tìm thấy truyện."); return; }
 
-  const idx     = story.chapters.findIndex(c => c.id === chapterId);
+  // Compare as strings to handle both numeric and string chapter IDs without type mismatch
+  const idx     = story.chapters.findIndex(c => String(c.id) === String(chapterStr));
   if (idx === -1) { root.innerHTML = errHtml("Không tìm thấy chương."); return; }
 
   const chapter  = story.chapters[idx];
@@ -951,11 +951,11 @@ async function loadReaderPage() {
   const navBtns = (bottom = false) => `
     <div class="reader-nav-${bottom ? "bottom" : "top"}">
       ${prevCh
-        ? `<button class="btn btn-outline" onclick="goToChapter('${story.id}',${prevCh.id})">‹ Chương trước</button>`
+        ? `<button class="btn btn-outline" onclick="goToChapter('${story.id}','${prevCh.id}')">‹ Chương trước</button>`
         : `<button class="btn btn-outline" disabled style="opacity:.35">‹ Chương trước</button>`}
       <a href="${storyUrl(story.id)}" class="btn btn-outline">📋 Mục lục</a>
       ${nextCh
-        ? `<button class="btn btn-accent" onclick="goToChapter('${story.id}',${nextCh.id})">${nextBtnLabel}</button>`
+        ? `<button class="btn btn-accent" onclick="goToChapter('${story.id}','${nextCh.id}')">${nextBtnLabel}</button>`
         : `<button class="btn btn-accent" disabled style="opacity:.35">Chương tiếp ›</button>`}
     </div>
   `;
@@ -983,20 +983,17 @@ function goToChapter(storyId, chapterId) {
   let chapAff = null;
   if (_storiesCache) {
     const story = _storiesCache.find(s => s.id === storyId);
-    const ch    = story?.chapters.find(c => c.id === chapterId);
+    // Use string coercion so numeric vs string IDs both match
+    const ch    = story?.chapters.find(c => String(c.id) === String(chapterId));
     if (ch?.affiliateUrl) chapAff = ch.affiliateUrl;
   }
 
+  // If chapter has affiliate: open in new tab alongside navigation — no popup
   if (chapAff) {
-    // Chapter has its own affiliate link:
-    // Open it in a new tab and navigate to the chapter immediately — no popup
     window.open(chapAff, '_blank', 'noopener,noreferrer');
-    location.href = readerUrl(storyId, chapterId);
-  } else {
-    // No chapter-specific affiliate → use random interstitial as before
-    const ad = AFFILIATE_ADS[Math.floor(Math.random() * AFFILIATE_ADS.length)];
-    showInterstitial(ad, () => { location.href = readerUrl(storyId, chapterId); });
   }
+  // Always navigate directly — no interstitial for chapters without affiliate
+  location.href = readerUrl(storyId, chapterId);
 }
 
 function showInterstitial(ad, onContinue) {
