@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://luulyhnc.github.io/luulyhiennhicac/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://luulyhnc.github.io/luulyhiennhicac/index.html?genre=Ng%C3%B4n+T%C3%ACnh</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://luulyhnc.github.io/luulyhiennhicac/index.html?genre=%C4%90%C3%B4+Th%E1%BB%8B</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://luulyhnc.github.io/luulyhiennhicac/index.html?genre=N%E1%BB%AF+C%C6%B0%E1%BB%9Dng</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://luulyhnc.github.io/luulyhiennhicac/guide.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+  </url>
+</urlset>

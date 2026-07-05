@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /login.html
+Disallow: /otp-verify.html
+Disallow: /forgot-password.html
+Disallow: /HUONG-DAN-QUAN-TRI.html
+
+Sitemap: https://luulyhnc.github.io/luulyhiennhicac/sitemap.xml
