@@ -844,21 +844,16 @@ async function openChapterEditor(storyId, chapterId) {
     const file = input.files?.[0];
     const st   = document.getElementById('_ced_img_st');
     if (!file) return;
-    if (st) st.textContent = '⏳ Đang upload…';
-    const reader = new FileReader();
-    reader.onload = async e => {
-      try {
-        const b64  = e.target.result.split(',')[1];
-        const ext  = (file.name.split('.').pop() || 'jpg').toLowerCase();
-        const fname = 'images/chapters/' + Date.now() + '.' + ext;
-        await AUTH.ghPutRaw(fname, b64, 'Upload: chapter image ' + file.name);
-        const url = 'https://raw.githubusercontent.com/' + GH_REPO + '/main/' + fname;
-        const inp = document.getElementById('ced_img');
-        if (inp) { inp.value = url; _ceImgPreview(); }
-        if (st) st.textContent = '✅ Upload xong!';
-      } catch(err) { if (st) st.textContent = '❌ ' + err.message; }
-    };
-    reader.readAsDataURL(file);
+    if (st) st.textContent = '⏳ Đang nén và upload…';
+    try {
+      const b64  = await _resizeImageToJpegBase64(file);
+      const fname = 'images/chapters/' + Date.now() + '.jpg';
+      await AUTH.ghPutRaw(fname, b64, 'Upload: chapter image ' + file.name);
+      const url = 'https://raw.githubusercontent.com/' + GH_REPO + '/main/' + fname;
+      const inp = document.getElementById('ced_img');
+      if (inp) { inp.value = url; _ceImgPreview(); }
+      if (st) st.textContent = '✅ Upload xong!';
+    } catch(err) { if (st) st.textContent = '❌ ' + err.message; }
   };
 
   // ── Word upload ──
@@ -1489,34 +1484,55 @@ function _ea(s) { return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot
 // Expose globally so other scripts (member.js) can check AUTH.isOwner
 window.AUTH = AUTH;
 
+// ── Resize/compress an image file client-side before upload ────
+// GitHub's Contents API rejects files over ~1MB; phone photos are
+// routinely 3-8MB, so every upload silently failed without this.
+function _resizeImageToJpegBase64(file, maxDim = 1600, quality = 0.82) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const objUrl = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(objUrl);
+      let { width: w, height: h } = img;
+      if (w > maxDim || h > maxDim) {
+        const scale = maxDim / Math.max(w, h);
+        w = Math.round(w * scale);
+        h = Math.round(h * scale);
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      const dataUrl = canvas.toDataURL('image/jpeg', quality);
+      resolve(dataUrl.split(',')[1]);
+    };
+    img.onerror = () => { URL.revokeObjectURL(objUrl); reject(new Error('Không đọc được ảnh, thử lại với ảnh khác.')); };
+    img.src = objUrl;
+  });
+}
+
 // ── Cover / Background image upload via GitHub API ─────────────
 async function _uploadCoverFile(input, urlInputId, statusId, previewId) {
   const file = input.files[0];
   if (!file) return;
   const statusEl = document.getElementById(statusId);
   const urlInput = document.getElementById(urlInputId);
-  if (statusEl) statusEl.textContent = '⏳ Đang upload…';
-  const reader = new FileReader();
-  reader.onload = async e => {
-    try {
-      const b64   = e.target.result.split(',')[1];
-      const ext   = (file.name.split('.').pop() || 'jpg').toLowerCase();
-      const fname = 'images/covers/' + Date.now() + '-' + Math.random().toString(36).slice(2,6) + '.' + ext;
-      await AUTH.ghPutRaw(fname, b64, 'Upload: ' + file.name);
-      const url = 'https://raw.githubusercontent.com/' + GH_REPO + '/main/' + fname;
-      if (urlInput) urlInput.value = url;
-      if (statusEl) statusEl.textContent = '✅ Upload xong!';
-      // Update preview images
-      const ids = [previewId, 'se_prev', 'as-prev'].filter(Boolean);
-      ids.forEach(pid => {
-        const img = document.getElementById(pid);
-        if (img) { img.src = url; img.style.display = 'block'; }
-      });
-    } catch(err) {
-      if (statusEl) statusEl.textContent = '❌ ' + err.message;
-    }
-  };
-  reader.readAsDataURL(file);
+  if (statusEl) statusEl.textContent = '⏳ Đang nén và upload…';
+  try {
+    const b64   = await _resizeImageToJpegBase64(file);
+    const fname = 'images/covers/' + Date.now() + '-' + Math.random().toString(36).slice(2,6) + '.jpg';
+    await AUTH.ghPutRaw(fname, b64, 'Upload: ' + file.name);
+    const url = 'https://raw.githubusercontent.com/' + GH_REPO + '/main/' + fname;
+    if (urlInput) urlInput.value = url;
+    if (statusEl) statusEl.textContent = '✅ Upload xong!';
+    // Update preview images
+    const ids = [previewId, 'se_prev', 'as-prev'].filter(Boolean);
+    ids.forEach(pid => {
+      const img = document.getElementById(pid);
+      if (img) { img.src = url; img.style.display = 'block'; }
+    });
+  } catch(err) {
+    if (statusEl) statusEl.textContent = '❌ ' + err.message;
+  }
 }
 window._uploadCoverFile = _uploadCoverFile;
 

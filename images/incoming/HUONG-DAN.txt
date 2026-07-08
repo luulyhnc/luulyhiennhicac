@@ -1,0 +1,12 @@
+MỤC ẢNH NGUỒN — nơi bạn tải ảnh lên để Claude viết truyện phù hợp
+
+Cách dùng:
+1. Vào thư mục này trên GitHub (images/incoming/) bằng trình duyệt.
+2. Bấm "Add file" → "Upload files" → kéo thả ảnh vào.
+3. Đặt tên file gợi ý chủ đề, ví dụ: "co-trang-cung-dau-1.jpg", "hien-dai-CEO-2.png".
+4. Bấm "Commit changes" để lưu.
+5. Nhắn Claude: "tôi vừa đẩy ảnh vào images/incoming/, viết truyện theo ảnh đó".
+
+Claude sẽ xem ảnh, viết truyện/chương phù hợp với không khí, nhân vật trong ảnh, rồi dùng ảnh đó làm bìa hoặc minh họa chương.
+
+(File này chỉ để đánh dấu thư mục tồn tại trên Git — không ảnh hưởng gì đến web.)
