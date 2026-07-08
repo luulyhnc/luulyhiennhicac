@@ -485,6 +485,7 @@ async function loadHomePage() {
   const search = params.get("search") || "";
   const genre  = params.get("genre")  || "";
   const status = params.get("status") || "";
+  const length = params.get("length") || "";
 
   let all = await fetchStories();
 
@@ -510,6 +511,9 @@ async function loadHomePage() {
   } else if (status) {
     stories = stories.filter(s => s.status.toLowerCase() === status.toLowerCase());
     if (heading) heading.textContent = status;
+  } else if (length) {
+    stories = stories.filter(s => (s.length||"").toLowerCase() === length.toLowerCase());
+    if (heading) heading.textContent = length === "Dài kỳ" ? "Truyện Dài Kỳ" : "Truyện Ngắn";
   }
 
   if (!stories.length) {
@@ -718,6 +722,14 @@ function filterGenre(tabEl, genre) {
   document.querySelectorAll('.genre-tab').forEach(t => t.classList.remove('active'));
   tabEl.classList.add('active');
   const url = genre ? `index.html?genre=${encodeURIComponent(genre)}` : 'index.html';
+  history.pushState({}, '', url);
+  loadHomePage();
+}
+
+function filterLength(tabEl, length) {
+  document.querySelectorAll('.genre-tab').forEach(t => t.classList.remove('active'));
+  tabEl.classList.add('active');
+  const url = `index.html?length=${encodeURIComponent(length)}`;
   history.pushState({}, '', url);
   loadHomePage();
 }
