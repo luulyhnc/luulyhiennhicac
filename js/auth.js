@@ -100,7 +100,13 @@ const AUTH = {
       headers: { Authorization:`token ${this.pat}`, Accept:'application/vnd.github.v3+json', 'Content-Type':'application/json' },
       body: JSON.stringify(body)
     });
-    if (!r.ok) { const e = await r.json().catch(()=>({})); throw new Error(e.message||`GitHub PUT error (${r.status})`); }
+    if (!r.ok) {
+      const e = await r.json().catch(()=>({}));
+      if (r.status === 401 || r.status === 404) {
+        throw new Error(`Chưa đăng nhập hoặc mã PAT đã hết hạn/không đủ quyền (mã lỗi ${r.status}). Hãy đăng xuất rồi đăng nhập lại bằng một Personal Access Token mới (quyền "repo") tại github.com/settings/tokens.`);
+      }
+      throw new Error(`${e.message||'Lỗi không rõ'} (mã lỗi ${r.status})`);
+    }
     return r.json();
   },
 
@@ -844,6 +850,11 @@ async function openChapterEditor(storyId, chapterId) {
     const file = input.files?.[0];
     const st   = document.getElementById('_ced_img_st');
     if (!file) return;
+    if (!AUTH.pat) {
+      if (st) st.textContent = '❌ Chưa đăng nhập bằng PAT GitHub. Đăng xuất rồi đăng nhập lại tại trang admin trước khi upload ảnh.';
+      input.value = '';
+      return;
+    }
     if (st) st.textContent = '⏳ Đang nén và upload…';
     try {
       const b64  = await _resizeImageToJpegBase64(file);
@@ -1516,6 +1527,11 @@ async function _uploadCoverFile(input, urlInputId, statusId, previewId) {
   if (!file) return;
   const statusEl = document.getElementById(statusId);
   const urlInput = document.getElementById(urlInputId);
+  if (!AUTH.pat) {
+    if (statusEl) statusEl.textContent = '❌ Chưa đăng nhập bằng PAT GitHub. Đăng xuất rồi đăng nhập lại tại trang admin trước khi upload ảnh.';
+    input.value = '';
+    return;
+  }
   if (statusEl) statusEl.textContent = '⏳ Đang nén và upload…';
   try {
     const b64   = await _resizeImageToJpegBase64(file);
