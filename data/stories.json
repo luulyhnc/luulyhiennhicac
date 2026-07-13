@@ -1,5 +1,82 @@
 [
   {
+    "id": "nu-phu-xin-rut-lui-khoi-kich-ban-chet",
+    "title": "Nữ Phụ Xin Rút Lui Khỏi Kịch Bản Chết",
+    "author": "Lưu Ly",
+    "cover": "https://raw.githubusercontent.com/luulyhnc/luulyhiennhicac/main/images/covers/1780379867256-8cjp.png",
+    "description": "Xuyên vào thân xác nữ phụ phản diện trong chính cuốn tiểu thuyết mình từng đọc dở, Tống Vi Vi chỉ nhớ đúng một chi tiết quan trọng: nhân vật này sẽ chết thảm ở chương một trăm vì dám tranh giành nam chính với nữ chính. Không muốn chết oan, cô quyết định làm mọi cách để rút lui hoàn toàn khỏi kịch bản định mệnh — nhưng nam chính lạnh lùng của truyện lại nhất quyết không cho cô rời đi dễ dàng như vậy.",
+    "status": "Hoàn thành",
+    "source": "Sáng tác",
+    "genre": [
+      "Ngôn Tình",
+      "Đô Thị"
+    ],
+    "genres": [
+      "Xuyên sách",
+      "Hiện đại"
+    ],
+    "length": "Ngắn",
+    "tags": [
+      "xuyên sách",
+      "nữ phụ",
+      "tránh flag chết"
+    ],
+    "hidden": false,
+    "chapters": [
+      {
+        "id": "1",
+        "title": "Chương 1: Xuyên Vào Vai Ác Nữ",
+        "content": "Tống Vi Vi mở mắt ra, phát hiện mình đang đứng trong một phòng tập gym sang trọng, tay cầm cốc sinh tố đang run rẩy vì tức giận, còn trước mặt là một cô gái mắt đỏ hoe đang bị mình vừa mắng xối xả.\n\nKý ức ùa về chỉ trong tích tắc: đây là tiểu thuyết ngôn tình \"Tổng Tài Muốn Cưới Tôi\" mà cô từng đọc dở dang trước khi ngủ quên, và cô hiện đang mặc vào thân xác của Chu Y Nhi — nữ phụ phản diện chuyên gây khó dễ cho nữ chính, sẽ chết thảm trong một vụ tai nạn xe hơi ở đúng chương một trăm vì tội dám tranh giành nam chính.\n\n\"Xin lỗi,\" Vi Vi vội vàng đặt cốc sinh tố xuống, cúi đầu với cô gái đang khóc trước mặt. \"Tôi... tôi không nên nói vậy.\"\n\nCô gái kia và cả những người xung quanh nhìn cô như nhìn người ngoài hành tinh."
+      },
+      {
+        "id": "2",
+        "title": "Chương 2: Kế Hoạch Rút Lui",
+        "content": "Vi Vi nhanh chóng lập ra kế hoạch: tuyệt đối không được xuất hiện gần nam chính Thẩm Dịch Phàm, không tham gia bất kỳ sự kiện nào của công ty gia đình, và quan trọng nhất — tuyệt đối không được lên chiếc xe màu đen định mệnh vào đúng ngày mưa tháng mười hai.\n\nCô xin nghỉ việc ở vị trí trợ lý của Thẩm gia, chuyển ra sống một mình, thậm chí đổi cả số điện thoại để cắt đứt liên lạc với toàn bộ nhân vật trong truyện.\n\nNhưng đời không như mơ: ngay tuần đầu tiên thực hiện kế hoạch, Thẩm Dịch Phàm đích thân tìm đến tận nhà cô.\n\n\"Cô định trốn tôi à?\" hắn hỏi, ánh mắt lạnh lùng đầy khó hiểu."
+      },
+      {
+        "id": "3",
+        "title": "Chương 3: Nam Chính Không Cho Rút Lui",
+        "content": "\"Không phải trốn,\" Vi Vi đáp, cố giữ giọng bình thản. \"Tôi chỉ muốn có cuộc sống riêng, không liên quan gì đến gia tộc anh nữa.\"\n\nThẩm Dịch Phàm nhíu mày, nhìn cô như đang nhìn một sinh vật lạ hoàn toàn khác so với nữ phụ chanh chua anh từng biết. \"Cô thay đổi nhiều quá.\"\n\n\"Con người ai chẳng thay đổi,\" cô cười gượng, trong lòng thầm nghĩ: đương nhiên thay đổi, vì tôi không phải Chu Y Nhi thật.\n\nHắn không nói thêm, chỉ lặng lẽ để lại một tấm danh thiếp mới rồi rời đi, để lại Vi Vi đứng ngẩn ngơ tự hỏi liệu kế hoạch tránh né của mình có thực sự hiệu quả hay không."
+      },
+      {
+        "id": "4",
+        "title": "Chương 4: Nữ Chính Xuất Hiện",
+        "content": "Lâm Tiểu Vũ — nữ chính chính hiệu của cuốn truyện — tìm đến gặp Vi Vi tại quán cà phê, ánh mắt dò xét đầy cảnh giác.\n\n\"Chị thực sự không còn thích Dịch Phàm nữa sao?\" cô hỏi thẳng, không vòng vo.\n\n\"Thật lòng không,\" Vi Vi đáp chân thành. \"Em cứ yên tâm theo đuổi hạnh phúc của mình, chị chỉ muốn sống yên ổn thôi.\"\n\nLâm Tiểu Vũ có vẻ bất ngờ trước thái độ thẳng thắn này, nhưng cũng dần thư giãn hơn, thậm chí còn mời Vi Vi một tách trà như một lời làm hòa muộn màng."
+      },
+      {
+        "id": "5",
+        "title": "Chương 5: Ngày Mưa Định Mệnh",
+        "content": "Đến đúng ngày mưa tháng mười hai — ngày mà theo nguyên tác, Chu Y Nhi sẽ chết trong một vụ tai nạn xe hơi sau khi cãi vã với nam chính — Vi Vi quyết định ở lì trong nhà cả ngày, khóa chặt cửa, tắt hết điện thoại.\n\nNhưng đến chiều tối, tin báo khẩn cấp: mẹ ruột của Chu Y Nhi trong truyện gốc bị đột quỵ, cần người nhà đến bệnh viện gấp.\n\nVi Vi đứng trước lựa chọn khó khăn: ở nhà an toàn tuyệt đối, hay ra ngoài trời mưa để cứu người mẹ mà thân xác này vẫn còn nợ ân tình."
+      },
+      {
+        "id": "6",
+        "title": "Chương 6: Thay Đổi Định Mệnh",
+        "content": "Cuối cùng, Vi Vi vẫn quyết định lao ra ngoài trời mưa, gọi taxi đến bệnh viện thay vì tự lái xe như trong nguyên tác — một thay đổi nhỏ nhưng đủ để phá vỡ hoàn toàn kịch bản chết chóc đã định sẵn.\n\nTrên đường đi, cô nhận được cuộc gọi từ Thẩm Dịch Phàm, giọng anh gấp gáp khác thường: \"Đừng tự lái xe. Tôi đến đón cô ngay bây giờ.\"\n\nHóa ra, hắn cũng đã âm thầm theo dõi và lo lắng cho cô suốt thời gian qua, dù ngoài mặt vẫn luôn giữ vẻ lạnh lùng, khó gần như thường lệ."
+      },
+      {
+        "id": "7",
+        "title": "Chương 7: Sự Thật Về Nữ Phụ",
+        "content": "Tại bệnh viện, sau khi mẹ Chu Y Nhi qua cơn nguy kịch, Vi Vi tình cờ nghe được y tá trò chuyện, biết được sự thật: bản gốc Chu Y Nhi ghét bỏ nữ chính không phải vì ghen tuông vô cớ, mà vì tin đồn thất thiệt bị người khác dựng lên để chia rẽ hai người từ nhỏ.\n\nHiểu ra ngọn nguồn, Vi Vi quyết định tìm gặp kẻ đứng sau tin đồn — chính là một người họ hàng xa muốn đoạt gia sản Thẩm gia, đã lợi dụng sự ngây thơ của Chu Y Nhi bản gốc suốt nhiều năm."
+      },
+      {
+        "id": "8",
+        "title": "Chương 8: Vạch Trần Âm Mưu",
+        "content": "Với sự giúp đỡ của Thẩm Dịch Phàm, Vi Vi thu thập đủ bằng chứng vạch trần âm mưu chia rẽ gia tộc của kẻ họ hàng xa, khiến hắn phải cúi đầu nhận tội trước toàn thể gia tộc Thẩm gia.\n\n\"Cảm ơn cô đã tìm ra sự thật,\" Thẩm Dịch Phàm nói, ánh mắt nhìn cô đầy trân trọng chưa từng có. \"Ta đã hiểu lầm cô suốt bao năm qua.\"\n\n\"Không sao,\" Vi Vi cười, trong lòng nhẹ nhõm vì cuối cùng cũng gỡ được nút thắt hiểu lầm đã đeo bám thân xác này từ rất lâu."
+      },
+      {
+        "id": "9",
+        "title": "Chương 9: Tình Cảm Thật Lòng",
+        "content": "Qua thời gian dài sát cánh cùng nhau xử lý bao sóng gió, Thẩm Dịch Phàm dần nhận ra tình cảm mình dành cho Vi Vi đã vượt xa mối quan hệ đồng nghiệp thông thường.\n\n\"Ta muốn hỏi thẳng,\" anh nói trong một buổi tối yên tĩnh, \"cô có muốn thử bắt đầu lại từ đầu với ta không, không phải vì gia tộc, không phải vì hiểu lầm cũ, mà là vì chính con người thật của cô bây giờ?\"\n\nVi Vi sững người. Cô chưa từng nghĩ kế hoạch \"rút lui khỏi kịch bản\" lại dẫn mình đến một ngã rẽ hoàn toàn khác — một tình yêu thật sự, không viết sẵn trong bất kỳ trang sách nào."
+      },
+      {
+        "id": "10",
+        "title": "Chương 10 (Hoàn): Viết Lại Kịch Bản Đời Mình",
+        "content": "Vi Vi nhận lời, không phải vì đây là kịch bản định sẵn, mà vì trái tim cô thật lòng muốn vậy.\n\nĐám cưới của họ diễn ra đơn giản, ấm cúng, hoàn toàn khác so với những gì \"nguyên tác\" từng miêu tả về số phận bi thảm của nữ phụ Chu Y Nhi.\n\n\"Cảm ơn vì đã không chọn con đường an toàn nhất,\" Thẩm Dịch Phàm nói, nắm chặt tay cô trong ngày trọng đại. \"Nếu cô chỉ trốn tránh, có lẽ chúng ta đã không bao giờ gặp lại nhau theo cách này.\"\n\nVi Vi mỉm cười, nhìn về phía tương lai không còn bị bất kỳ trang sách nào định đoạt trước nữa — từ nay, mọi chương tiếp theo trong cuộc đời cô, sẽ do chính cô tự tay viết nên.\n\n— HOÀN —",
+        "affiliateUrl": "https://shope.ee/an_redir?origin_link=https%3A%2F%2Fshopee.vn%2Fsearch%3Fkeyword%3Dn%25C6%25B0%25E1%25BB%259Bc%2520hoa%2520n%25E1%25BB%25AF&affiliate_id=17311930036&sub_id=web-chuong"
+      }
+    ]
+  },
+  {
     "id": "xuyen-thanh-nha-hoan-hat-che-vuong-gia",
     "title": "Xuyên Thành Nha Hoàn, Ta Lỡ Tay Hất Chè Vào Mặt Vương Gia Phúc Hắc",
     "author": "Lưu Ly",
