@@ -1,24 +1,3 @@
-// ══════════════════════════════════════════════
-//  CONFIG — thay link affiliate thật vào đây
-// ══════════════════════════════════════════════
-const AFFILIATE_ADS = [
-  {
-    title: "🛍️ Shopee Sale Hôm Nay",
-    desc:  "Giảm đến 50% hàng ngàn sản phẩm – Click để xem ngay!",
-    url:   "https://shope.ee/your-affiliate-link-here"
-  },
-  {
-    title: "📚 Khóa Học Online Giảm 80%",
-    desc:  "Học lập trình, thiết kế tại nhà. Ưu đãi có hạn!",
-    url:   "https://your-affiliate-link-2.com"
-  },
-  {
-    title: "🎮 Nạp Game Giá Tốt Nhất",
-    desc:  "Nạp thẻ game uy tín, giá rẻ, xử lý tức thì 24/7.",
-    url:   "https://your-affiliate-link-3.com"
-  }
-];
-
 const INTERSTITIAL_SECONDS = 5;
 const CHAPTERS_PER_PAGE    = 50;
 
