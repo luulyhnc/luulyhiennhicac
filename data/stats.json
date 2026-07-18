@@ -1,0 +1,22 @@
+{
+  "updatedAt": "2026-07-18",
+  "period": "7 ngày gần nhất (11/7 - 17/7)",
+  "activeUsers": 5,
+  "newUsers": 5,
+  "events": 31,
+  "topPages": [
+    { "title": "Trang chủ – Gác Ngọc Thanh Vân", "views": 4 },
+    { "title": "Chi Tiết Truyện", "views": 3 },
+    { "title": "Chương 1: Ẩn Danh Nơi Thôn Dã – Giang Hồ Ẩn Danh Kiếm Khách", "views": 1 },
+    { "title": "Đăng Nhập", "views": 1 }
+  ],
+  "channels": [
+    { "name": "Organic Social (Facebook...)", "sessions": 3 },
+    { "name": "Direct (gõ thẳng URL)", "sessions": 2 }
+  ],
+  "cities": [
+    { "name": "Hà Nội", "users": 1 },
+    { "name": "Khác (quốc tế/bot)", "users": 3 }
+  ],
+  "note": "Số liệu lấy trực tiếp từ Google Analytics (G-MFC0XH8MX5). Cập nhật thủ công mỗi lần Claude làm việc — xem số liệu mới nhất và đầy đủ hơn tại analytics.google.com."
+}

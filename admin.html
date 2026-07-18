@@ -275,6 +275,11 @@
         <div class="adm-card-title">📚 5 truyện gần nhất</div>
         <div id="dash-recent"></div>
       </div>
+
+      <div class="adm-card">
+        <div class="adm-card-title">📈 Thống kê truy cập web (Google Analytics)</div>
+        <div id="dash-stats">Đang tải…</div>
+      </div>
     </div>
 
     <!-- ══ ĐĂNG TRUYỆN ══ -->
@@ -1138,6 +1143,36 @@ function renderDash() {
          <td><span class="rb ${s.status==='Hoàn thành'?'rb-ok':'rb-hidden'}">${esc(s.status||'—')}</span></td>
        </tr>`).join('')}
        </tbody></table>`;
+
+  loadStats();
+}
+
+// ── Thống kê truy cập (từ data/stats.json, cập nhật thủ công) ──
+async function loadStats() {
+  const div = document.getElementById('dash-stats');
+  if (!div) return;
+  try {
+    const r = await fetch('data/stats.json?t=' + Date.now());
+    const d = await r.json();
+    div.innerHTML = `
+      <div class="stat-grid">
+        <div class="stat-box"><div class="stat-num">${d.activeUsers}</div><div class="stat-lbl">👤 Người dùng hoạt động</div></div>
+        <div class="stat-box"><div class="stat-num">${d.newUsers}</div><div class="stat-lbl">🆕 Người dùng mới</div></div>
+        <div class="stat-box"><div class="stat-num">${d.events}</div><div class="stat-lbl">⚡ Sự kiện</div></div>
+      </div>
+      <div style="font-size:.78rem;color:var(--text3);margin:.4rem 0">Kỳ: ${esc(d.period)} — Cập nhật lần cuối: ${esc(d.updatedAt)}</div>
+      <div class="adm-card-title" style="font-size:.85rem;margin-top:.6rem">📄 Trang xem nhiều nhất</div>
+      <table class="adm-tbl"><tbody>
+        ${d.topPages.map(p=>`<tr><td>${esc(p.title)}</td><td style="text-align:right;font-weight:600">${p.views}</td></tr>`).join('')}
+      </tbody></table>
+      <div class="adm-card-title" style="font-size:.85rem;margin-top:.6rem">🔗 Nguồn truy cập</div>
+      <table class="adm-tbl"><tbody>
+        ${d.channels.map(c=>`<tr><td>${esc(c.name)}</td><td style="text-align:right;font-weight:600">${c.sessions}</td></tr>`).join('')}
+      </tbody></table>
+      <div style="font-size:.72rem;color:var(--text3);margin-top:.5rem;font-style:italic">${esc(d.note||'')}</div>`;
+  } catch (e) {
+    div.innerHTML = '<div class="adm-empty"><div class="ico">📭</div>Chưa có dữ liệu thống kê.</div>';
+  }
 }
 
 // ── Story table ────────────────────────────────────────────
