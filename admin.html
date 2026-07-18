@@ -1267,6 +1267,9 @@ function clearAddForm() {
 }
 
 async function doAddStory() {
+  if (window._uploadsInFlight > 0) {
+    return showAlert('as-alert', 'Ảnh đang upload, đợi thấy "✅ Upload xong!" rồi bấm Đăng truyện lại nhé.', false);
+  }
   const title  = v('as-title').trim();
   const author = v('as-author').trim();
   if (!title)  return showAlert('as-alert', 'Vui lòng nhập tên truyện.', false);
@@ -1707,6 +1710,9 @@ function renderIfacePreview() {
 }
 
 function saveIfaceSettings() {
+  if (window._uploadsInFlight > 0) {
+    return showAlert('iface-alert', 'Ảnh đang upload, đợi thấy "✅ Upload xong!" rồi bấm Lưu lại nhé.', false);
+  }
   const s = {
     sitename:   v('if-sitename'),
     slogan:     v('if-slogan'),
@@ -2662,6 +2668,9 @@ function renderSeriesPreview() {
 }
 
 async function doAddSeries() {
+  if (window._uploadsInFlight > 0) {
+    return showAlert('ser-alert', 'Ảnh đang upload, đợi thấy "✅ Upload xong!" rồi bấm Lưu lại nhé.', false);
+  }
   const title  = v('ser-title').trim();
   if (!title) return showAlert('ser-alert', 'Vui lòng nhập tên series.', false);
   const btn = document.getElementById('ser-btn');

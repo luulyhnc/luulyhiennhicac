@@ -524,6 +524,10 @@ function openStoryEditor(storyId) {
 async function _saveStoryEdits(storyId) {
   const msg = document.getElementById('_se_msg');
   const _s  = (t,ok) => { msg.textContent=t; msg.style.display='block'; msg.style.cssText+=`;background:${ok?'#e8f5e9':'#fdecea'};color:${ok?'#27ae60':'#e74c3c'}`; };
+  if (window._uploadsInFlight > 0) {
+    _s('⏳ Ảnh đang upload, đợi thấy "✅ Upload xong!" rồi bấm Lưu lại nhé.', false);
+    return;
+  }
   _s('⏳ Đang lấy dữ liệu từ GitHub...', true);
   try {
     const { stories, sha } = await AUTH.loadStories();
@@ -1533,6 +1537,7 @@ async function _uploadCoverFile(input, urlInputId, statusId, previewId) {
     return;
   }
   if (statusEl) statusEl.textContent = '⏳ Đang nén và upload…';
+  window._uploadsInFlight = (window._uploadsInFlight || 0) + 1;
   try {
     const b64   = await _resizeImageToJpegBase64(file);
     const fname = 'images/covers/' + Date.now() + '-' + Math.random().toString(36).slice(2,6) + '.jpg';
@@ -1548,6 +1553,8 @@ async function _uploadCoverFile(input, urlInputId, statusId, previewId) {
     });
   } catch(err) {
     if (statusEl) statusEl.textContent = '❌ ' + err.message;
+  } finally {
+    window._uploadsInFlight = Math.max(0, (window._uploadsInFlight || 1) - 1);
   }
 }
 window._uploadCoverFile = _uploadCoverFile;
