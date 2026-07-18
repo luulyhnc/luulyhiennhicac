@@ -1,5 +1,86 @@
 [
   {
+    "id": "nu-thanh-tra-va-vu-an-can-phong-khoa-trai",
+    "title": "Nữ Thanh Tra Và Vụ Án Căn Phòng Khóa Trái",
+    "author": "Lưu Ly",
+    "cover": "",
+    "description": "Một đại gia bất động sản được phát hiện đã chết trong phòng làm việc khóa trái từ bên trong, không dấu vết đột nhập. Thanh tra Đỗ Miên Trúc, người vừa chuyển về đội trọng án sau một vụ bê bối khiến cô mất niềm tin vào đồng đội cũ, phải một mình lần theo từng chi tiết nhỏ nhất để vạch trần kẻ giết người tưởng như không thể phạm tội trong một không gian bất khả xâm phạm.",
+    "status": "Hoàn thành",
+    "source": "Sáng tác",
+    "genre": [
+      "Trinh Thám",
+      "Hiện Đại"
+    ],
+    "genres": [
+      "Phá án",
+      "Hình sự",
+      "Hiện đại"
+    ],
+    "length": "Ngắn",
+    "tags": [
+      "trinh thám",
+      "phá án",
+      "phòng kín",
+      "nữ thanh tra"
+    ],
+    "hidden": false,
+    "chapters": [
+      {
+        "id": "1",
+        "title": "Chương 1: Cái Chết Sau Cánh Cửa Khóa Trái",
+        "content": "Biệt thự của Vương Chí Cường — chủ tịch tập đoàn bất động sản lớn nhất thành phố — sáng hôm ấy chìm trong tiếng còi xe cấp cứu. Người quản gia phá cửa phòng làm việc sau khi gõ mãi không thấy chủ nhân trả lời, và phát hiện ông đã chết trên ghế, một vết đâm chí mạng ở ngực, máu loang trên tấm thảm Ba Tư đắt tiền.\n\nĐiều kỳ lạ nhất: cửa phòng khóa trái từ bên trong bằng chốt cài cổ, cửa sổ duy nhất được hàn song sắt kiên cố, và không hề có lối thoát nào khác.\n\nThanh tra Đỗ Miên Trúc bước vào hiện trường, ánh mắt lướt qua căn phòng kín mít, khẽ nhíu mày. \"Một vụ án phòng kín,\" cô lẩm bẩm. \"Thú vị đây.\""
+      },
+      {
+        "id": "2",
+        "title": "Chương 2: Những Nghi Phạm Đầu Tiên",
+        "content": "Danh sách những người có mặt trong biệt thự đêm qua không nhiều: người vợ kế trẻ hơn nạn nhân hai mươi tuổi, cậu con trai riêng đang tranh chấp thừa kế, viên quản lý tài chính thân tín, và một vị khách lạ ghé thăm muộn mà không ai rõ danh tính.\n\n\"Tất cả đều có động cơ,\" đồng nghiệp của Miên Trúc nói, \"nhưng không ai có cơ hội — cửa khóa trái, chìa khóa duy nhất nằm trong túi áo nạn nhân.\"\n\nMiên Trúc cầm chiếc chìa khóa lên, xoay nhẹ dưới ánh đèn. \"Cơ hội luôn tồn tại, chỉ là ta chưa nhìn đúng góc độ thôi.\"",
+        "affiliateUrl": "https://shope.ee/an_redir?origin_link=https%3A%2F%2Fshopee.vn%2Fsearch%3Fkeyword%3Dserum%2520d%C6%B0%E1%BB%A1ng%2520da&affiliate_id=17311930036&sub_id=web-chuong"
+      },
+      {
+        "id": "3",
+        "title": "Chương 3: Người Vợ Kế Đầy Toan Tính",
+        "content": "Thẩm vấn người vợ kế, Miên Trúc nhận thấy sự bình tĩnh bất thường của cô ta trước cái chết của chồng. \"Tôi và ông ấy đã ký thỏa thuận tiền hôn nhân, tôi chẳng được gì nhiều nếu ông ấy chết,\" cô ta nói, giọng lạnh lùng.\n\nNhưng khi kiểm tra điện thoại, Miên Trúc phát hiện một loạt tin nhắn giữa người vợ kế và luật sư riêng, bàn về việc soạn lại di chúc chỉ một tuần trước khi án mạng xảy ra — một chi tiết cô ta cố tình giấu nhẹm."
+      },
+      {
+        "id": "4",
+        "title": "Chương 4: Bí Mật Của Cậu Con Trai",
+        "content": "Cậu con trai riêng của nạn nhân từng công khai cãi vã với cha về khoản nợ cờ bạc khổng lồ chỉ ba ngày trước khi ông bị giết. Nhân chứng kể lại cậu ta hét lên giữa bữa tiệc gia đình: \"Ông sẽ hối hận vì không chịu trả nợ giúp tôi!\"\n\nMiên Trúc lần theo dấu vết tài chính, phát hiện cậu ta đã vay nóng từ một băng nhóm cho vay nặng lãi, hạn chót trả nợ chính là đêm xảy ra án mạng — động cơ quá rõ ràng, có lẽ rõ ràng đến mức đáng ngờ."
+      },
+      {
+        "id": "5",
+        "title": "Chương 5: Vị Khách Bí Ẩn",
+        "content": "Camera an ninh cổng chính ghi lại một người đàn ông lạ mặt đến biệt thự lúc 22 giờ, rời đi chỉ mười lăm phút sau, đúng khung giờ pháp y ước tính nạn nhân tử vong. Nhưng người này không hề xuất hiện trong bất kỳ camera nào bên trong nhà.\n\n\"Làm sao một người ngoài lại vào được phòng khóa kín, giết người, rồi biến mất mà không để lại dấu vết?\" đồng nghiệp hỏi.\n\nMiên Trúc nhìn chằm chằm vào đoạn băng, ánh mắt dừng lại ở một chi tiết nhỏ nơi ống tay áo vị khách — vết bẩn đặc trưng của loại sơn chỉ dùng trong xưởng mộc."
+      },
+      {
+        "id": "6",
+        "title": "Chương 6: Manh Mối Từ Ổ Khóa",
+        "content": "Miên Trúc mời chuyên gia khóa đến kiểm tra chốt cài cửa, phát hiện dấu cạy nhẹ gần như vô hình ở phần bản lề — kỹ thuật của người thợ mộc chuyên nghiệp, có thể tháo và lắp lại chốt từ bên ngoài mà không để lại dấu vết rõ ràng.\n\n\"Vậy là hung thủ không cần ở trong phòng khi khóa cửa,\" cô nói, mắt sáng lên. \"Hắn giết người trước, rồi dàn dựng hiện trường như một vụ án bất khả thi để đánh lạc hướng thời gian tử vong thực sự.\""
+      },
+      {
+        "id": "7",
+        "title": "Chương 7: Người Quản Lý Tài Chính Lộ Diện",
+        "content": "Miên Trúc điều tra sâu về viên quản lý tài chính thân tín, phát hiện ông ta đã biển thủ một khoản tiền khổng lồ suốt năm năm qua, và nạn nhân vừa mới phát hiện ra sự thật này chỉ một ngày trước khi chết.\n\nQuan trọng hơn: viên quản lý từng có thời gian học nghề mộc trước khi chuyển sang ngành tài chính — kỹ năng hoàn toàn khớp với dấu cạy tinh vi trên ổ khóa.\n\n\"Ông đã đến biệt thự tối hôm đó, đúng không?\" Miên Trúc hỏi thẳng, đặt tấm ảnh vết sơn trên ống tay áo trước mặt hắn."
+      },
+      {
+        "id": "8",
+        "title": "Chương 8: Lời Thú Tội",
+        "content": "Viên quản lý cuối cùng cũng sụp đổ. \"Ông ấy dọa sẽ báo cảnh sát, sẽ khiến tôi ngồi tù cả đời,\" hắn nói, giọng run rẩy. \"Tôi chỉ muốn nói chuyện, nhưng ông ấy quá cứng rắn, tôi... tôi mất kiểm soát.\"\n\nSau khi giết người, hắn đã dùng kỹ năng mộc cũ để dàn dựng hiện trường phòng kín, hòng đánh lạc hướng điều tra, đồng thời xóa dấu vết mình từng ghé qua đêm đó bằng cách giả làm vị khách lạ trong đoạn camera cổng."
+      },
+      {
+        "id": "9",
+        "title": "Chương 9: Công Lý Cho Người Đã Khuất",
+        "content": "Với đầy đủ bằng chứng — dấu cạy ổ khóa, vết sơn, lịch sử biển thủ, và lời thú tội — viên quản lý chính thức bị bắt giữ. Người vợ kế và cậu con trai, dù có động cơ, hoàn toàn không liên quan đến cái chết thực sự.\n\n\"Đôi khi động cơ rõ ràng nhất lại không phải là sự thật,\" Miên Trúc nói với đồng nghiệp, xếp lại hồ sơ vụ án. \"Kẻ giấu mình kỹ nhất mới chính là kẻ đáng ngờ nhất.\"",
+        "affiliateUrl": "https://shope.ee/an_redir?origin_link=https%3A%2F%2Fshopee.vn%2Fsearch%3Fkeyword%3Dvi%25C3%25AAn%2520u%25E1%25BB%2591ng%2520collagen&affiliate_id=17311930036&sub_id=web-chuong"
+      },
+      {
+        "id": "10",
+        "title": "Chương 10 (Hoàn): Khởi Đầu Mới Của Nữ Thanh Tra",
+        "content": "Vụ án khép lại, danh tiếng của Đỗ Miên Trúc trong đội trọng án bắt đầu được khẳng định. Không còn là \"người mới chuyển đến\" bị hoài nghi, cô dần trở thành người mà đồng đội tin tưởng giao phó những vụ án hóc búa nhất.\n\n\"Cảm ơn vì đã không bỏ cuộc với vụ án này,\" cấp trên nói, bắt tay cô trước toàn đội.\n\nMiên Trúc mỉm cười, nhìn ra ngoài cửa sổ sở cảnh sát. Thành phố vẫn còn nhiều bí mật đang chờ được phanh phui, và cô đã sẵn sàng cho những vụ án tiếp theo.\n\n— HOÀN —",
+        "affiliateUrl": "https://shope.ee/an_redir?origin_link=https%3A%2F%2Fshopee.vn%2Fsearch%3Fkeyword%3Dkem%2520ch%25E1%25BB%2591ng%2520n%25E1%25BA%25AFng&affiliate_id=17311930036&sub_id=web-chuong"
+      }
+    ]
+  },
+  {
     "id": "chang-re-o-nho-bi-khinh-thuong-hoa-ra-la-dai-thieu-gia",
     "title": "Chàng Rể Ở Nhờ",
     "author": "Lưu Ly",
