@@ -1,5 +1,173 @@
 [
   {
+    "id": "do-mien-truc-va-buc-thu-tuyet-menh-gia",
+    "title": "Đỗ Miên Trúc Và Bức Thư Tuyệt Mệnh Giả",
+    "author": "Lưu Ly",
+    "cover": "",
+    "description": "Một nữ ca sĩ trẻ nổi tiếng được tìm thấy đã chết tại căn hộ riêng, cạnh đó là bức thư tuyệt mệnh viết tay đầy đủ chữ ký xác nhận của gia đình. Nhưng thanh tra Đỗ Miên Trúc phát hiện một chi tiết nhỏ trong nét chữ khiến cô nghi ngờ: liệu đây có thật sự là một vụ tự tử, hay là một vụ án mạng được ngụy trang hoàn hảo bởi chính những người thân cận nhất với nạn nhân?",
+    "status": "Hoàn thành",
+    "source": "Sáng tác",
+    "genre": [
+      "Trinh Thám",
+      "Hiện Đại"
+    ],
+    "genres": [
+      "Phá án",
+      "Hình sự",
+      "Hiện đại"
+    ],
+    "length": "Ngắn",
+    "tags": [
+      "trinh thám",
+      "phá án",
+      "tự tử giả",
+      "nữ thanh tra"
+    ],
+    "hidden": false,
+    "seriesId": "nu-thanh-tra-do-mien-truc",
+    "seriesTitle": "Đỗ Miên Trúc: Hồ Sơ Chưa Khép",
+    "seriesOrder": 4,
+    "chapters": [
+      {
+        "id": "1",
+        "title": "Chương 1: Bức Thư Hoàn Hảo",
+        "content": "Nữ ca sĩ trẻ Chu Hạ Vy được tìm thấy đã chết trong bồn tắm tại căn hộ riêng sang trọng, làn nước đã nguội lạnh từ lâu, một lọ thuốc ngủ rỗng không nằm lăn lóc trên sàn gạch men trắng. Trên bàn trang điểm, một bức thư tuyệt mệnh viết tay được đặt ngay ngắn, nét chữ mềm mại quen thuộc, ký tên đầy đủ như mọi bức thư cô từng viết cho người hâm mộ.\n\nĐội điều tra ban đầu nhanh chóng kết luận đây là một vụ tự tử vì áp lực dư luận sau một scandal gần đây.\n\nNhưng khi Đỗ Miên Trúc được mời đến thẩm định lại hồ sơ theo yêu cầu của gia đình nạn nhân, cô cầm bức thư lên, ánh mắt dán chặt vào một nét bút run nhẹ bất thường ở cuối chữ ký — một chi tiết quá nhỏ để mắt thường nhận ra, nhưng đủ để khiến cô dừng lại. \"Có gì đó không ổn ở đây,\" cô nói khẽ."
+      },
+      {
+        "id": "2",
+        "title": "Chương 2: Nét Chữ Không Khớp",
+        "content": "Miên Trúc mời chuyên gia giám định chữ viết đối chiếu bức thư tuyệt mệnh với hàng chục mẫu chữ viết tay cũ của Hạ Vy được thu thập từ nhật ký, thư tay gửi gia đình, và cả những tấm thiệp viết vội cho bạn bè.\n\nKết quả khiến cả đội sững sờ: dù rất giống, bức thư tuyệt mệnh có một độ nghiêng bút khác biệt tinh vi ở gần như mọi con chữ có nét móc — dấu hiệu của một người thuận tay trái đang cố viết giống chữ của người thuận tay phải.\n\n\"Hạ Vy thuận tay phải,\" trợ lý riêng của cô xác nhận khi được hỏi. Miên Trúc nhìn xuống bức thư, một giả thuyết lạnh người bắt đầu hình thành trong đầu cô: có ai đó đã giả mạo bức thư này, và người ấy chắc chắn phải rất thân thiết với nạn nhân mới nắm rõ từng nét chữ đến vậy.",
+        "affiliateUrl": "https://shope.ee/an_redir?origin_link=https%3A%2F%2Fshopee.vn%2Fsearch%3Fkeyword%3Dserum%2520d%C6%B0%E1%BB%A1ng%2520da&affiliate_id=17311930036&sub_id=web-chuong"
+      },
+      {
+        "id": "3",
+        "title": "Chương 3: Người Quản Lý Tận Tụy",
+        "content": "Người quản lý của Hạ Vy, một phụ nữ trung niên đã đồng hành với cô suốt bảy năm sự nghiệp, tỏ ra suy sụp thái quá trước ống kính truyền thông nhưng lại bình tĩnh đến lạ khi trả lời thẩm vấn riêng với Miên Trúc.\n\n\"Tôi là người hiểu Hạ Vy nhất,\" bà ta nói, giọng đều đều. \"Tôi biết mọi thói quen, mọi nét chữ, mọi bí mật của con bé.\"\n\nCâu nói ấy, thay vì trấn an, lại khiến Miên Trúc thêm cảnh giác. Cô lặng lẽ điều tra tài chính của công ty quản lý, phát hiện một hợp đồng bảo hiểm nhân thọ trị giá khổng lồ được ký cho Hạ Vy chỉ ba tháng trước, với người quản lý là người thụ hưởng chính — một chi tiết chưa từng được công bố trước truyền thông."
+      },
+      {
+        "id": "4",
+        "title": "Chương 4: Scandal Được Dàn Dựng",
+        "content": "Miên Trúc lần theo nguồn gốc của scandal khiến Hạ Vy chịu áp lực dư luận trước khi chết, phát hiện những bằng chứng \"rò rỉ\" trên mạng xã hội đều xuất phát từ cùng một địa chỉ IP ẩn danh, được đăng tải đúng vào thời điểm hợp đồng bảo hiểm mới ký xong.\n\n\"Scandal này không phải ngẫu nhiên,\" cô nói với đội, đặt bản đồ kết nối các tài khoản ẩn danh lên bàn. \"Ai đó đã cố tình đẩy Hạ Vy vào khủng hoảng tâm lý, để khi cái chết xảy ra, mọi người sẽ mặc định đó là tự tử vì áp lực, không ai nghi ngờ gì thêm.\"\n\nMột kế hoạch được chuẩn bị kỹ lưỡng đến rợn người, trải dài suốt nhiều tháng trước khi ra tay thực sự."
+      },
+      {
+        "id": "5",
+        "title": "Chương 5: Camera Trong Căn Hộ",
+        "content": "Rà soát lại toàn bộ hệ thống camera an ninh tòa nhà, Miên Trúc phát hiện một khoảng trống đáng ngờ kéo dài đúng bốn mươi phút vào đêm xảy ra án mạng — hệ thống báo bảo trì định kỳ, nhưng lịch bảo trì lại được đặt lịch chỉ hai ngày trước đó bởi chính người quản lý tòa nhà.\n\n\"Ai đó đã mua chuộc nhân viên bảo trì,\" Miên Trúc kết luận, sau khi đối chiếu bảng lương bất thường của người này với một khoản tiền mặt lớn vừa nhận được. Bốn mươi phút mất dấu ấy đủ để một người có mặt trong căn hộ, gây án, và rời đi mà không để lại bất kỳ hình ảnh nào."
+      },
+      {
+        "id": "6",
+        "title": "Chương 6: Đối Chất",
+        "content": "Với bằng chứng về hợp đồng bảo hiểm, dấu vết tài chính mua chuộc nhân viên bảo trì, và kết quả giám định chữ viết, Miên Trúc triệu tập người quản lý đến buổi đối chất chính thức, đặt từng tài liệu lên bàn một cách chậm rãi và có chủ đích.\n\n\"Bà thuận tay trái,\" cô nói, chỉ vào bản giám định. \"Và bà là người duy nhất đủ thân thiết để giả mạo nét chữ của Hạ Vy đến mức gần hoàn hảo như vậy.\"\n\nGương mặt người quản lý dần mất đi vẻ bình tĩnh giả tạo, những giọt mồ hôi lấm tấm bắt đầu xuất hiện trên trán bà ta dưới ánh đèn phòng thẩm vấn."
+      },
+      {
+        "id": "7",
+        "title": "Chương 7: Động Cơ Thật Sự",
+        "content": "Dưới áp lực bằng chứng không thể chối cãi, người quản lý cuối cùng cũng thú nhận: bà ta đang gánh khoản nợ cờ bạc bí mật khổng lồ, và khoản tiền bảo hiểm là lối thoát duy nhất bà ta nhìn thấy sau nhiều đêm mất ngủ tuyệt vọng.\n\n\"Tôi đã chăm sóc con bé bảy năm trời như con ruột của mình,\" bà ta nói, giọng nghẹn lại, \"nhưng nợ nần đã biến tôi thành một con người khác mà chính tôi cũng không nhận ra.\"\n\nMiên Trúc lặng nhìn người phụ nữ ấy sụp xuống trong nước mắt, cảm nhận rõ ranh giới mong manh giữa tình cảm chân thành và sự tha hóa khi con người bị dồn vào đường cùng."
+      },
+      {
+        "id": "8",
+        "title": "Chương 8: Lời Xin Lỗi Không Kịp Nói",
+        "content": "Gia đình Hạ Vy, sau khi biết sự thật, không giấu nổi sự phẫn nộ lẫn đau đớn tột cùng — người họ tin tưởng giao phó con gái mình suốt bảy năm lại chính là kẻ đã tước đoạt mạng sống của cô vì những toan tính cá nhân.\n\n\"Con bé luôn nói bà ấy như người mẹ thứ hai của nó,\" mẹ ruột của Hạ Vy nói, giọng run rẩy trong buổi họp báo thông báo kết quả điều tra. \"Chúng tôi không ngờ...\"\n\nMiên Trúc đứng lặng phía sau, không nói gì thêm, chỉ khẽ cúi đầu trước nỗi đau của một gia đình vừa mất người thân, vừa mất đi cả niềm tin vào người họ từng xem là ruột thịt."
+      },
+      {
+        "id": "9",
+        "title": "Chương 9: Công Lý Cho Người Nghệ Sĩ",
+        "content": "Với đầy đủ bằng chứng, người quản lý chính thức bị khởi tố tội giết người có chủ đích và trục lợi bảo hiểm, một bản án nghiêm khắc được tòa án tuyên bố sau nhiều phiên xét xử căng thẳng.\n\n\"Danh tiếng của Hạ Vy cuối cùng cũng được minh oan,\" Miên Trúc nói với đồng nghiệp, gấp lại tập hồ sơ dày cộp đã theo cô suốt nhiều tuần điều tra không ngơi nghỉ. \"Cô ấy không hề yếu đuối đến mức tự kết liễu đời mình vì một scandal bị dàn dựng — cô ấy là nạn nhân của lòng tham, không phải của sự tuyệt vọng.\"",
+        "affiliateUrl": "https://shope.ee/an_redir?origin_link=https%3A%2F%2Fshopee.vn%2Fsearch%3Fkeyword%3Dvi%25C3%25AAn%2520u%25E1%25BB%2591ng%2520collagen&affiliate_id=17311930036&sub_id=web-chuong"
+      },
+      {
+        "id": "10",
+        "title": "Chương 10 (Hoàn): Sự Thật Không Bao Giờ Chìm Vào Quên Lãng",
+        "content": "Đứng trước mộ phần của Chu Hạ Vy trong một buổi chiều lộng gió, Miên Trúc đặt một bó hoa nhỏ, lặng lẽ như một lời xin lỗi muộn màng thay cho cả hệ thống đã suýt để một vụ án mạng bị chôn vùi dưới lớp vỏ bọc tự tử hoàn hảo.\n\n\"Nếu không có chi tiết nhỏ trong nét chữ ấy,\" đồng nghiệp đi cùng nói, \"có lẽ vụ án này đã khép lại từ lâu rồi.\"\n\n\"Sự thật luôn để lại dấu vết,\" Miên Trúc đáp, mắt nhìn xa xăm về phía chân trời, \"dù nhỏ đến đâu, dù được ngụy trang tinh vi đến đâu. Việc của chúng ta là đừng bao giờ ngừng nhìn kỹ hơn một chút, đừng bao giờ chấp nhận câu trả lời dễ dàng nhất chỉ vì nó có vẻ hợp lý.\"\n\n— HOÀN —",
+        "affiliateUrl": "https://shope.ee/an_redir?origin_link=https%3A%2F%2Fshopee.vn%2Fsearch%3Fkeyword%3Dkem%2520ch%25E1%25BB%2591ng%2520n%25E1%25BA%25AFng&affiliate_id=17311930036&sub_id=web-chuong"
+      }
+    ]
+  },
+  {
+    "id": "do-mien-truc-va-nhan-chung-khong-ton-tai",
+    "title": "Đỗ Miên Trúc Và Nhân Chứng Không Tồn Tại",
+    "author": "Lưu Ly",
+    "cover": "",
+    "description": "Một vụ án tham nhũng lớn sắp được đưa ra xét xử bỗng chốc rơi vào bế tắc khi nhân chứng quan trọng nhất — người duy nhất có thể buộc tội kẻ chủ mưu — biến mất không dấu vết, và hồ sơ lý lịch của người này dần lộ ra những điểm bất thường đến rợn người: dường như con người ấy chưa từng tồn tại. Thanh tra Đỗ Miên Trúc phải lần theo một danh tính giả để tìm ra sự thật trước khi phiên tòa khép lại vĩnh viễn trong im lặng.",
+    "status": "Hoàn thành",
+    "source": "Sáng tác",
+    "genre": [
+      "Trinh Thám",
+      "Hiện Đại"
+    ],
+    "genres": [
+      "Phá án",
+      "Hình sự",
+      "Hiện đại"
+    ],
+    "length": "Ngắn",
+    "tags": [
+      "trinh thám",
+      "phá án",
+      "danh tính giả",
+      "nữ thanh tra"
+    ],
+    "hidden": false,
+    "seriesId": "nu-thanh-tra-do-mien-truc",
+    "seriesTitle": "Đỗ Miên Trúc: Hồ Sơ Chưa Khép",
+    "seriesOrder": 5,
+    "chapters": [
+      {
+        "id": "1",
+        "title": "Chương 1: Nhân Chứng Biến Mất",
+        "content": "Chỉ ba ngày trước phiên tòa xét xử vụ tham nhũng chấn động liên quan đến một quan chức cấp cao, nhân chứng chủ chốt tên Ngô Bình An — người từng làm kế toán riêng và nắm giữ toàn bộ bằng chứng giao dịch phi pháp — đột nhiên mất tích khỏi căn hộ được bảo vệ nghiêm ngặt.\n\nKhông có dấu hiệu đột nhập, không có dấu vết giằng co, chỉ có một tách trà còn ấm bỏ dở trên bàn như thể người ấy vừa đứng dậy đi đâu đó rồi không bao giờ quay lại.\n\nĐỗ Miên Trúc được điều động khẩn cấp đến hiện trường, ánh mắt quét qua căn phòng gọn gàng đến bất thường. \"Không phải một cuộc bắt cóc,\" cô nói, giọng trầm xuống. \"Trông giống như người này tự nguyện rời đi hơn — nhưng tại sao lại chọn đúng thời điểm này?\""
+      },
+      {
+        "id": "2",
+        "title": "Chương 2: Hồ Sơ Trống Rỗng",
+        "content": "Khi lật lại hồ sơ lý lịch của Ngô Bình An để tìm manh mối về nơi ẩn náu có thể, Miên Trúc phát hiện một điều rùng rợn: giấy khai sinh được cấp tại một bệnh viện đã ngừng hoạt động từ hai mươi năm trước, số chứng minh nhân dân trùng khớp với một người đã qua đời từ lâu, và không một người thân, bạn học, hay hàng xóm cũ nào từng thực sự gặp mặt người này trước năm năm trước.\n\n\"Người này không tồn tại,\" cô nói, đặt tập hồ sơ mỏng manh xuống bàn, tay khẽ run lên vì một cảm giác lạnh sống lưng hiếm khi xuất hiện trong sự nghiệp của cô. \"Toàn bộ danh tính của Ngô Bình An là giả, được dựng lên tỉ mỉ đến mức qua mặt được cả hệ thống kiểm tra lý lịch nghiêm ngặt nhất.\"",
+        "affiliateUrl": "https://shope.ee/an_redir?origin_link=https%3A%2F%2Fshopee.vn%2Fsearch%3Fkeyword%3Dth%E1%BB%B1c%2520ph%E1%BA%A9m%2520ch%E1%BB%A9c%2520n%C4%83ng&affiliate_id=17311930036&sub_id=web-chuong"
+      },
+      {
+        "id": "3",
+        "title": "Chương 3: Dấu Vết Từ Quá Khứ",
+        "content": "Miên Trúc lần theo những mảnh ký ức hiếm hoi mà đồng nghiệp cũ của Ngô Bình An còn nhớ được, ghép nối từng chi tiết nhỏ về giọng nói, thói quen, cách cầm bút — và dần nhận ra những đặc điểm ấy trùng khớp kỳ lạ với một nhân chứng bảo vệ khác đã \"biến mất\" trong một vụ án khác từ tám năm trước.\n\n\"Đây không phải lần đầu tiên người này đổi danh tính,\" cô nói, ghim thêm một tấm ảnh cũ lên bảng trắng, nối những đường chỉ đỏ đan xen thành một mạng lưới phức tạp. \"Có ai đó, hoặc một tổ chức nào đó, đang giúp những nhân chứng quan trọng biến mất và tái xuất hiện với danh tính hoàn toàn mới sau mỗi vụ án lớn.\""
+      },
+      {
+        "id": "4",
+        "title": "Chương 4: Chương Trình Bảo Vệ Bí Mật",
+        "content": "Đào sâu hơn vào hệ thống, Miên Trúc phát hiện một chương trình bảo vệ nhân chứng không chính thức, hoạt động song song và độc lập với chương trình bảo vệ nhân chứng hợp pháp của nhà nước — do một nhóm cựu nhân viên tình báo về hưu vận hành, nhận thù lao khổng lồ từ những nhân chứng muốn biến mất hoàn toàn khỏi mọi nguy hiểm.\n\n\"Họ không làm gì phạm pháp về bản chất,\" đồng nghiệp nói khi xem qua tài liệu thu thập được, \"chỉ là giúp người ta biến mất một cách hợp pháp bằng giấy tờ giả.\"\n\n\"Nhưng nếu Ngô Bình An tự ý rời đi ngay trước phiên tòa,\" Miên Trúc đáp, giọng nghiêm trọng, \"thì có ai đó đã trả một cái giá rất lớn để chương trình này giúp anh ta trốn thoát đúng lúc quan trọng nhất — và điều đó có nghĩa là bị cáo tham nhũng đã biết trước và ra tay kịp thời.\""
+      },
+      {
+        "id": "5",
+        "title": "Chương 5: Kẻ Đứng Sau Đường Dây",
+        "content": "Miên Trúc tìm ra người đứng đầu chương trình bảo vệ ngầm — một người phụ nữ lớn tuổi từng là chuyên gia làm giấy tờ giả cho ngành tình báo, nay sống ẩn dật dưới vỏ bọc một chủ tiệm sách cũ yên tĩnh giữa lòng thành phố.\n\n\"Tôi chỉ giúp những người sợ hãi có một cuộc sống mới,\" bà ta nói, không hề tỏ ra hoảng loạn trước sự xuất hiện đột ngột của cảnh sát. \"Tôi không hỏi lý do, không phán xét động cơ của họ.\"\n\n\"Nhưng lần này,\" Miên Trúc nói, đặt lệnh khám xét lên quầy sách, \"bà đã giúp một nhân chứng trốn tránh công lý ngay trước phiên tòa quan trọng nhất năm nay. Tôi cần biết ai đã trả tiền cho việc này, và tiền đó đến từ đâu.\""
+      },
+      {
+        "id": "6",
+        "title": "Chương 6: Khoản Tiền Đáng Ngờ",
+        "content": "Sau nhiều giờ thuyết phục kiên nhẫn, người phụ nữ cuối cùng cũng hé lộ một phần sự thật: khoản tiền khổng lồ trả cho việc giúp Ngô Bình An biến mất được chuyển qua một chuỗi công ty vỏ bọc phức tạp, nhưng dấu vết cuối cùng lại dẫn thẳng về một tài khoản đứng tên con trai của chính quan chức đang bị xét xử vì tham nhũng.\n\n\"Con trai ông ta đã ra tay để bảo vệ cha mình,\" Miên Trúc nói, ghép các mảnh chứng cứ tài chính lại thành một bức tranh hoàn chỉnh. \"Không phải nhân chứng tự nguyện bỏ trốn vì sợ hãi — mà là bị mua chuộc để biến mất đúng lúc, với một cái giá đủ lớn để đổi lấy cả một cuộc đời mới hoàn toàn khác.\""
+      },
+      {
+        "id": "7",
+        "title": "Chương 7: Cuộc Truy Tìm Danh Tính Mới",
+        "content": "Với manh mối về phong cách làm giấy tờ đặc trưng của đường dây, Miên Trúc phối hợp cùng đội kỹ thuật rà soát hàng loạt hồ sơ nhập cư và đăng ký cư trú mới trong vòng ba ngày qua trên khắp cả nước, tìm kiếm những điểm bất thường tinh vi tương tự như hồ sơ giả của Ngô Bình An.\n\nSau nhiều đêm gần như không ngủ, một cái tên nổi lên: một người đàn ông vừa đăng ký tạm trú tại một thành phố biển xa xôi, với gương mặt đã qua chỉnh sửa nhẹ nhưng ánh mắt và dáng đi vẫn không thể che giấu hoàn toàn.\n\n\"Tìm thấy hắn rồi,\" Miên Trúc nói, đặt tấm ảnh so sánh trước cấp trên, cảm giác nhẹ nhõm xen lẫn hồi hộp trước khi cuộc truy bắt cuối cùng bắt đầu."
+      },
+      {
+        "id": "8",
+        "title": "Chương 8: Cuộc Gặp Gỡ Cuối Cùng",
+        "content": "Đội của Miên Trúc lặng lẽ áp sát căn nhà nhỏ ven biển nơi Ngô Bình An — hay giờ đây mang một cái tên hoàn toàn khác — đang sống ẩn dật, chuẩn bị bắt giữ trước khi hắn kịp biến mất lần nữa.\n\nKhi đối mặt trực tiếp, người đàn ông ấy không hề chống cự, chỉ thở dài nhẹ nhõm như trút được một gánh nặng đè nén suốt nhiều ngày qua. \"Tôi biết sớm muộn gì cũng bị tìm ra,\" hắn nói. \"Tôi chỉ sợ, nếu ở lại làm chứng, con trai ông ta sẽ không để tôi sống được đến ngày ra tòa.\"\n\nMiên Trúc lặng nhìn hắn, hiểu rằng đằng sau sự phản bội công lý này còn có một nỗi sợ hãi rất con người mà không ai có thể hoàn toàn trách cứ."
+      },
+      {
+        "id": "9",
+        "title": "Chương 9: Phiên Tòa Được Cứu Vãn",
+        "content": "Với sự bảo vệ nghiêm ngặt hơn và lời khai đầy đủ của Ngô Bình An được thu thập lại đúng hạn, phiên tòa xét xử vụ tham nhũng được tiến hành trở lại, và cả quan chức tham nhũng lẫn con trai ông ta vì tội mua chuộc nhân chứng đều phải đối mặt với những cáo buộc nghiêm trọng.\n\n\"Suýt chút nữa toàn bộ vụ án đã sụp đổ,\" cấp trên nói với Miên Trúc sau phiên tòa, giọng đầy nhẹ nhõm. \"Nếu không tìm ra nhân chứng kịp thời, công lý đã có thể bị chôn vùi mãi mãi trong một danh tính không tồn tại.\"\n\nMiên Trúc chỉ khẽ gật đầu, trong lòng thầm nhắc nhở bản thân rằng công lý đôi khi mong manh đến mức chỉ cần một người biến mất đúng lúc là đủ để sụp đổ hoàn toàn.",
+        "affiliateUrl": "https://shope.ee/an_redir?origin_link=https%3A%2F%2Fshopee.vn%2Fsearch%3Fkeyword%3Dm%C3%A1y%2520massage%2520m%E1%BA%B7t&affiliate_id=17311930036&sub_id=web-chuong"
+      },
+      {
+        "id": "10",
+        "title": "Chương 10 (Hoàn): Danh Tính Không Còn Quan Trọng",
+        "content": "Trước khi rời khỏi thành phố biển để trở về, Miên Trúc ghé qua căn nhà nhỏ nơi Ngô Bình An từng ẩn náu, đứng lặng nhìn ra biển xanh thẳm trải dài đến tận chân trời.\n\n\"Anh có hối hận vì đã từng chọn biến mất không?\" cô hỏi khi gặp lại anh ta lần cuối trong trại tạm giam trước khi làm chứng chính thức.\n\n\"Tôi hối hận vì đã sợ hãi thay vì tin tưởng vào công lý,\" Ngô Bình An đáp, ánh mắt giờ đây đã bình thản hơn nhiều. \"Nhưng may mắn là cô đã không từ bỏ việc tìm ra tôi, dù tôi đã cố che giấu bản thân kỹ đến mức nào.\"\n\nMiên Trúc mỉm cười nhẹ, quay lưng bước đi giữa làn gió biển mát lành. Với cô, danh tính của một người có thể thay đổi, nhưng sự thật thì không bao giờ biến mất hoàn toàn — nó chỉ chờ đợi một người đủ kiên nhẫn để tìm ra mà thôi.\n\n— HOÀN —",
+        "affiliateUrl": "https://shope.ee/an_redir?origin_link=https%3A%2F%2Fshopee.vn%2Fsearch%3Fkeyword%3Dn%C6%B0%E1%BB%9Bc%2520hoa%2520n%E1%BB%AF&affiliate_id=17311930036&sub_id=web-chuong"
+      }
+    ]
+  },
+  {
     "id": "do-mien-truc-va-vu-mat-tich-trong-dem-mua",
     "title": "Đỗ Miên Trúc Và Vụ Mất Tích Trong Đêm Mưa",
     "author": "Lưu Ly",
