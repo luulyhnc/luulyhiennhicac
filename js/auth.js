@@ -291,12 +291,17 @@ function _initHeader() {
         aMember.href = 'admin.html';
         aMember.onclick = function() { sessionStorage.setItem('_adm_tab','members'); m.remove(); };
 
+        const aStats = _row('📈 &nbsp;Thống kê truy cập');
+        aStats.href = 'admin.html';
+        aStats.onclick = function() { sessionStorage.setItem('_adm_tab','dash'); sessionStorage.setItem('_adm_scroll','dash-stats'); m.remove(); };
+
         const bAI = _row('🤖 &nbsp;AI Kiểm duyệt', null,
           function() { if (typeof _openAiModeration==='function') _openAiModeration(); });
 
         m.appendChild(aPanel);
         m.appendChild(aStory);
         m.appendChild(aMember);
+        m.appendChild(aStats);
         m.appendChild(_sep());
         m.appendChild(bAI);
 

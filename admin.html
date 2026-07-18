@@ -1019,6 +1019,11 @@ async function initAdmin(jumpTab) {
   loadIfaceSettings();
   populateHeroSelect();
   if (jumpTab) showTab(jumpTab);
+  const jumpScroll = sessionStorage.getItem('_adm_scroll');
+  if (jumpScroll) {
+    sessionStorage.removeItem('_adm_scroll');
+    setTimeout(() => document.getElementById(jumpScroll)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+  }
 }
 
 // ── Tab ────────────────────────────────────────────────────
