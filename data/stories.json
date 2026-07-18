@@ -1,5 +1,173 @@
 [
   {
+    "id": "do-mien-truc-va-vu-mat-tich-trong-dem-mua",
+    "title": "Đỗ Miên Trúc Và Vụ Mất Tích Trong Đêm Mưa",
+    "author": "Lưu Ly",
+    "cover": "",
+    "description": "Một nữ sinh viên năm cuối biến mất không dấu vết sau khi rời quán cà phê giữa đêm mưa tầm tã, chiếc ô của cô bị bỏ lại ngay giữa con hẻm vắng. Thanh tra Đỗ Miên Trúc phát hiện nạn nhân không phải người đầu tiên mất tích theo cùng một kiểu trong khu vực này suốt ba năm qua — và kẻ đứng sau tất cả có thể đang ẩn mình ngay trong chính vòng bạn bè thân thiết của các nạn nhân.",
+    "status": "Hoàn thành",
+    "source": "Sáng tác",
+    "genre": [
+      "Trinh Thám",
+      "Hiện Đại"
+    ],
+    "genres": [
+      "Phá án",
+      "Hình sự",
+      "Hiện đại"
+    ],
+    "length": "Ngắn",
+    "tags": [
+      "trinh thám",
+      "phá án",
+      "mất tích",
+      "nữ thanh tra"
+    ],
+    "hidden": false,
+    "seriesId": "nu-thanh-tra-do-mien-truc",
+    "seriesTitle": "Nữ Thanh Tra Đỗ Miên Trúc",
+    "seriesOrder": 2,
+    "chapters": [
+      {
+        "id": "1",
+        "title": "Chương 1: Chiếc Ô Bỏ Lại Giữa Hẻm",
+        "content": "Mưa đã tạnh từ lâu nhưng chiếc ô màu vàng của Lâm Ý Nhi vẫn nằm chỏng chơ giữa con hẻm sau quán cà phê, cạnh vệt bùn loang lổ như dấu hiệu của một cuộc giằng co ngắn ngủi. Cô sinh viên năm cuối ngành kiến trúc đã không về nhà từ đêm hôm trước, điện thoại tắt máy, không ai trong nhóm bạn nhận được tin nhắn cuối cùng nào đáng ngờ.\n\nThanh tra Đỗ Miên Trúc đứng giữa hẻm, nhìn chiếc ô, rồi ngẩng đầu quan sát góc camera duy nhất trong khu vực — vừa vặn bị che khuất bởi tán cây um tùm. \"Kẻ này biết rất rõ điểm mù ở đây,\" cô nói."
+      },
+      {
+        "id": "2",
+        "title": "Chương 2: Kiểu Mất Tích Quen Thuộc",
+        "content": "Rà soát hồ sơ cũ, Miên Trúc lạnh người khi phát hiện đây là vụ mất tích thứ tư trong khu vực suốt ba năm qua — tất cả nạn nhân đều là nữ sinh viên, đều biến mất vào đêm mưa, đều để lại một vật dụng cá nhân ngay tại hiện trường như một dấu hiệu cố ý.\n\n\"Ba vụ trước đều bị xếp vào diện tự nguyện rời đi hoặc chưa đủ căn cứ hình sự,\" đồng nghiệp nói. \"Không ai nối chúng lại với nhau.\"\n\nMiên Trúc ghim bốn tấm ảnh lên bảng trắng, vẽ một đường thẳng nối chúng. \"Từ hôm nay, sẽ có người nối lại.\"",
+        "affiliateUrl": "https://shope.ee/an_redir?origin_link=https%3A%2F%2Fshopee.vn%2Fsearch%3Fkeyword%3Dth%E1%BB%B1c%2520ph%E1%BA%A9m%2520ch%E1%BB%A9c%2520n%C4%83ng&affiliate_id=17311930036&sub_id=web-chuong"
+      },
+      {
+        "id": "3",
+        "title": "Chương 3: Vòng Bạn Bè Đáng Ngờ",
+        "content": "Miên Trúc nhận thấy cả bốn nạn nhân, dù không quen biết nhau, đều từng tham gia một câu lạc bộ tình nguyện chung tên \"Ánh Sáng Đêm\" — nơi tổ chức các buổi phát cơm từ thiện muộn vào những đêm mưa.\n\n\"Kẻ gây án chọn nạn nhân không ngẫu nhiên,\" cô kết luận. \"Hắn theo dõi họ từ trong chính câu lạc bộ này, biết rõ lịch trình, thói quen, và cả những đêm họ sẽ đi một mình.\"\n\nDanh sách thành viên câu lạc bộ hiện tại có hơn năm mươi người — cần thu hẹp phạm vi nhanh chóng trước khi có nạn nhân thứ năm."
+      },
+      {
+        "id": "4",
+        "title": "Chương 4: Người Đàn Ông Lặng Lẽ",
+        "content": "Trong số các thành viên câu lạc bộ, một người đàn ông trung niên tên Hà Tuấn Kiệt nổi bật vì luôn là người cuối cùng rời đi sau mỗi buổi phát cơm, thường tình nguyện dọn dẹp một mình đến tận khuya.\n\nMiên Trúc âm thầm điều tra lý lịch hắn, phát hiện hắn từng là nhân viên bảo vệ tại chính tòa nhà nơi nạn nhân đầu tiên từng sống, và bị sa thải vì hành vi theo dõi nữ sinh viên trong khu trọ — một tiền sử bị ỉm đi vì không đủ bằng chứng khởi tố khi đó."
+      },
+      {
+        "id": "5",
+        "title": "Chương 5: Căn Nhà Kho Bỏ Hoang",
+        "content": "Theo dõi Hà Tuấn Kiệt trong nhiều ngày, Miên Trúc phát hiện hắn thường xuyên ghé qua một nhà kho bỏ hoang ở ngoại ô vào những đêm mưa — nơi không có trong bất kỳ hồ sơ nào liên quan đến hắn.\n\nXin được lệnh khám xét khẩn cấp, đội của cô đột kích nhà kho giữa đêm, phát hiện một căn phòng kín được cách âm sơ sài, những món đồ cá nhân của cả bốn nạn nhân được cất giữ cẩn thận như chiến lợi phẩm — nhưng không thấy dấu vết của Ý Nhi."
+      },
+      {
+        "id": "6",
+        "title": "Chương 6: Cuộc Rượt Đuổi Trong Mưa",
+        "content": "Hà Tuấn Kiệt phát hiện bị lộ, lập tức bỏ trốn khỏi nhà kho ngay trước khi lực lượng cảnh sát ập vào toàn bộ. Miên Trúc một mình đuổi theo dấu chân hắn qua những con đường đất trơn trượt vì mưa, không chờ tiếp viện.\n\n\"Đứng lại!\" cô hét lên, nhưng hắn vẫn lao đi, cuối cùng trượt ngã trên bờ ruộng lầy lội. Miên Trúc vật lộn khống chế hắn giữa trời mưa tầm tã, còng tay hắn lại đúng lúc đội hỗ trợ đến nơi."
+      },
+      {
+        "id": "7",
+        "title": "Chương 7: Nơi Giam Giữ Bí Mật",
+        "content": "Dưới áp lực thẩm vấn, Hà Tuấn Kiệt khai ra một địa điểm giam giữ thứ hai — một căn hầm nhỏ dưới ngôi nhà cũ của gia đình hắn, nơi hắn giữ Lâm Ý Nhi suốt hai ngày qua, chưa kịp thực hiện ý đồ như với ba nạn nhân trước.\n\nĐội giải cứu tìm thấy cô trong tình trạng hoảng loạn nhưng còn sống, run rẩy ôm chặt lấy Miên Trúc khi được đưa ra khỏi bóng tối ẩm thấp của căn hầm."
+      },
+      {
+        "id": "8",
+        "title": "Chương 8: Sự Thật Về Ba Nạn Nhân Trước",
+        "content": "Đau lòng thay, lời khai của Hà Tuấn Kiệt xác nhận cả ba nạn nhân trước đó đều đã tử vong từ lâu, thi thể được hắn phi tang tại một khu rừng ven thành phố mà đội pháp y sau đó xác nhận và tìm thấy đầy đủ.\n\n\"Ít nhất chúng ta đã kịp cứu người thứ tư,\" Miên Trúc nói với gia đình các nạn nhân đã khuất, giọng trầm xuống. \"Nhưng tôi xin lỗi vì công lý đã đến quá muộn với con của các vị.\""
+      },
+      {
+        "id": "9",
+        "title": "Chương 9: Khép Lại Ba Năm Ám Ảnh",
+        "content": "Vụ án chính thức khép lại sau khi tòa án tuyên án chung thân đối với Hà Tuấn Kiệt, chấm dứt ba năm nỗi ám ảnh của các gia đình có con em mất tích trong khu vực.\n\n\"Ba năm là quá dài để một kẻ như hắn tự do ngoài kia,\" Miên Trúc nói, nhìn ra khung cửa sổ văn phòng đầy nắng sau cơn mưa. \"Nhưng ít nhất, từ giờ những đêm mưa ở khu này sẽ không còn ai phải sợ hãi nữa.\"",
+        "affiliateUrl": "https://shope.ee/an_redir?origin_link=https%3A%2F%2Fshopee.vn%2Fsearch%3Fkeyword%3Dm%C3%A1y%2520massage%2520m%E1%BA%B7t&affiliate_id=17311930036&sub_id=web-chuong"
+      },
+      {
+        "id": "10",
+        "title": "Chương 10 (Hoàn): Lời Cảm Ơn Muộn Màng",
+        "content": "Lâm Ý Nhi, sau khi hồi phục, đích thân đến sở cảnh sát tìm gặp Miên Trúc để cảm ơn. \"Nếu không có chị nối các vụ án lại với nhau, có lẽ em cũng đã trở thành nạn nhân thứ tư bị lãng quên như ba người kia,\" cô nói, nước mắt lưng tròng.\n\n\"Đừng cảm ơn tôi,\" Miên Trúc đáp, siết chặt tay cô. \"Hãy sống thật tốt phần đời còn lại — đó mới là điều những nạn nhân đã mất mong muốn nhất.\"\n\nMiên Trúc quay về bàn làm việc, mở hồ sơ vụ án tiếp theo đang chờ đợi trên bàn.\n\n— HOÀN —",
+        "affiliateUrl": "https://shope.ee/an_redir?origin_link=https%3A%2F%2Fshopee.vn%2Fsearch%3Fkeyword%3Dkem%2520tr%E1%BB%8B%2520m%E1%BB%A5n&affiliate_id=17311930036&sub_id=web-chuong"
+      }
+    ]
+  },
+  {
+    "id": "do-mien-truc-va-ke-mang-mat-na-so-mot",
+    "title": "Đỗ Miên Trúc Và Kẻ Mang Mặt Nạ Số Một",
+    "author": "Lưu Ly",
+    "cover": "",
+    "description": "Một kẻ giết người bí ẩn để lại một chiếc mặt nạ giấy đánh số thứ tự tại mỗi hiện trường, thách thức toàn bộ lực lượng cảnh sát thành phố giải mã trước khi nạn nhân tiếp theo xuất hiện. Thanh tra Đỗ Miên Trúc buộc phải đối đầu với đối thủ nguy hiểm nhất sự nghiệp — một kẻ am hiểu chính xác cách cô tư duy, như thể hắn đã dõi theo cô từ rất lâu trước khi ván cờ bắt đầu.",
+    "status": "Hoàn thành",
+    "source": "Sáng tác",
+    "genre": [
+      "Trinh Thám",
+      "Hiện Đại"
+    ],
+    "genres": [
+      "Phá án",
+      "Hình sự",
+      "Hiện đại"
+    ],
+    "length": "Ngắn",
+    "tags": [
+      "trinh thám",
+      "phá án",
+      "giết người hàng loạt",
+      "nữ thanh tra"
+    ],
+    "hidden": false,
+    "seriesId": "nu-thanh-tra-do-mien-truc",
+    "seriesTitle": "Nữ Thanh Tra Đỗ Miên Trúc",
+    "seriesOrder": 3,
+    "chapters": [
+      {
+        "id": "1",
+        "title": "Chương 1: Chiếc Mặt Nạ Đánh Số",
+        "content": "Nạn nhân được tìm thấy trong tư thế ngồi ngay ngắn trên ghế công viên, một chiếc mặt nạ giấy trắng vẽ số \"1\" đặt cẩn thận trên đùi, như thể hung thủ muốn cả thành phố biết đây chỉ mới là khởi đầu.\n\nĐỗ Miên Trúc cầm chiếc mặt nạ lên bằng găng tay, lật qua lật lại. Không dấu vân tay, không ADN, chỉ có một dòng chữ viết tay nhỏ phía sau: \"Trò chơi bắt đầu, thanh tra.\"\n\n\"Hắn biết tên tôi,\" cô nói, giọng lạnh đi vài phần."
+      },
+      {
+        "id": "2",
+        "title": "Chương 2: Nạn Nhân Số Hai",
+        "content": "Đúng bảy ngày sau, nạn nhân thứ hai xuất hiện với chiếc mặt nạ số \"2\", lần này đặt tại một nhà chờ xe buýt giữa khu dân cư đông đúc — hung thủ ngày càng táo tợn, thách thức camera an ninh dày đặc mà vẫn không để lại manh mối nào.\n\nMiên Trúc nhận ra cả hai nạn nhân đều từng là nhân chứng trong một vụ án cũ mà chính cô từng tham gia điều tra nhiều năm trước — một vụ án tưởng đã khép lại hoàn toàn.",
+        "affiliateUrl": "https://shope.ee/an_redir?origin_link=https%3A%2F%2Fshopee.vn%2Fsearch%3Fkeyword%3Dvitamin%2520t%E1%BB%95ng%2520h%E1%BB%A3p&affiliate_id=17311930036&sub_id=web-chuong"
+      },
+      {
+        "id": "3",
+        "title": "Chương 3: Vụ Án Cũ Sống Lại",
+        "content": "Lật lại hồ sơ năm xưa, Miên Trúc rùng mình nhận ra: đó là vụ án oan mà cô từng góp phần minh oan cho một nghi phạm bị kết tội sai, khiến kẻ thật sự phạm tội khi đó trốn thoát vì thiếu bằng chứng.\n\n\"Nếu đúng là hắn,\" cô nói với đội, \"thì hắn đang giết dần những nhân chứng đã khiến vụ án cũ đổ bể, và có lẽ... tôi mới là mục tiêu cuối cùng hắn nhắm đến.\""
+      },
+      {
+        "id": "4",
+        "title": "Chương 4: Lời Đe Dọa Cá Nhân",
+        "content": "Một phong thư không tên được gửi thẳng đến bàn làm việc của Miên Trúc, bên trong là chiếc mặt nạ số \"3\" còn trống — chưa có nạn nhân nào gắn với nó, như một lời cảnh báo rằng hắn đã chọn xong người tiếp theo.\n\n\"Hắn muốn chơi đùa với tôi trước khi ra tay,\" Miên Trúc nói, ánh mắt kiên định dù trong lòng không giấu nổi phần bất an. \"Vậy thì tôi sẽ chơi cùng hắn — theo luật của tôi.\""
+      },
+      {
+        "id": "5",
+        "title": "Chương 5: Danh Sách Nhân Chứng Còn Sống",
+        "content": "Miên Trúc lập danh sách toàn bộ nhân chứng còn sống liên quan đến vụ án oan năm xưa, cắt cử người bảo vệ từng người một, đồng thời cài bẫy thông tin giả để dụ hung thủ lộ diện sớm hơn dự kiến.\n\nNhưng hắn dường như luôn đi trước một bước — né được mọi cái bẫy, như thể có người nội bộ đang rò rỉ thông tin điều tra ra ngoài."
+      },
+      {
+        "id": "6",
+        "title": "Chương 6: Kẻ Phản Bội Trong Đội",
+        "content": "Sau nhiều đêm rà soát, Miên Trúc phát hiện một đồng nghiệp trẻ mới chuyển đến đội gần đây đã âm thầm sao chép toàn bộ hồ sơ vụ án ra ổ cứng rời — chính là người đã cung cấp thông tin cho hung thủ suốt thời gian qua vì bị đe dọa uy hiếp gia đình.\n\n\"Tôi không có lựa chọn,\" người đồng nghiệp thú nhận trong nước mắt. \"Hắn nói sẽ giết vợ con tôi nếu tôi không hợp tác.\""
+      },
+      {
+        "id": "7",
+        "title": "Chương 7: Cái Bẫy Ngược",
+        "content": "Biết được kẻ nội gián, Miên Trúc quyết định lợi dụng chính hắn để tương kế tựu kế — cố tình để lộ một thông tin giả về nơi ở của mình, chờ hung thủ sập bẫy đến tận nơi để bắt giữ.\n\nĐêm hôm đó, một bóng người đeo mặt nạ trắng xuất hiện tại địa chỉ giả, nhưng ngay khi định rút lui phát hiện bị lừa, hắn đã bị lực lượng phục kích của Miên Trúc bao vây từ mọi phía."
+      },
+      {
+        "id": "8",
+        "title": "Chương 8: Gương Mặt Thật Sau Chiếc Mặt Nạ",
+        "content": "Khi chiếc mặt nạ bị lột xuống, gương mặt thật của hung thủ khiến toàn đội sững sờ — chính là em trai ruột của nghi phạm từng bị kết án oan năm xưa, người đã âm thầm nuôi hận suốt nhiều năm sau khi anh trai mình chết trong tù vì không chịu nổi áp lực tù tội.\n\n\"Các người đã cướp đi người thân duy nhất của tôi,\" hắn gào lên trong tuyệt vọng khi bị còng tay. \"Giờ tôi chỉ muốn các người nếm trải đúng nỗi đau đó.\""
+      },
+      {
+        "id": "9",
+        "title": "Chương 9: Công Lý Muộn Màng Cho Cả Hai Phía",
+        "content": "Vụ án khép lại với một nỗi day dứt khó gọi tên: hung thủ tuy phạm tội tày trời nhưng động cơ lại xuất phát từ chính sai lầm hệ thống pháp lý năm xưa. Miên Trúc đề xuất mở lại hồ sơ vụ án oan cũ để minh oan trọn vẹn cho người anh trai đã khuất, dù đã quá muộn để cứu được mạng sống của ông.\n\n\"Công lý không chỉ là bắt kẻ có tội,\" cô nói với cấp trên, \"mà còn là dám sửa sai những gì hệ thống từng làm hỏng.\"",
+        "affiliateUrl": "https://shope.ee/an_redir?origin_link=https%3A%2F%2Fshopee.vn%2Fsearch%3Fkeyword%3Dd%E1%BA%A7u%2520g%E1%BB%99i%2520d%C6%B0%E1%BB%A3c%2520li%E1%BB%87u&affiliate_id=17311930036&sub_id=web-chuong"
+      },
+      {
+        "id": "10",
+        "title": "Chương 10 (Hoàn): Ván Cờ Kết Thúc",
+        "content": "Đứng trước tấm bảng ghi đầy đủ toàn bộ chuỗi sự kiện của vụ án, Miên Trúc gỡ từng tấm ảnh xuống, xếp gọn vào hồ sơ lưu trữ. Cuộc chơi mà hung thủ gọi tên đã kết thúc, nhưng những bài học về trách nhiệm của người cầm cân công lý thì vẫn còn nguyên đó.\n\n\"Lần sau, nếu còn ai thách thức chị,\" đồng nghiệp trẻ hỏi, \"chị có sợ không?\"\n\nMiên Trúc mỉm cười, khoác áo choàng bước ra khỏi văn phòng. \"Tôi không sợ trò chơi của họ. Tôi chỉ sợ mình bỏ sót một sự thật nào đó mà thôi.\"\n\n— HOÀN —",
+        "affiliateUrl": "https://shope.ee/an_redir?origin_link=https%3A%2F%2Fshopee.vn%2Fsearch%3Fkeyword%3Dn%C6%B0%E1%BB%9Bc%2520hoa%2520n%E1%BB%AF&affiliate_id=17311930036&sub_id=web-chuong"
+      }
+    ]
+  },
+  {
     "id": "nu-thanh-tra-va-vu-an-can-phong-khoa-trai",
     "title": "Nữ Thanh Tra Và Vụ Án Căn Phòng Khóa Trái",
     "author": "Lưu Ly",
@@ -78,7 +246,10 @@
         "content": "Vụ án khép lại, danh tiếng của Đỗ Miên Trúc trong đội trọng án bắt đầu được khẳng định. Không còn là \"người mới chuyển đến\" bị hoài nghi, cô dần trở thành người mà đồng đội tin tưởng giao phó những vụ án hóc búa nhất.\n\n\"Cảm ơn vì đã không bỏ cuộc với vụ án này,\" cấp trên nói, bắt tay cô trước toàn đội.\n\nMiên Trúc mỉm cười, nhìn ra ngoài cửa sổ sở cảnh sát. Thành phố vẫn còn nhiều bí mật đang chờ được phanh phui, và cô đã sẵn sàng cho những vụ án tiếp theo.\n\n— HOÀN —",
         "affiliateUrl": "https://shope.ee/an_redir?origin_link=https%3A%2F%2Fshopee.vn%2Fsearch%3Fkeyword%3Dkem%2520ch%25E1%25BB%2591ng%2520n%25E1%25BA%25AFng&affiliate_id=17311930036&sub_id=web-chuong"
       }
-    ]
+    ],
+    "seriesId": "nu-thanh-tra-do-mien-truc",
+    "seriesTitle": "Nữ Thanh Tra Đỗ Miên Trúc",
+    "seriesOrder": 1
   },
   {
     "id": "chang-re-o-nho-bi-khinh-thuong-hoa-ra-la-dai-thieu-gia",

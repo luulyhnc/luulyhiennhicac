@@ -7,5 +7,14 @@
     "description": "Series MH Brothers – Những Nhánh Cây Tự Tìm Ánh Sáng là vũ trụ ngôn tình hiện đại xoay quanh gia đình MH Brothers và những con người bước vào hệ sinh thái ấy. Sáu câu chuyện là sáu lát cắt của tình yêu trưởng thành: có chữa lành sau tổn thương, có lời hứa ở lại, có sự thật khiến người ta đau nhưng phải đối diện, có cái đẹp được đặt vào thực tế, có tiếc nuối không thể ký tên, và có một cô gái được yêu thương nhưng vẫn tự mở lối sáng của riêng mình. Gia đình là gốc rễ, tình yêu là những nhánh cây tự tìm ánh sáng.",
     "genre": "Đô Thị",
     "status": "Đang ra"
+  },
+  {
+    "id": "nu-thanh-tra-do-mien-truc",
+    "title": "Nữ Thanh Tra Đỗ Miên Trúc",
+    "author": "Lưu Ly",
+    "cover": "",
+    "description": "Series trinh thám xoay quanh thanh tra Đỗ Miên Trúc — người phụ nữ sắc sảo, kiên định, chuyên phá những vụ án hóc búa nhất thành phố: từ án mạng phòng kín bất khả thi, đến chuỗi mất tích bí ẩn kéo dài nhiều năm, và cả một kẻ giết người thách thức chính cô bằng những chiếc mặt nạ đánh số. Mỗi tập là một vụ án độc lập, cùng chung một nữ thanh tra không bao giờ bỏ cuộc trước sự thật.",
+    "genre": "Trinh Thám",
+    "status": "Đang ra"
   }
 ]
