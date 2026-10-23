@@ -1470,7 +1470,7 @@
     "id": "nu-thanh-tra-va-vu-an-can-phong-khoa-trai",
     "title": "Vụ Án Căn Phòng Khóa Trái",
     "author": "Lưu Ly",
-    "cover": "",
+    "cover": "images/covers/nu-thanh-tra-va-vu-an-can-phong-khoa-trai.jpg",
     "description": "Một đại gia bất động sản được phát hiện đã chết trong phòng làm việc khóa trái từ bên trong, không dấu vết đột nhập. Thanh tra Đỗ Miên Trúc, người vừa chuyển về đội trọng án sau một vụ bê bối khiến cô mất niềm tin vào đồng đội cũ, phải một mình lần theo từng chi tiết nhỏ nhất để vạch trần kẻ giết người tưởng như không thể phạm tội trong một không gian bất khả xâm phạm.",
     "status": "Hoàn thành",
     "source": "Sáng tác",
@@ -2146,7 +2146,7 @@
     "id": "sau-con-mua-anh-tim-lai-em",
     "title": "Sau Cơn Mưa, Anh Tìm Lại Em",
     "author": "Lưu Ly",
-    "cover": "",
+    "cover": "images/covers/sau-con-mua-anh-tim-lai-em.jpg",
     "description": "Ba năm trước, Diệp An rời khỏi thành phố trong cơn mưa lớn sau tin nhắn chia tay của Phó Duy Trạch. Ba năm sau, cô trở về với tư cách giám đốc sáng tạo AUREVIA, dự án làm đẹp – sáng tạo mở đầu cho hệ sinh thái MH Brothers. Khi quá khứ, Phó thị và MH Brothers buộc hai người làm việc chung, sự thật năm xưa dần lộ ra. Nhưng sự thật đến muộn không tự động chữa lành; Diệp An chỉ quay lại khi chính cô muốn chọn lại tình yêu.",
     "status": "Hoàn thành",
     "source": "Sáng tác",
@@ -3103,7 +3103,9 @@
       "ngôn tình",
       "hành động"
     ],
-    "cover": null,
+    "cover": "images/covers/ho-toc-thanh-khau-va-thien-gioi-chi-luyen.jpg",
+    "author": "Lưu Ly",
+    "genre": ["Tiên Hiệp", "Ngôn Tình", "Hành Động"],
     "chapters": [
       {
         "id": "1",
