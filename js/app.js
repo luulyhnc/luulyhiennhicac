@@ -417,7 +417,16 @@ async function fetchStories(forceRefresh) {
   if (_storiesCache && !forceRefresh) return _storiesCache;
   const res = await fetch("data/stories.json?_=" + Date.now(), { cache: 'no-store' });
   if (!res.ok) throw new Error("Không thể tải dữ liệu truyện (" + res.status + ")");
-  _storiesCache = await res.json();
+  const mainStories = await res.json();
+  // Supplementary original fiction is kept in a separate file so the admin's
+  // existing story database and save workflow remain unchanged.
+  let extraStories = [];
+  try {
+    const extraRes = await fetch("data/ancient-school-2026.json?_=" + Date.now(), { cache: 'no-store' });
+    if (extraRes.ok) extraStories = await extraRes.json();
+  } catch (e) { console.warn("Supplementary stories unavailable:", e); }
+  const ids = new Set(mainStories.map(s => s.id));
+  _storiesCache = [...extraStories.filter(s => !ids.has(s.id)), ...mainStories];
   return _storiesCache;
 }
 
